@@ -65,24 +65,20 @@ class Testcase_10_70_VersionNegotiationSuccess(base_tests.SimpleProtocol):
         self.controller.initial_hello = False
         self.controller.start()
 
-        try:
-            self.controller.connect(timeout=20)
-            self.controller.keep_alive = True
+        self.controller.connect(timeout=120)
+        self.controller.keep_alive = True
 
-            if not self.controller.active:
-                raise Exception("Controller startup failed")
-            if self.controller.switch_addr is None:
-                raise Exception("Controller startup failed (no switch addr)")
-            logging.info("Connected " + str(self.controller.switch_addr))
-        except:
-            self.controller.kill()
-            del self.controller
-            raise
+        if not self.controller.active:
+            raise Exception("Controller startup failed")
+        if self.controller.switch_addr is None:
+            raise Exception("Controller startup failed (no switch addr)")
+        logging.info("Connected " + str(self.controller.switch_addr))
+
 
     @wireshark_capture
     def runTest(self):
         logging.info("Running 10.70 - Version negotiation on version field success test")
-        timeout = 60
+        timeout = 120
         nego_version = 4
         (rv, pkt) = self.controller.poll(exp_msg=ofp.OFPT_HELLO, timeout=timeout)
         self.assertIsNotNone(rv, 'Did not receive Hello msg')
@@ -99,13 +95,8 @@ class Testcase_10_70_VersionNegotiationSuccess(base_tests.SimpleProtocol):
         self.assertEqual(rv.version,nego_version, 'Received version of Hello msg is not 4')
         logging.info("Received echo reply with correct version")
 
-    def tearDown(self):
-        self.controller.shutdown()
-        self.controller.join()
-        del self.controller
-        base_tests.BaseTest.tearDown(self)
 
-
+        
 
 class Testcase_10_30_TCPdefaultPort(base_tests.SimpleProtocol):
     """
@@ -121,7 +112,7 @@ class Testcase_10_30_TCPdefaultPort(base_tests.SimpleProtocol):
         self.controller.message_send(request)
         (rv, pkt) = self.controller.poll(exp_msg=ofp.OFPT_ECHO_REPLY,timeout=timeout)
         self.assertIsNotNone(rv, 'Did not receive Echo reply')
-        logging.info("Received echo reply with default port")
+        logging.info("Received echo reply with port "+str(config["controller_port"]))
 
 
 
@@ -168,7 +159,7 @@ class Testcase_10_90_VersionNegotiationBitmap(base_tests.SimpleProtocol):
         self.controller.initial_hello = False
         self.controller.start()
 
-        try:
+        """try:
             self.controller.connect(timeout=20)
             self.controller.keep_alive = True
 
@@ -180,28 +171,25 @@ class Testcase_10_90_VersionNegotiationBitmap(base_tests.SimpleProtocol):
         except:
             self.controller.kill()
             del self.controller
-            raise
+            raise"""
 
     @wireshark_capture
     def runTest(self):
         logging.info("Running 10.90 - Version negotiation based on bitmap test")
-        timeout = 60
-        version = 1
-        (rv, pkt) = self.controller.poll(exp_msg=ofp.OFPT_HELLO, timeout=timeout)
-        self.assertIsNotNone(rv, 'Did not receive Hello msg')
-        self.assertEqual(rv.version,version, 'Received version of Hello msg is not 4')
+        (rv, pkt) = self.controller.poll(exp_msg=ofp.OFPT_HELLO, timeout=5)
         logging.info("Received Hello msg with correct version")
-        reply = ofp.message.hello()
-        reply.version=version
-        bitmap = ofp.common.uint32(0x16) # 10110
+        version = 1
+        req = ofp.message.hello()
+        req.version=version
+        bitmap = ofp.common.uint32(0x16) 
         hello_elem = ofp.common.hello_elem_versionbitmap(bitmaps=[bitmap])
         req.elements.append(hello_elem)
-        self.controller.message_send(reply)
+        self.controller.message_send(req)
         logging.info("Sending Hello msg with bitmap")
-        self.assertTrue(res.elements != [], 'Hello msg does not include Bitmap')
+        self.assertTrue(rv.elements != [], 'Hello msg does not include Bitmap')
         request=ofp.message.echo_request()
         self.controller.message_send(request)
-        (rv, pkt) = self.controller.poll(exp_msg=ofp.OFPT_ECHO_REPLY,timeout=timeout)
+        (rv, pkt) = self.controller.poll(exp_msg=ofp.OFPT_ECHO_REPLY,timeout=5)
         self.assertIsNotNone(rv, 'Did not receive Echo reply')
         self.assertEqual(rv.version,version, 'Received version of Hello msg is not 4')
         logging.info("Version negotiation Success")

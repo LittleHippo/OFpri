@@ -78,11 +78,10 @@ class Testcase_80_190_Prerequisite_wrong_position(base_tests.SimpleDataPlane):
         priority=1
         actions=[ofp.action.output(port=out_port,max_len=128)]
         instructions=[ofp.instruction.apply_actions(actions=actions)]
-        #Match on IPv4 UDP source Port with a wrong pre-requisite(ip_proto=6)
+        #Match on IPv4 source address (Pre-requisite field on wrong position) 
         match = ofp.match([
+                ofp.oxm.ipv4_src_masked(0xc0a80000, 0xfffff000),
                 ofp.oxm.eth_type(0x0800),
-                ofp.oxm.ip_proto(6),
-                ofp.oxm.udp_src(53),
                 ])
         req = ofp.message.flow_add(table_id=table_id,
                                    match= match,

@@ -272,6 +272,12 @@ class Testcase_40_130_GetConfigFragNormal(base_tests.SimpleProtocol):
     def runTest(self):
         logging.info("Running 40.130 - Get switch config - Frag normal test")
         timeout = 5
+        request = ofp.message.set_config(flags=0,miss_send_len=128)
+        self.controller.message_send(request)
+        (response, pkt) = self.controller.poll(exp_msg=ofp.OFPT_ERROR,         
+                                               timeout=5)
+        self.assertTrue(response is None, 
+                               'Switch replied with error message') 
         request = ofp.message.get_config_request()
         rv = self.controller.message_send(request)
         self.assertTrue(rv != -1, " Failed to send get config request.")
@@ -293,6 +299,12 @@ class Testcase_40_140_GetConfigFragDrop(base_tests.SimpleProtocol):
     def runTest(self):
         logging.info("Running 40.140 - Get switch config - Frag drop test")
         timeout = 5
+        request = ofp.message.set_config(flags=1,miss_send_len=128)
+        self.controller.message_send(request)
+        (response, pkt) = self.controller.poll(exp_msg=ofp.OFPT_ERROR,         
+                                               timeout=5)
+        self.assertTrue(response is None, 
+                               'Switch replied with error message') 
         request = ofp.message.get_config_request()
         rv = self.controller.message_send(request)
         self.assertTrue(rv != -1, " Failed to send get config request.")
@@ -300,6 +312,12 @@ class Testcase_40_140_GetConfigFragDrop(base_tests.SimpleProtocol):
         self.assertIsNotNone(reply,'Did not receive get config reply')
         self.assertTrue(reply.flags == 1, "Frag drop is not set")
         logging.info("Frag drop is set")
+        request = ofp.message.set_config(flags=0,miss_send_len=128)
+        self.controller.message_send(request)
+        (response, pkt) = self.controller.poll(exp_msg=ofp.OFPT_ERROR,         
+                                               timeout=5)
+        self.assertTrue(response is None, 
+                               'Switch replied with error message') 
 
 
 
@@ -313,14 +331,36 @@ class Testcase_40_150_GetConfigFragReasm(base_tests.SimpleProtocol):
     @wireshark_capture
     def runTest(self):
         logging.info("Running 40.150 - Get switch config - Frag reasm test")
+        request = ofp.message.features_request()
+        (reply, pkt)= self.controller.transact(request)
+        self.assertIsNotNone(reply, "Did not receive Features Reply Message")
+        self.assertEqual(reply.type, ofp.OFPT_FEATURES_REPLY, "Received message is not features reply")
+        mask = 32
+        cap = mask & int(reply.capabilities)
         timeout = 5
-        request = ofp.message.get_config_request()
-        rv = self.controller.message_send(request)
-        self.assertTrue(rv != -1, " Failed to send get config request.")
-        (reply, pkt) = self.controller.poll(exp_msg=ofp.OFPT_GET_CONFIG_REPLY,timeout=timeout)
-        self.assertIsNotNone(reply,'Did not receive get config reply')
-        self.assertTrue(reply.flags == 2, "Frag reasm is not set")
-        logging.info("Frag reasm is set")
+        request = ofp.message.set_config(flags=2,miss_send_len=128)
+        self.controller.message_send(request)
+        (response, pkt) = self.controller.poll(exp_msg=ofp.OFPT_ERROR,         
+                                               timeout=5)
+        if cap == 0:
+            self.assertTrue(response is not None, 
+                               'Switch did not reply with error message')
+            logging.info("Switch does not support Frag reasm")
+        else:
+            request = ofp.message.get_config_request()
+            rv = self.controller.message_send(request)
+            self.assertTrue(rv != -1, " Failed to send get config request.")
+            (reply, pkt) = self.controller.poll(exp_msg=ofp.OFPT_GET_CONFIG_REPLY,timeout=timeout)
+            self.assertIsNotNone(reply,'Did not receive get config reply')
+            self.assertTrue(reply.flags == 2, "Frag reasm is not set")
+            logging.info("Frag reasm is set")
+            
+        request = ofp.message.set_config(flags=0,miss_send_len=128)
+        self.controller.message_send(request)
+        (response, pkt) = self.controller.poll(exp_msg=ofp.OFPT_ERROR,         
+                                               timeout=5)
+        self.assertTrue(response is None, 
+                               'Switch replied with error message') 
 
 
 
@@ -335,6 +375,12 @@ class Testcase_40_160_GetConfigFragMask(base_tests.SimpleProtocol):
     def runTest(self):
         logging.info("Running 40.160 - Get switch config - Frag mask test")
         timeout = 5
+        request = ofp.message.set_config(flags=3,miss_send_len=128)
+        self.controller.message_send(request)
+        (response, pkt) = self.controller.poll(exp_msg=ofp.OFPT_ERROR,         
+                                               timeout=5)
+        self.assertTrue(response is None, 
+                               'Switch replied with error message') 
         request = ofp.message.get_config_request()
         rv = self.controller.message_send(request)
         self.assertTrue(rv != -1, " Failed to send get config request.")
@@ -342,6 +388,12 @@ class Testcase_40_160_GetConfigFragMask(base_tests.SimpleProtocol):
         self.assertIsNotNone(reply,'Did not receive get config reply')
         self.assertTrue(reply.flags == 3, "Frag mask is not set")
         logging.info("Frag mask is set")
+        request = ofp.message.set_config(flags=0,miss_send_len=128)
+        self.controller.message_send(request)
+        (response, pkt) = self.controller.poll(exp_msg=ofp.OFPT_ERROR,         
+                                               timeout=5)
+        self.assertTrue(response is None, 
+                               'Switch replied with error message') 
 
 
 
