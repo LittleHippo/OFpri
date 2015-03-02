@@ -1,0 +1,817 @@
+# Copyright (c) 2014, 2015 Beijing Internet Institute(BII)
+###Testcases implemented for Openflow 1.3 conformance certification test @Author: Maple Yip
+
+"""
+Test suite 440 verifies the device correctly implements various required error messages. Some devices may be unable 
+to trigger specific error messages. The results of these test cases may be marked as not applicable or pass.
+
+To satisfy the basic requirements an OpenFlow enabled device must pass 440.10 - 440.100, 440.240 - 440.430, 440.450, 
+440.470, 440.480, 440.580, and 440.600 - 440.680.
+"""
+
+from oftest import config
+from oftest.parse import parse_ip, parse_ipv6, parse_mac
+from oftest.testutils import *
+from time import sleep
+import oftest.packet as scapy
+
+import json
+import logging
+import ofp
+import oftest.base_tests as base_tests
+import oftest.controller as controller
+import oftest.dataplane as dataplane
+import oftest.illegal_message as illegal_message
+import oftest.parse as parse
+import os
+import sys
+import role_request
+from oftest.oflog import *
+from oftest import *
+
+import BII_testgroup140
+import BII_testgroup150
+import BII_testgroup200
+
+
+
+class Testcase_440_10_BadMatchData(base_tests.SimpleDataPlane):
+
+    """
+    440.10 - Bad match data
+    Verify the data field of this ofp_error message includes either the full ofp_flow_mod 
+    message, or the first 64 bytes of that message.
+    """
+    @wireshark_capture
+    def runTest(self):
+        logging.info("Running test case Bad Match Data")
+        delete_all_flows(self.controller)
+        out_port, no_port = openflow_ports(2)
+        table_id=test_param_get("table", 0)
+        priority=1
+        actions=[ofp.action.output(port=out_port,max_len=128)]
+        instructions=[ofp.instruction.apply_actions(actions=actions)]
+        #Match on TCP source Port with missing pre-requisites
+        match = ofp.match([
+                ofp.oxm.tcp_src(53),
+                ])
+        req = ofp.message.flow_add(table_id=table_id,
+                                    match= match,
+                                    buffer_id=ofp.OFP_NO_BUFFER,
+                                    instructions=instructions,
+                                    priority=priority)
+        logging.info("Installing a flow to match on IPv4 TCP source Port (with missing pre-requisites) and action output to port %s", out_port)
+        self.controller.message_send(req)
+        reply, _ = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
+        self.assertIsNotNone(reply, "The switch did not generate OFPT_ERROR")
+        logging.info("Switch generated an error")
+        self.assertEqual(reply.err_type,ofp.const.OFPET_BAD_MATCH,"Reply type is not OFPET_BAD_MATCH")
+        logging.info("Error type is OFPET_BAD_MATCH")
+        self.assertEqual(reply.code,ofp.const.OFPBMC_BAD_PREREQ, "Reply code is not OFPBMC_BAD_PREREQ")
+        logging.info("Error Code is OFPBMC_BAD_PREREQ")
+        logging.info("Swtich generated an error and the flow is not installed")
+        self.assertTrue(len(reply.data) >= 64, "Data field of error message should include at least 64 bytes")
+        logging.info("Received error message contains at least 64 bytes data.")
+
+
+
+class Testcase_440_30_FlowmodFailedTableFull(BII_testgroup150.Testcase_150_30_Table_full):
+
+    """
+    Tested in 150.30
+    440.30 - Flow mod failed table full
+    Verify how "OFPFC_ADD" is handled if table has no space.
+    """
+
+
+
+
+
+class Testcase_440_40_FlowmodFailedBadTableID(BII_testgroup150.Testcase_150_10_Invalid_table):
+
+    """
+    Tested in 150.10
+    440.40 - Flow mod failed bad table id
+    Verify how "FLOW_MOD" with invalid TABLE-ID is handled. 
+    """
+
+
+
+
+
+class Testcase_440_50_FlowmodFailedOverlap(BII_testgroup140.Testcase_140_10_Overlap_Check):
+
+    """
+    Tested in 140.10
+    440.50 - Flow mod failed overlap
+    Verify how "FLOW_MOD" with invalid TABLE-ID is handled. 
+    """
+
+
+
+
+class Testcase_440_80_FlowmodFailedBadCommand(base_tests.SimpleDataPlane):
+    """
+    440.80 - Flow mod failed bad command
+    Verify a bad flow mod command triggers the correct error message.
+    """
+    @wireshark_capture
+    def runTest(self):
+        logging.info("Running test case Flow Mod Failed Bad Command")
+        delete_all_flows(self.controller)
+        in_port,out_port,no_port = openflow_ports(3)
+        table_id=test_param_get("table", 0)
+        priority = 1
+        actions=[ofp.action.output(port=out_port,max_len=128)]
+        instructions=[ofp.instruction.apply_actions(actions=actions)]
+        match = ofp.match([ofp.oxm.in_port(in_port)])
+        req = ofp.message.flow_add(table_id=table_id,
+                                   match=match,
+                                   buffer_id=ofp.OFP_NO_BUFFER,
+                                   instructions=instructions,
+                                   priority=priority )
+        req._command = 9
+        self.controller.message_send(req)
+        reply, _ = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
+        self.assertIsNotNone(reply, "The switch failed to generate an error.")
+        logging.info("Error Message Received")
+        self.assertEqual(reply.err_type,ofp.const.OFPET_FLOW_MOD_FAILED, " Error type is not OFPET_FLOW_MOD_FAILED")
+        logging.info("Received OFPET_FLOW_MOD_FAILED")
+        self.assertEqual(reply.code, ofp.const.OFPFMFC_BAD_COMMAND, "Error Code is not OFPFMFC_BAD_COMMAND")
+        logging.info("Received Error code is OFPFMFC_BAD_COMMAND")
+
+
+
+
+class Testcase_440_90_FlowmodFailedBadFlags(base_tests.SimpleDataPlane):
+    """
+    440.90 - Flow mod failed bad flags
+    Verify bad flow mod flags trigger the correct error message.
+    """
+    @wireshark_capture
+    def runTest(self):
+        logging.info("Running test case Flow Mod Failed Bad Flags")
+        delete_all_flows(self.controller)
+        out_port, = openflow_ports(1)
+        table_id=test_param_get("table", 0)
+        priority = 1
+        flags=ofp.OFPFF_BSN_SEND_IDLE
+        match = ofp.match([
+                ofp.oxm.eth_type(0x0800)
+                ])
+        actions = [ofp.action.output(port=ofp.OFPP_CONTROLLER, max_len=128)]
+        instructions = [ofp.instruction.apply_actions(actions=actions)]
+        req = ofp.message.flow_modify(table_id=table_id,
+                                       buffer_id=ofp.OFP_NO_BUFFER,
+                                       priority=priority,
+                                       match=match,
+                                       instructions=instructions,
+                                       flags=flags)
+        self.controller.message_send(req)
+        reply, _ = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
+        self.assertIsNotNone(reply, "The switch failed to generate an error.")
+        logging.info("Error Message Received")
+        self.assertEqual(reply.err_type,ofp.const.OFPET_FLOW_MOD_FAILED, " Error type is not OFPET_FLOW_MOD_FAILED")
+        logging.info("Received OFPET_FLOW_MOD_FAILED")
+        self.assertEqual(reply.code, ofp.const.OFPFMFC_BAD_FLAGS, "Error Code is not OFPFMFC_BAD_FLAGS")
+        logging.info("Received Error code is OFPFMFC_BAD_FLAGS")
+
+
+
+
+class Testcase_440_100_FlowmodFailedData(base_tests.SimpleDataPlane):
+    """
+    440.100 - Flow mod failed data
+    Verify flow mod failed errors include up to 64 bytes of the offending request.
+    """
+    @wireshark_capture
+    def runTest(self):
+        logging.info("Running test case Flow Mod Failed Data")
+        delete_all_flows(self.controller)
+        out_port, = openflow_ports(1)
+        table_id=test_param_get("table", 0)
+        priority1 = 1
+        priority2 = 2
+        flags=ofp.OFPFF_CHECK_OVERLAP
+        match = ofp.match([
+                ofp.oxm.eth_type(0x0800)
+                ])
+        actions = [ofp.action.output(port=ofp.OFPP_CONTROLLER, max_len=128)]
+        instructions = [ofp.instruction.apply_actions(actions=actions)]
+        req1 = ofp.message.flow_add(table_id=table_id,
+                                    buffer_id=ofp.OFP_NO_BUFFER,
+                                    priority=priority1,
+                                    match=match,
+                                    instructions=instructions)
+        self.controller.message_send(req1)
+        reply, _ = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
+        self.assertIsNone(reply, "The switch  generated OFPT_ERROR. Could not insert the flow ")
+
+        req2 = ofp.message.flow_add(table_id=table_id,
+                                    buffer_id=ofp.OFP_NO_BUFFER,
+                                    priority=priority2,
+                                    match=match,
+                                    instructions=instructions,
+                                    flags=flags)
+        self.controller.message_send(req2)
+        reply, _ = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
+        self.assertIsNone(reply, "The switch  generated OFPT_ERROR. Could not insert the flow ")
+
+        req3 = ofp.message.flow_add(table_id=table_id,
+                                    buffer_id=ofp.OFP_NO_BUFFER,
+                                    priority=priority1,
+                                    match=match,
+                                    instructions=instructions,
+                                    flags=flags)
+        self.controller.message_send(req3)
+        reply, _ = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
+        self.assertIsNotNone(reply, "The switch failed to generate an error.")
+        logging.info("Error Message Received")
+        self.assertEqual(reply.err_type,ofp.const.OFPET_FLOW_MOD_FAILED, " Error type is not OFPET_FLOW_MOD_FAILED")
+        logging.info("Received OFPET_FLOW_MOD_FAILED")
+        self.assertEqual(reply.code, ofp.const.OFPFMFC_OVERLAP, "Error Code is not OFPFMFC_OVERLAP")
+        logging.info("Received Error code is OFPFMFC_OVERLAP")
+        self.assertTrue(len(reply.data) >= 64, "Data field of error message should include at least 64 bytes")
+        logging.info("Received correct error message contains at least 64 bytes data.")
+
+
+
+
+class Testcase_440_250_GroupModFailedData(base_tests.SimpleDataPlane):
+
+    """
+    440.250 - Group mod failed
+    Verify group mod failed errors include up to 64 bytes of the offending request.
+    """
+
+    def setUp(self):
+        base_tests.SimpleDataPlane.setUp(self)
+        delete_all_flows(self.controller)
+        delete_all_groups(self.controller)
+    
+    @wireshark_capture
+    def runTest(self):
+        logging.info("Running test case Group Mod Failed Data")
+        port1, = openflow_ports(1)
+
+        msg = ofp.message.group_add(
+            group_type=ofp.OFPGT_ALL,
+            group_id=0,
+            buckets=[ofp.bucket(actions=[ofp.action.output(port1)])])
+        msg.command = 7
+        self.controller.message_send(msg)
+        reply, _ = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
+        self.assertIsNotNone(reply, "The switch failed to generate an error.")
+        logging.info("Error Message Received")
+        self.assertEqual(reply.err_type,ofp.const.OFPET_GROUP_MOD_FAILED, " Error type is not OFPET_GROUP_MOD_FAILED")
+        logging.info("Received OFPET_GROUP_MOD_FAILED")
+        self.assertTrue(len(reply.data) != 0, "Data field of error message should include at least 64 bytes")
+        logging.info("Received correct error message contains data.")
+
+
+
+
+class Testcase_440_260_PortModFailedBadPort(base_tests.SimpleDataPlane):
+    """
+    440.260 - Port mod failed bad port
+    Verify the correct error message is generated when a port mod specifies a port number that 
+    does not exist.
+    """
+    @wireshark_capture
+    def runTest(self):
+        logging.info("Running test case Port Mod Failed Bad Port")
+        #Send Echo request to check that the control channel is up.
+        request = ofp.message.echo_request()
+        logging.info("Sending a Echo Request")
+        reply, pkt = self.controller.transact(request)
+        self.assertIsNotNone(reply, "Did not receive Echo Reply")
+        self.assertEqual(reply.type, ofp.OFPT_ECHO_REPLY, "Response is not echo reply")
+        req = ofp.message.port_mod(port_no=ofp.const.OFPP_MAX)
+        self.controller.message_send(req)
+        reply, _ = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
+        self.assertIsNotNone(reply, "The switch failed to generate an error.")
+        logging.info("Error Message Received")
+        self.assertEqual(reply.err_type,ofp.const.OFPET_PORT_MOD_FAILED, " Error type is not OFPET_PORT_MOD_FAILED")
+        logging.info("Received OFPET_PORT_MOD_FAILED")
+        self.assertEqual(reply.code, ofp.const.OFPPMFC_BAD_PORT, "Error Code is not OFPPMFC_BAD_PORT")
+        logging.info("Received Error code is OFPPMFC_BAD_PORT")
+
+
+
+class Testcase_440_270_PortModFailedBadHWAddr(base_tests.SimpleDataPlane):
+    """
+    440.270 - Port mod failed bad hw address
+    Verify the correct error message is generated when a port mod specifies a hardware address 
+    that does not match the port numbers hardware address.
+    """
+    @wireshark_capture
+    def runTest(self):
+        logging.info("Running test case Port Mod Failed Bad HW Address")
+        #Send Echo request to check that the control channel is up.
+        request = ofp.message.echo_request()
+        logging.info("Sending a Echo Request")
+        reply, pkt = self.controller.transact(request)
+        self.assertIsNotNone(reply, "Did not receive Echo Reply")
+        self.assertEqual(reply.type, ofp.OFPT_ECHO_REPLY, "Response is not echo reply")
+        port1, = openflow_ports(1)
+        invalidHWaddr = [0,0,0,0,0,0]
+        req = ofp.message.port_mod(port_no=port1,hw_addr=invalidHWaddr)
+        self.controller.message_send(req)
+        reply, _ = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
+        self.assertIsNotNone(reply, "The switch failed to generate an error.")
+        logging.info("Error Message Received")
+        self.assertEqual(reply.err_type,ofp.const.OFPET_PORT_MOD_FAILED, " Error type is not OFPET_PORT_MOD_FAILED")
+        logging.info("Received OFPET_PORT_MOD_FAILED")
+        self.assertEqual(reply.code, ofp.const.OFPPMFC_BAD_HW_ADDR, "Error Code is not OFPPMFC_BAD_HW_ADDR")
+        logging.info("Received Error code is OFPPMFC_BAD_HW_ADDR")
+
+
+
+
+class Testcase_440_280_PortModFailedBadConfig(base_tests.SimpleDataPlane):
+    """
+    440.280 - Port mod failed bad configuration
+    Verify the correct error message is generated when a port mod specifies a bad configuration.
+    """
+    @wireshark_capture
+    def runTest(self):
+        logging.info("Running test case Port Mod Failed Bad Config")
+        #Send Echo request to check that the control channel is up.
+        request = ofp.message.echo_request()
+        logging.info("Sending a Echo Request")
+        reply, pkt = self.controller.transact(request)
+        self.assertIsNotNone(reply, "Did not receive Echo Reply")
+        self.assertEqual(reply.type, ofp.OFPT_ECHO_REPLY, "Response is not echo reply")
+        port1, = openflow_ports(1)
+        
+        request = ofp.message.port_desc_stats_request()
+        stats = get_stats(self, request)
+        hw_addr=[]
+        for item in stats:
+            if item.port_no in openflow_ports(1):
+                hw_addr.append(item.hw_addr)
+        invalidConfig = 256
+        mask = 256
+        req = ofp.message.port_mod(port_no=port1, 
+                                hw_addr=hw_addr[0],
+                                config=invalidConfig, 
+                                mask=mask)
+        self.controller.message_send(req)
+        reply, _ = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
+        self.assertIsNotNone(reply, "The switch failed to generate an error.")
+        logging.info("Error Message Received")
+        self.assertEqual(reply.err_type,ofp.const.OFPET_PORT_MOD_FAILED, " Error type is not OFPET_PORT_MOD_FAILED")
+        logging.info("Received OFPET_PORT_MOD_FAILED")
+        self.assertEqual(reply.code, ofp.const.OFPPMFC_BAD_CONFIG, "Error Code is not OFPPMFC_BAD_CONFIG")
+        logging.info("Received Error code is OFPPMFC_BAD_CONFIG")
+
+
+
+
+class Testcase_440_290_PortModFailedBadAdvertise(base_tests.SimpleDataPlane):
+    """
+    440.290 - Port mod failed bad advertise
+    Verify the correct error message is generated when a port mod specifies a bad advertise field.
+    """
+    @wireshark_capture
+    def runTest(self):
+        logging.info("Running test case Port Mod Failed Bad Advertise")
+        #Send Echo request to check that the control channel is up.
+        request = ofp.message.echo_request()
+        logging.info("Sending a Echo Request")
+        reply, pkt = self.controller.transact(request)
+        self.assertIsNotNone(reply, "Did not receive Echo Reply")
+        self.assertEqual(reply.type, ofp.OFPT_ECHO_REPLY, "Response is not echo reply")
+        port1, = openflow_ports(1)
+        
+        request = ofp.message.port_desc_stats_request()
+        stats = get_stats(self, request)
+        hw_addr=[]
+        for item in stats:
+            if item.port_no in openflow_ports(1):
+                hw_addr.append(item.hw_addr)
+        invalidAdvertise = 0x0000ffff
+        req = ofp.message.port_mod(port_no=port1, 
+                                hw_addr=hw_addr[0],
+                                advertise=invalidAdvertise)
+        self.controller.message_send(req)
+        reply, _ = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
+        self.assertIsNotNone(reply, "The switch failed to generate an error.")
+        logging.info("Error Message Received")
+        self.assertEqual(reply.err_type,ofp.const.OFPET_PORT_MOD_FAILED, " Error type is not OFPET_PORT_MOD_FAILED")
+        logging.info("Received OFPET_PORT_MOD_FAILED")
+        self.assertEqual(reply.code, ofp.const.OFPPMFC_BAD_ADVERTISE, "Error Code is not OFPPMFC_BAD_ADVERTISE")
+        logging.info("Received Error code is OFPPMFC_BAD_ADVERTISE")
+
+
+
+
+class Testcase_440_310_PortModFailedData(base_tests.SimpleDataPlane):
+    """
+    440.310 - Port mod failed data
+    Verify port mod failed errors include up to 64 bytes of the offending request.
+    """
+    @wireshark_capture
+    def runTest(self):
+        logging.info("Running test case Port Mod Failed Data")
+        #Send Echo request to check that the control channel is up.
+        request = ofp.message.echo_request()
+        logging.info("Sending a Echo Request")
+        reply, pkt = self.controller.transact(request)
+        self.assertIsNotNone(reply, "Did not receive Echo Reply")
+        self.assertEqual(reply.type, ofp.OFPT_ECHO_REPLY, "Response is not echo reply")
+        req = ofp.message.port_mod(port_no=ofp.const.OFPP_MAX)
+        self.controller.message_send(req)
+        reply, _ = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
+        self.assertIsNotNone(reply, "The switch failed to generate an error.")
+        logging.info("Error Message Received")
+        self.assertEqual(reply.err_type,ofp.const.OFPET_PORT_MOD_FAILED, " Error type is not OFPET_PORT_MOD_FAILED")
+        logging.info("Received OFPET_PORT_MOD_FAILED")
+        self.assertEqual(reply.code, ofp.const.OFPPMFC_BAD_PORT, "Error Code is not OFPPMFC_BAD_PORT")
+        logging.info("Received Error code is OFPPMFC_BAD_PORT")
+        self.assertTrue(len(reply.data) != 0, "Data field of error message should include at least 64 bytes")
+        logging.info("Received correct error message contains data.")
+
+
+
+
+class Testcase_440_320_TableModFailedBadTable(base_tests.SimpleDataPlane):
+    """
+    440.320 - Table mod failed bad table
+    Verify the correct error message is generated when a table mod specifies a table number 
+    that does not exist.
+    """
+    @wireshark_capture
+    def runTest(self):
+        logging.info("Running test case Table Mod Failed Bad Table")
+        #Send Echo request to check that the control channel is up.
+        request = ofp.message.echo_request()
+        logging.info("Sending a Echo Request")
+        reply, pkt = self.controller.transact(request)
+        self.assertIsNotNone(reply, "Did not receive Echo Reply")
+        self.assertEqual(reply.type, ofp.OFPT_ECHO_REPLY, "Response is not echo reply")
+        table_id=ofp.const.OFPTT_MAX
+        request = ofp.message.table_mod(table_id=table_id)
+        reply, _ = self.controller.transact(request)
+        self.assertIsNotNone(reply, "The switch failed to generate an error.")
+        logging.info("Error Message Received")
+        self.assertEqual(reply.err_type,ofp.const.OFPET_TABLE_MOD_FAILED, " Error type is not OFPET_TABLE_MOD_FAILED")
+        logging.info("Received OFPET_TABLE_MOD_FAILED")
+        self.assertEqual(reply.code, ofp.const.OFPTMFC_BAD_TABLE, "Error Code is not OFPTMFC_BAD_TABLE")
+        logging.info("Received Error code is OFPTMFC_BAD_TABLE")
+
+
+
+
+class Testcase_440_330_TableModFailedBadConfig(BII_testgroup200.Testcase_200_150_basic_OFPT_TABLE_MOD):
+
+    """
+    Tested in 200.150
+    440.330 - Table mod failed bad config
+    Verify table modification can recognize lower 2 bits and returns error for others.
+    """
+
+
+
+
+class Testcase_440_350_TableModFailedData(base_tests.SimpleDataPlane):
+    """
+    440.350 - Table mod failed data
+    Verify table mod failed errors include up to 64 bytes of the offending request.
+    """
+    @wireshark_capture
+    def runTest(self):
+        logging.info("Running test case Table Mod Failed Data")
+        #Send Echo request to check that the control channel is up.
+        request = ofp.message.echo_request()
+        logging.info("Sending a Echo Request")
+        reply, pkt = self.controller.transact(request)
+        self.assertIsNotNone(reply, "Did not receive Echo Reply")
+        self.assertEqual(reply.type, ofp.OFPT_ECHO_REPLY, "Response is not echo reply")
+        table_id=ofp.const.OFPTT_MAX
+        request = ofp.message.table_mod(table_id=table_id)
+        reply, _ = self.controller.transact(request)
+        self.assertIsNotNone(reply, "The switch failed to generate an error.")
+        logging.info("Error Message Received")
+        self.assertEqual(reply.err_type,ofp.const.OFPET_TABLE_MOD_FAILED, " Error type is not OFPET_TABLE_MOD_FAILED")
+        logging.info("Received OFPET_TABLE_MOD_FAILED")
+        self.assertEqual(reply.code, ofp.const.OFPTMFC_BAD_TABLE, "Error Code is not OFPTMFC_BAD_TABLE")
+        logging.info("Received Error code is OFPTMFC_BAD_TABLE")
+        self.assertTrue(len(reply.data) != 0, "Data field of error message should include at least 64 bytes")
+        logging.info("Received correct error message contains data.")
+
+
+
+
+class Testcase_440_360_QueueOPFailedBadPort(base_tests.SimpleDataPlane):
+    """
+    440.360 - Queue operation failed bad port
+    Verify the correct error message is generated when a queue op message specifies a bad port.
+    """
+    @wireshark_capture
+    def runTest(self):
+        logging.info("Running test case Queue OP Failed Bad Port")
+        #Send Echo request to check that the control channel is up.
+        request = ofp.message.echo_request()
+        logging.info("Sending a Echo Request")
+        reply, pkt = self.controller.transact(request)
+        self.assertIsNotNone(reply, "Did not receive Echo Reply")
+        self.assertEqual(reply.type, ofp.OFPT_ECHO_REPLY, "Response is not echo reply")
+        invalidPort = ofp.const.OFPP_MAX
+        request = ofp.message.queue_stats_request(port_no=invalidPort)
+        self.controller.message_send(request)
+        reply, _ = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
+        self.assertIsNotNone(reply, "The switch failed to generate an error.")
+        self.assertEqual(reply.err_type,ofp.const.OFPET_QUEUE_OP_FAILED, " Error type is not OFPET_QUEUE_OP_FAILED")
+        logging.info("Received OFPET_QUEUE_OP_FAILED")
+        self.assertEqual(reply.code, ofp.const.OFPQOFC_BAD_PORT, "Error Code is not OFPQOFC_BAD_PORT")
+        logging.info("Received Error code is OFPQOFC_BAD_PORT")
+
+
+
+
+class Testcase_440_370_QueueOPFailedBadQueue(base_tests.SimpleDataPlane):
+    """
+    440.370 - Queue operation failed bad queue
+    Verify the correct error message is generated when a queue op message specifies a bad queue.
+    """
+    @wireshark_capture
+    def runTest(self):
+        logging.info("Running test case Queue OP Failed Bad Queue")
+        #Send Echo request to check that the control channel is up.
+        request = ofp.message.echo_request()
+        logging.info("Sending a Echo Request")
+        reply, pkt = self.controller.transact(request)
+        self.assertIsNotNone(reply, "Did not receive Echo Reply")
+        self.assertEqual(reply.type, ofp.OFPT_ECHO_REPLY, "Response is not echo reply")
+        
+        port1, = openflow_ports(1)
+        invalidQueue = 0xfffffffe
+        request = ofp.message.queue_stats_request(port_no=port1, queue_id=invalidQueue)
+        reply, _ = self.controller.transact(request)
+        self.assertIsNotNone(reply, "The switch failed to generate an error.")
+        logging.info("Error Message Received")
+        self.assertEqual(reply.err_type,ofp.const.OFPET_QUEUE_OP_FAILED, " Error type is not OFPET_QUEUE_OP_FAILED")
+        logging.info("Received OFPET_QUEUE_OP_FAILED")
+        self.assertEqual(reply.code, ofp.const.OFPQOFC_BAD_QUEUE, "Error Code is not OFPQOFC_BAD_QUEUE")
+        logging.info("Received Error code is OFPQOFC_BAD_QUEUE")
+
+
+
+
+class Testcase_440_390_QueueOPFailedData(base_tests.SimpleDataPlane):
+    """
+    440.390 - Queue operation failed data
+    Verify queue op failed errors include up to 64 bytes of the offending request.
+    """
+    @wireshark_capture
+    def runTest(self):
+        logging.info("Running test case Queue OP Failed Data")
+        #Send Echo request to check that the control channel is up.
+        request = ofp.message.echo_request()
+        logging.info("Sending a Echo Request")
+        reply, pkt = self.controller.transact(request)
+        self.assertIsNotNone(reply, "Did not receive Echo Reply")
+        self.assertEqual(reply.type, ofp.OFPT_ECHO_REPLY, "Response is not echo reply")
+        invalidPort = ofp.const.OFPP_MAX
+        request = ofp.message.queue_stats_request(port_no=invalidPort)
+        reply, _ = self.controller.transact(request)
+        self.assertIsNotNone(reply, "The switch failed to generate an error.")
+        logging.info("Error Message Received")
+        self.assertEqual(reply.err_type,ofp.const.OFPET_QUEUE_OP_FAILED, " Error type is not OFPET_QUEUE_OP_FAILED")
+        logging.info("Received OFPET_QUEUE_OP_FAILED")
+        self.assertEqual(reply.code, ofp.const.OFPQOFC_BAD_PORT, "Error Code is not OFPQOFC_BAD_PORT")
+        logging.info("Received Error code is OFPQOFC_BAD_PORT")
+        self.assertTrue(len(reply.data) != 0, "Data field of error message should include at least 64 bytes")
+        logging.info("Received correct error message contains data.")
+
+
+
+class Testcase_440_400_SwitchConfigFailedBadFlags(base_tests.SimpleDataPlane):
+    """
+    440.400 - Switch config failed bad flags
+    Verify the correct error message is generated when a switch config specifies bad flags.
+    """
+    @wireshark_capture
+    def runTest(self):
+        logging.info("Running test case Switch Config Failed Bad Flags")
+        #Send Echo request to check that the control channel is up.
+        request = ofp.message.echo_request()
+        logging.info("Sending a Echo Request")
+        reply, pkt = self.controller.transact(request)
+        self.assertIsNotNone(reply, "Did not receive Echo Reply")
+        self.assertEqual(reply.type, ofp.OFPT_ECHO_REPLY, "Response is not echo reply")
+        
+        invalidFlags = 5
+        req = ofp.message.set_config(flags=invalidFlags)
+        self.controller.message_send(req)
+        reply, _ = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
+        self.assertIsNotNone(reply, "The switch failed to generate an error.")
+        logging.info("Error Message Received")
+        self.assertEqual(reply.err_type,ofp.const.OFPET_SWITCH_CONFIG_FAILED, " Error type is not OFPET_SWITCH_CONFIG_FAILED")
+        logging.info("Received OFPET_SWITCH_CONFIG_FAILED")
+        self.assertEqual(reply.code, ofp.const.OFPSCFC_BAD_FLAGS, "Error Code is not OFPSCFC_BAD_FLAGS")
+        logging.info("Received Error code is OFPSCFC_BAD_FLAGS")
+
+
+
+
+class Testcase_440_430_SwitchConfigFailedData(base_tests.SimpleDataPlane):
+    """
+    440.430 - Switch config failed date
+    Verify switch config failed errors include up to 64 bytes of the offending request.
+    """
+    @wireshark_capture
+    def runTest(self):
+        logging.info("Running test case Switch Config Failed Data")
+        #Send Echo request to check that the control channel is up.
+        request = ofp.message.echo_request()
+        logging.info("Sending a Echo Request")
+        reply, pkt = self.controller.transact(request)
+        self.assertIsNotNone(reply, "Did not receive Echo Reply")
+        self.assertEqual(reply.type, ofp.OFPT_ECHO_REPLY, "Response is not echo reply")
+        
+        invalidFlags = 18
+        req = ofp.message.set_config(flags=invalidFlags)
+        self.controller.message_send(req)
+        reply, _ = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
+        self.assertIsNotNone(reply, "The switch failed to generate an error.")
+        logging.info("Error Message Received")
+        self.assertEqual(reply.err_type,ofp.const.OFPET_SWITCH_CONFIG_FAILED, " Error type is not OFPET_SWITCH_CONFIG_FAILED")
+        logging.info("Received OFPET_SWITCH_CONFIG_FAILED")
+        self.assertEqual(reply.code, ofp.const.OFPSCFC_BAD_FLAGS, "Error Code is not OFPSCFC_BAD_FLAGS")
+        logging.info("Received Error code is OFPSCFC_BAD_FLAGS")
+        self.assertTrue(len(reply.data) != 0, "Data field of error message should include at least 64 bytes")
+        logging.info("Received correct error message contains data.")
+
+
+
+"""
+class Testcase_440_450_RoleRequestFailedUnsupported(base_tests.SimpleDataPlane):
+    """ """
+    440.450 - Role request failed unsupported
+    Verify the correct error message is generated when a role request is unsupported.
+    """ """
+    @wireshark_capture
+    def runTest(self):
+        logging.info("Running test case Role Request Failed Unsupported")
+        #Send Echo request to check that the control channel is up.
+        request = ofp.message.echo_request()
+        logging.info("Sending a Echo Request")
+        reply, pkt = self.controller.transact(request)
+        self.assertIsNotNone(reply, "Did not receive Echo Reply")
+        self.assertEqual(reply.type, ofp.OFPT_ECHO_REPLY, "Response is not echo reply")
+        
+        role, gen0 = role_request.simple_role_request(self, ofp.OFPCR_ROLE_NOCHANGE)
+        self.assertEqual(role, ofp.OFPCR_ROLE_EQUAL)
+        # Smallest greater generation ID
+        role, gen1 = role_request.simple_role_request(self, ofp.OFPCR_ROLE_SLAVE, role_request.add_mod64(gen0, 1))
+        reply, _ = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
+        self.assertIsNotNone(reply, "The switch failed to generate an error.")
+        logging.info("Error Message Received")
+        self.assertEqual(reply.err_type,ofp.const.OFPET_ROLE_REQUEST_FAILED, " Error type is not OFPET_ROLE_REQUEST_FAILED")
+        logging.info("Received OFPET_ROLE_REQUEST_FAILED")
+        self.assertEqual(reply.code, ofp.const.OFPRRFC_UNSUP, "Error Code is not OFPRRFC_UNSUP")
+        logging.info("Received Error code is OFPRRFC_UNSUP")
+"""
+
+
+
+class Testcase_440_470_RoleRequestFailedData(base_tests.SimpleDataPlane):
+    """
+    440.470 - Role request failed data
+    Verify role request failed errors include up to 64 bytes of the offending request.
+    """
+    @wireshark_capture
+    def runTest(self):
+        logging.info("Running test case Role Request Failed Data")
+        #Send Echo request to check that the control channel is up.
+        request = ofp.message.echo_request()
+        logging.info("Sending a Echo Request")
+        reply, pkt = self.controller.transact(request)
+        self.assertIsNotNone(reply, "Did not receive Echo Reply")
+        self.assertEqual(reply.type, ofp.OFPT_ECHO_REPLY, "Response is not echo reply")
+        invalidRole = 4
+        req = ofp.message.role_request(role=invalidRole)
+        self.controller.message_send(req)
+        reply, _ = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
+        self.assertIsNotNone(reply, "The switch failed to generate an error.")
+        logging.info("Error Message Received")
+        self.assertEqual(reply.err_type,ofp.const.OFPET_ROLE_REQUEST_FAILED, " Error type is not OFPET_ROLE_REQUEST_FAILED")
+        logging.info("Received OFPET_ROLE_REQUEST_FAILED")
+        self.assertEqual(reply.code, ofp.const.OFPRRFC_BAD_ROLE, "Error Code is not OFPRRFC_BAD_ROLE")
+        logging.info("Received Error code is OFPRRFC_BAD_ROLE")
+        self.assertTrue(len(reply.data) != 0, "Data field of error message should include at least 64 bytes")
+        logging.info("Received correct error message contains data.")
+
+
+
+"""
+class Testcase_440_580_MeterModFailedOutofMeter(base_tests.SimpleDataPlane):
+    """ """
+    440.580 - Meter mod failed out of meters
+    When the device is out of meters verify the correct error message is generated.
+    """ """
+    @wireshark_capture
+    def runTest(self):
+        logging.info("Running test case Meter Mod Failed Out of Meter")
+        #Send Echo request to check that the control channel is up.
+        request = ofp.message.echo_request()
+        logging.info("Sending a Echo Request")
+        reply, pkt = self.controller.transact(request)
+        self.assertIsNotNone(reply, "Did not receive Echo Reply")
+        self.assertEqual(reply.type, ofp.OFPT_ECHO_REPLY, "Response is not echo reply")
+        logging.info("Delete metermod")
+        req = ofp.message.meter_mod()
+        req.command = ofp.OFPMC_DELETE
+        req.meter_id = ofp.const.OFPM_ALL
+        self.controller.message_send(req)
+        logging.info("Insert metermod")
+        no = 2500
+        band1 = ofp.meter_band.drop()
+        band1.rate = 1024
+        band1.burst_size = 12
+        for i in range(1, no):
+            msg = ofp.message.meter_mod()
+            msg.command = ofp.OFPMC_ADD
+            msg.meter_id = i
+            msg.flags = ofp.OFPMF_KBPS
+            msg.meters = [band1]
+            self.controller.message_send(msg)
+            reply, _ = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
+            if reply is not None:
+                logging.info("Error Message Received")
+                self.assertEqual(reply.err_type,ofp.const.OFPET_METER_MOD_FAILED, " Error type is not OFPET_METER_MOD_FAILED")
+                logging.info("Received OFPET_METER_MOD_FAILED")
+                self.assertEqual(reply.code, ofp.const.OFPMMFC_OUT_OF_METERS, "Error Code is not OFPMMFC_OUT_OF_METERS")
+                logging.info("Received Error code is OFPMMFC_OUT_OF_METERS")
+                return
+        self.assertIsNotNone(reply, "The switch failed to generate an error.")
+"""
+
+
+class Testcase_440_600_MeterModFailedData(base_tests.SimpleDataPlane):
+    """
+    440.600 - Meter mod failed data
+    Verify meter mod failed errors include up to 64 bytes of the offending request.
+    """
+    @wireshark_capture
+    def runTest(self):
+        logging.info("Running test case Meter Mod Failed Data")
+        #Send Echo request to check that the control channel is up.
+        request = ofp.message.echo_request()
+        logging.info("Sending a Echo Request")
+        reply, pkt = self.controller.transact(request)
+        self.assertIsNotNone(reply, "Did not receive Echo Reply")
+        self.assertEqual(reply.type, ofp.OFPT_ECHO_REPLY, "Response is not echo reply")
+        logging.info("Delete metermod")
+        req = ofp.message.meter_mod()
+        req.command = ofp.OFPMC_DELETE
+        req.meter_id = ofp.const.OFPM_ALL
+        self.controller.message_send(req)
+        logging.info("Insert metermod")
+        no = 2500
+        band1 = ofp.meter_band.drop()
+        band1.rate = 1024
+        band1.burst_size = 12
+        for i in range(1, no):
+            msg = ofp.message.meter_mod()
+            msg.command = ofp.OFPMC_ADD
+            msg.meter_id = i
+            msg.flags = ofp.OFPMF_KBPS
+            msg.meters = [band1]
+            self.controller.message_send(msg)
+            reply, _ = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
+            if reply is not None:
+                logging.info("Error Message Received")
+                self.assertEqual(reply.err_type,ofp.const.OFPET_METER_MOD_FAILED, " Error type is not OFPET_METER_MOD_FAILED")
+                logging.info("Received OFPET_METER_MOD_FAILED")
+                self.assertEqual(reply.code, ofp.const.OFPMMFC_OUT_OF_METERS, "Error Code is not OFPMMFC_OUT_OF_METERS")
+                logging.info("Received Error code is OFPMMFC_OUT_OF_METERS")
+                self.assertTrue(len(reply.data) != 0, "Data field of error message should include at least 64 bytes")
+                logging.info("Received correct error message contains data.")
+                return
+        self.assertIsNotNone(reply, "The switch failed to generate an error.")
+
+
+
+
+class Testcase_440_610_TableFeaturesFailedBadTable(base_tests.SimpleDataPlane):
+    """
+    440.610 - Table features failed bad table
+    Verify the correct error message is generated when a table features request specifies a bad table id.
+    """
+    @wireshark_capture
+    def runTest(self):
+        logging.info("Running test case Table Features Failed Bad Table")
+        table_id = ofp.OFPTT_MAX
+        req = ofp.message.table_features_stats_request()
+        self.controller.message_send(req)
+        reply, _ = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
+        self.assertIsNotNone(reply, "The switch failed to generate an error.")
+        logging.info("Error Message Received")
+        self.assertEqual(reply.err_type,ofp.const.OFPET_TABLE_FEATURES_FAILED, " Error type is not OFPET_TABLE_FEATURES_FAILED")
+        logging.info("Received OFPET_TABLE_FEATURES_FAILED")
+        self.assertEqual(reply.code, ofp.const.OFPTFFC_BAD_TABLE, "Error Code is not OFPTFFC_BAD_TABLE")
+        logging.info("Received Error code is OFPTFFC_BAD_TABLE")
+        
