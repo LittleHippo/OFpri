@@ -42,11 +42,14 @@ class Testcase_150_10_Invalid_table(base_tests.SimpleDataPlane):
 
         actions = [ofp.action.output(out_port)]
 
-        pkt = simple_tcp_packet()
-
         #logging.info("Running actions test for %s", pp(actions))
+        request = ofp.message.features_request()
+        (reply, pkt)= self.controller.transact(request)
+        self.assertIsNotNone(reply, "Did not receive Features Reply Message")
+        tables_no = reply.n_tables 
 
         delete_all_flows(self.controller)
+        pkt = simple_tcp_packet()
 
         logging.info("Inserting flow")
         request = ofp.message.flow_add(
@@ -65,7 +68,7 @@ class Testcase_150_10_Invalid_table(base_tests.SimpleDataPlane):
         do_barrier(self.controller)
 
         request = ofp.message.flow_delete(
-                table_id=0xFD, #invalid table id
+                table_id=tables_no+1, #invalid table id
                 match=packet_to_flow_match(self, pkt),
                 out_port = ofp.OFPP_ANY,
                 out_group = ofp.OFPG_ANY,

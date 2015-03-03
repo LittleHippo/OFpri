@@ -1,3 +1,6 @@
+# Distributed under the OpenFlow Software License (see LICENSE)
+# Copyright (c) 2010 The Board of Trustees of The Leland Stanford Junior University
+# Copyright (c) 2012, 2013 Big Switch Networks, Inc.
 # Copyright (c) 2014, 2015 Beijing Internet Institute(BII)
 ###Testcases implemented for Openflow 1.3 conformance certification test @Author: Pan Zhang
 """
@@ -663,25 +666,10 @@ class Testcase_140_120_Delete_nonexisting(base_tests.SimpleDataPlane):
 
         #logging.info("Running actions test for %s", pp(actions))
 
-        delete_all_flows(self.controller)
-
-        logging.info("Inserting flow")
-        request = ofp.message.flow_add(
-                table_id=test_param_get("table", 0),
-                match=packet_to_flow_match(self, pkt),
-                instructions=[
-                    ofp.instruction.apply_actions(actions)],
-                buffer_id=ofp.OFP_NO_BUFFER, priority = 1000)
-        self.controller.message_send(request)
-        logging.info("Inserting a flow to forward packet to port %d", out_port)
-        reply, _ = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
-        self.assertIsNone(reply, "Switch generated an error when inserting flow")
-        do_barrier(self.controller)
-        self.dataplane.send(in_port, str(pkt))
-        verify_packet(self, str(pkt),out_port)
         table_stats = get_stats(self, ofp.message.table_stats_request())
         self.assertIsNotNone(table_stats,"Did not receive flow stats reply messsage")
         active_count = table_stats[0].active_count
+        logging.info("Active flow entry: %d",active_count)
 
         request = ofp.message.flow_delete(
                 table_id=test_param_get("table", 0),
@@ -699,8 +687,8 @@ class Testcase_140_120_Delete_nonexisting(base_tests.SimpleDataPlane):
         #verify_no_packet(self, str(pkt),out_port)
         table_stats = get_stats(self, ofp.message.table_stats_request())
         self.assertIsNotNone(table_stats,"Did not receive flow stats reply messsage")
-        #active_count = table_stats[0].active_count
         self.assertEqual(table_stats[0].active_count, active_count, "The active counts are not equal")
+        logging.info("The active counts are equal")
 
 class Testcase_140_130_Priority_strict(base_tests.SimpleDataPlane):
     """
@@ -996,14 +984,14 @@ class Testcase_140_170_Delete_match_syntax(base_tests.SimpleDataPlane):
         ports = openflow_ports(4)
         in_port, out_port, out_portY, out_portZ = openflow_ports(4)
         #flags = ofp.OFPFF_SEND_FLOW_REM
-        match2 = ofp.match([ofp.oxm.eth_type(0x0800), ofp.oxm.ip_proto(6), ofp.oxm.tcp_dst(80), ofp.oxm.tcp_src(50)])
-        match1 = ofp.match([ofp.oxm.eth_type(0x0800), ofp.oxm.ip_proto(6), ofp.oxm.tcp_dst(80)])
+        match2 = ofp.match([ofp.oxm.eth_src([0,6,7,8,9,10]), ofp.oxm.eth_dst([0,1,2,3,4,5])])
+        match1 = ofp.match([ofp.oxm.eth_src([0,6,7,8,9,10])])
         match3 = ofp.match()
 
         #match1 = ofp.match([ofp.oxm.eth_type(ANY),ofp.oxm.tcp_dst(80)])
         actions = [ofp.action.output(out_port)]
 
-        pkt = simple_tcp_packet(tcp_dport = 80, tcp_sport = 50)
+        pkt = simple_tcp_packet()
         
 
 
@@ -1289,30 +1277,33 @@ class Testcase_140_220_Delete_all_tables(base_tests.SimpleDataPlane):
         ports = openflow_ports(4)
         in_port, out_port, out_portY, out_portZ = openflow_ports(4)
         #flags = ofp.OFPFF_SEND_FLOW_REM
-
+        
         actions = [ofp.action.output(out_port)]
-
-        pkt = simple_tcp_packet()
 
         #logging.info("Running actions test for %s", pp(actions))
 
         delete_all_flows(self.controller)
+        
+        request = ofp.message.features_request()
+        (reply, pkt)= self.controller.transact(request)
+        self.assertIsNotNone(reply, "Did not receive Features Reply Message")
+        tables_no = reply.n_tables
 
         logging.info("Inserting flow")
-        request = ofp.message.flow_add(
-                table_id= 0,
-                match=packet_to_flow_match(self, pkt),
-                instructions=[
-                    ofp.instruction.apply_actions(actions)],
-                buffer_id=ofp.OFP_NO_BUFFER, priority = 100)
-        self.controller.message_send(request)
-        logging.info("Inserting a flow to forward packet to port %d to all the tables", out_port)
-        reply, _ = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
-        self.assertIsNone(reply, "Switch generated an error when inserting flow")
-        do_barrier(self.controller)
-        #self.dataplane.send(in_port, str(pkt))
-        #verify_packet(self, str(pkt),out_port)
+        pkt = simple_tcp_packet()
         
+        for table_id in range(tables_no):
+            req = ofp.message.flow_add(table_id=table_id,
+                                   match=packet_to_flow_match(self, pkt),
+                                   buffer_id=ofp.OFP_NO_BUFFER,
+                                   instructions=[ofp.instruction.apply_actions(actions)],
+                                   priority = 100)
+            logging.info("Inserting a flow to table %d ", table_id)
+            rv = self.controller.message_send(req)
+            self.assertTrue(rv != -1, "Failed to insert flow to table %d "%table_id)
+            do_barrier(self.controller)
+            
+      
         request = ofp.message.flow_delete(
                 table_id=ofp.OFPTT_ALL,
                 buffer_id=ofp.OFP_NO_BUFFER,)
@@ -1321,5 +1312,6 @@ class Testcase_140_220_Delete_all_tables(base_tests.SimpleDataPlane):
         reply, _ = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
         self.assertIsNone(reply, "Switch generated an error when deleting flow")
         #stats = get_flow_stats(self, match = ofp.match(), table_id = 0)
+        time.sleep(2)
         self.dataplane.send(in_port, str(pkt))
         verify_no_packet(self, str(pkt),out_port)
