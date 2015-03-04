@@ -50,6 +50,12 @@ class Testcase_180_10_reference_count(base_tests.SimpleDataPlane):
         #logging.info("Running actions test for %s", pp(actions))
 
         delete_all_flows(self.controller)
+        
+        table_stats = get_stats(self, ofp.message.table_stats_request())
+        self.assertIsNotNone(table_stats,"Did not receive flow stats reply messsage")
+        orig_active_count=table_stats[0].active_count
+        orig_lookup_count=table_stats[0].lookup_count
+        orig_matched_count=table_stats[0].matched_count
 
         logging.info("Inserting flow")
         request = ofp.message.flow_add(
@@ -74,9 +80,9 @@ class Testcase_180_10_reference_count(base_tests.SimpleDataPlane):
         table_stats = get_stats(self, ofp.message.table_stats_request())
         self.assertIsNotNone(table_stats,"Did not receive flow stats reply messsage")
 
-        self.assertEqual(table_stats[0].active_count, 1, "The active_count counter is not 1")
-        self.assertEqual(table_stats[0].lookup_count, 3, "The lookup_count counter is not 3")
-        self.assertEqual(table_stats[0].matched_count, 2, "The matched_count counter is not 2")
+        self.assertEqual(table_stats[0].active_count, orig_active_count+1, "The active_count counter is not increased by 1")
+        self.assertEqual(table_stats[0].lookup_count, orig_lookup_count+3, "The lookup_count counter is not increased by 3")
+        self.assertEqual(table_stats[0].matched_count, orig_matched_count+2, "The matched_count counter is not increased by 2")
 
 
 class Testcase_180_80_per_port_received_packets_counter(BII_testgroup340.Testcase_340_50_MultipartPortStatsRxPackets):
@@ -136,7 +142,7 @@ class Testcase_180_230_correct_packet_drop_counters(base_tests.SimpleDataPlane):
         self.assertIsNone(reply, "Switch generated an error when setting up the port")
         sleep(2)
         self.controller.clear_queue()
-        base_tests.SimpleDataPlane.tearDown(self)
+        base_test.SimpleDataPlane.tearDown(self)
 
 
     @wireshark_capture

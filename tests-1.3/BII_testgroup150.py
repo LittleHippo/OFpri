@@ -698,8 +698,28 @@ class Testcase_150_140_illegal_value(base_tests.SimpleDataPlane):
         pkt = simple_tcp_packet()
         #match=packet_to_flow_match(self, pkt)
         
+        """bad_network_mask_match = ofp.match([ofp.oxm.vlan_vid(0)])
+        logging.info("Inserting flow 1")
+        request = ofp.message.flow_add(
+                table_id=test_param_get("table", 0),
+                #match=packet_to_flow_match(self, pkt),
+                match = bad_network_mask_match,
+                instructions=[ofp.instruction.apply_actions(actions = [ofp.action.output(out_port)])],
+                buffer_id=ofp.OFP_NO_BUFFER,
+                priority=1000)
+        self.controller.message_send(request)
+        logging.info("Inserting a flow with illegal value")
+        reply, _ = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
+        self.assertIsNotNone(reply, "The switch did not generate an OFPT_ERROR.")
+        self.assertEqual(reply.err_type, ofp.OFPET_BAD_MATCH,
+                         ("Error type %d was received, but we expected "
+                          "OFPET_BAD_MATCH.") % reply.err_type)
+        self.assertEqual(reply.code, ofp.OFPBMC_BAD_VALUE,
+                         ("Bad instruction code %d was received, but we "
+                          "expected OFPBMC_BAD_VALUE.") % reply.code)"""
+                          
         bad_network_mask_match = ofp.match([ofp.oxm.vlan_vid(4095)])
-        logging.info("Inserting flow")
+        logging.info("Inserting flow 2")
         request = ofp.message.flow_add(
                 table_id=test_param_get("table", 0),
                 #match=packet_to_flow_match(self, pkt),
@@ -861,6 +881,18 @@ class Testcase_150_170_undefined_group(base_tests.SimpleDataPlane):
 
         #actions = [ofp.action.output(out_port)]
         delete_all_flows(self.controller)
+        
+        request = ofp.message.group_features_stats_request()
+        reply, _= self.controller.transact(request)
+        self.assertIsNotNone(reply, "Did not receive group features reply")
+        if reply.type == ofp.const.OFPT_ERROR:
+            self.assertEqual(reply.err_type, ofp.const.OFPET_BAD_REQUEST, "Error type is not OFPET_BAD_REQUEST")
+            self.assertEqual(reply.code, ofp.const.OFPBRC_BAD_STAT, "Error code is not OFPBRC_BAD_STAT")
+            logging.info("DUT does not support group features and returned error msg as expected")
+        else:
+            self.assertEqual(reply.stats_type,ofp.const.OFPST_GROUP_FEATURES,"Received msg is not group features")
+            self.assertTrue(reply.capabilities!=0,"Group is not supported by DUT")
+            
         pkt = simple_tcp_packet()
         action = ofp.action.group(group_id = ofp.OFPG_ALL) 
         logging.info("Inserting flow")
@@ -900,6 +932,18 @@ class Testcase_150_175_undefined_meter(base_tests.SimpleDataPlane):
         in_port, out_port = openflow_ports(2)
 
         delete_all_flows(self.controller)
+        
+        request = ofp.message.meter_features_stats_request()
+        reply, _= self.controller.transact(request)
+        self.assertIsNotNone(reply, "Did not receive meter features reply")
+        if reply.type == ofp.const.OFPT_ERROR:
+            self.assertEqual(reply.err_type, ofp.const.OFPET_BAD_REQUEST, "Error type is not OFPET_BAD_REQUEST")
+            self.assertEqual(reply.code, ofp.const.OFPBRC_BAD_STAT, "Error code is not OFPBRC_BAD_STAT")
+            logging.info("DUT does not support meter features and returned error msg as expected")
+        else:
+            self.assertEqual(reply.stats_type,ofp.const.OFPST_METER_FEATURES,"Received msg is not meter features")
+            self.assertIsNotNone(reply.features,"meter is not supported by DUT")
+            
         pkt = simple_tcp_packet()
         #action = ofp.action.meter(meter_id = 1) 
         logging.info("Inserting flow")
@@ -911,11 +955,6 @@ class Testcase_150_175_undefined_meter(base_tests.SimpleDataPlane):
                 buffer_id=ofp.OFP_NO_BUFFER,
                 priority=1000)
         self.controller.message_send(request)
-        """
-        request = ofp.message.meter_mod(command = ofp.OFPMC_MODIFY, meter_id = 1)
-        self.controller.message_send(request)
-        """
-        logging.info("modfying a undefined meter")
         reply, _ = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
         self.assertIsNotNone(reply, "The switch did not generate an OFPT_ERROR.")
         self.assertEqual(reply.err_type, ofp.OFPET_METER_MOD_FAILED,
@@ -947,30 +986,19 @@ class Testcase_150_180_bad_action(base_tests.SimpleDataPlane):
         pkt = simple_tcp_packet()
         #match=packet_to_flow_match(self, pkt)
         
-        match = ofp.match([ofp.oxm.vlan_vid(1)])
+        match = ofp.match([ofp.oxm.vlan_vid(ofp.OFPVID_PRESENT|2)])
         logging.info("Inserting flow")
         request = ofp.message.flow_add(
                 table_id=test_param_get("table", 0),
                 #match=packet_to_flow_match(self, pkt),
                 match = match,
-                instructions=[ofp.instruction.apply_actions(actions = [ofp.action.output(out_port)])],
+                instructions=[ofp.instruction.apply_actions(actions = [ofp.action.set_field(ofp.oxm.vlan_vid(4096)),ofp.action.output(out_port)])],
                 buffer_id=ofp.OFP_NO_BUFFER,
                 priority=1000)
         self.controller.message_send(request)
-        logging.info("Inserting a flow matching on vlan_vid 1")
+        logging.info("Inserting a flow matching on vlan_vid 2")
         #logging.info("Inserting a flow with illegal value")
         reply, _ = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
-        self.assertIsNone(reply, "Switch generates an error")
-
-        request = ofp.message.flow_mod(
-                table_id=test_param_get("table", 0),
-                #match=packet_to_flow_match(self, pkt),
-                match = ofp.match([ofp.oxm.vlan_vid(4096)]),
-                instructions=[ofp.instruction.apply_actions(actions = [ofp.action.output(out_port)])],
-                buffer_id=ofp.OFP_NO_BUFFER,
-                priority=1000,
-                _command=ofp.OFPFC_MODIFY)
-        self.controller.message_send(request)
         self.assertIsNotNone(reply, "The switch did not generate an OFPT_ERROR.")
         self.assertEqual(reply.err_type, ofp.OFPET_BAD_ACTION,
                          ("Error type %d was received, but we expected "

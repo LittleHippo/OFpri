@@ -104,7 +104,7 @@ class Testcase_200_20_basic_OFPT_ERROR(base_tests.SimpleDataPlane):
     def runTest(self):
         logging.info("Running 10.80 - Version negotiation failure test")
         timeout = 5
-        nego_version = 0
+        nego_version = 8
         logging.info("Received Hello msg with correct version")
         request = ofp.message.hello()
         request.version=nego_version
