@@ -12,6 +12,7 @@ the config_setup function. The option's result will end up in the global
 oftest.config dictionary.
 """
 
+
 from __future__ import print_function
 
 import sys
@@ -77,7 +78,7 @@ CONFIG_DEFAULT = {
 
     # Logging options
     "log_file"           : "oft.log",
-    "log_dir"            : "/home/sdn/logs/",
+    "log_dir"            : "/home/sdn/logs",
     "debug"              : "verbose",
     "profile"            : False,
     "profile_file"       : "profile.out",
@@ -423,6 +424,7 @@ sys.modules["ofp"] = loxi.protocol(name_to_version[config["openflow_version"]])
 # HACK: testutils.py imports controller.py, which needs the ofp module
 import oftest.testutils
 from oftest import oflog
+from oftest.oflog import *
 
 # Load config for publishing logs
 oflog.set_config()
@@ -562,10 +564,10 @@ signal.signal(signal.SIGINT, signal.SIG_DFL)
 
 if __name__ == "__main__":
     profiler = profiler_setup(config)
-
+    
     # Set up the dataplane
     oftest.dataplane_instance = oftest.dataplane.DataPlane(config)
-    pcap_setup(config)
+    # pcap_setup(config)
     for of_port, ifname in config["port_map"].items():
         oftest.dataplane_instance.port_add(ifname, of_port)
 
