@@ -16,7 +16,7 @@ import BII_testgroup140
 import BII_testgroup40
 import oftest.packet as scapy
 from loxi.pp import pp
-
+import oftest.controller as controller
 from oftest.testutils import *
 from oftest.parse import parse_ipv6
 from oftest.oflog import *
