@@ -78,7 +78,7 @@ CONFIG_DEFAULT = {
 
     # Logging options
     "log_file"           : "oft.log",
-    "log_dir"            : "/home/sdn/logs",
+    "log_dir"            : "/home/sdn/oflogs/",
     "debug"              : "verbose",
     "profile"            : False,
     "profile_file"       : "profile.out",
