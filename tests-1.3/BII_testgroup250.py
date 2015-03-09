@@ -140,7 +140,7 @@ class Testcase_250_140_SwitchConfigMissSendLen(base_tests.SimpleDataPlane):
 
         for table_id in range(tables_no):
         	priority=0
-        	actions=[ofp.action.output(port=ofp.OFPP_CONTROLLER, max_len=0)]
+        	actions=[ofp.action.output(port=ofp.OFPP_CONTROLLER, max_len=128)]
         	instructions=[ofp.instruction.apply_actions(actions=actions)]
        	 	match = ofp.match([])
         	req = ofp.message.flow_add(table_id=table_id,
@@ -154,70 +154,24 @@ class Testcase_250_140_SwitchConfigMissSendLen(base_tests.SimpleDataPlane):
         	do_barrier(self.controller)
 
         port1, = openflow_ports(1)
-        pkt = str(simple_tcp_packet(pktlen=200))
-        self.dataplane.send(port1, pkt)
-        logging.info("Sending a dataplane packet")
-        verify_packets(self, pkt, [])
-        rv, raw=self.controller.poll(exp_msg=ofp.const.OFPT_PACKET_IN, timeout=timeout)
-        self.assertTrue(rv is not None, 'Packet in message not received')
-        self.assertEqual(len(rv.data),0, "length of data in packet in is not 0.")
-        logging.info("Packet In received as expected")
-
-        logging.info("Delete all flows on DUT")
-        rv = delete_all_flows(self.controller)
-        self.assertEqual(rv, 0, "Failed to delete all flows")
+        pkt = str(simple_tcp_packet(pktlen=1500))
         
+        miss_send_len_list=[0,0xffe5,0xffff]
+        for miss_send_len in miss_send_len_list:
+            request = ofp.message.set_config(miss_send_len=miss_send_len)
+            self.controller.message_send(request)
+            self.dataplane.send(port1, pkt)
+            logging.info("Sending a dataplane packet")
+            verify_packets(self, pkt, [])
+            rv, raw=self.controller.poll(exp_msg=ofp.const.OFPT_PACKET_IN, timeout=timeout)
+            self.assertTrue(rv is not None, 'Packet in message not received')
+            self.assertTrue(len(rv.data)<=miss_send_len, "length of data in packet in is not correct.")
+            logging.info("Packet In received as expected")
+            
+        request = ofp.message.set_config(miss_send_len=128)
+        self.controller.message_send(request)
+           
 
-        for table_id in range(tables_no):
-        	priority=0
-        	actions=[ofp.action.output(port=ofp.OFPP_CONTROLLER, max_len=0xffe5)]
-        	instructions=[ofp.instruction.apply_actions(actions=actions)]
-       	 	match = ofp.match([])
-        	req = ofp.message.flow_add(table_id=table_id,
-                                   match= match,
-                                   buffer_id=ofp.OFP_NO_BUFFER,
-                                   instructions=instructions,
-                                   priority=priority)
-        	logging.info("Sending Table Miss flowmod")
-        	rv = self.controller.message_send(req)
-        	self.assertTrue(rv != -1, "Failed to insert Table Miss flow")
-        	do_barrier(self.controller)
-
-        self.dataplane.send(port1, pkt)
-        logging.info("Sending a dataplane packet")
-        verify_packets(self, pkt, [])
-        rv, raw=self.controller.poll(exp_msg=ofp.const.OFPT_PACKET_IN, timeout=timeout)
-        self.assertTrue(rv is not None, 'Packet in message not received')
-        self.assertEqual(len(rv.data),len(pkt), "length of data in packet in is not 0.")
-        logging.info("Packet In received as expected")
-
-        logging.info("Delete all flows on DUT")
-        rv = delete_all_flows(self.controller)
-        self.assertEqual(rv, 0, "Failed to delete all flows")
-        
-
-        for table_id in range(tables_no):
-        	priority=0
-        	actions=[ofp.action.output(port=ofp.OFPP_CONTROLLER, max_len=ofp.const.OFPCML_NO_BUFFER)]
-        	instructions=[ofp.instruction.apply_actions(actions=actions)]
-       	 	match = ofp.match([])
-        	req = ofp.message.flow_add(table_id=table_id,
-                                   match= match,
-                                   buffer_id=ofp.OFP_NO_BUFFER,
-                                   instructions=instructions,
-                                   priority=priority)
-        	logging.info("Sending Table Miss flowmod")
-        	rv = self.controller.message_send(req)
-        	self.assertTrue(rv != -1, "Failed to insert Table Miss flow")
-        	do_barrier(self.controller)
-
-        self.dataplane.send(port1, pkt)
-        logging.info("Sending a dataplane packet")
-        verify_packets(self, pkt, [])
-        rv, raw=self.controller.poll(exp_msg=ofp.const.OFPT_PACKET_IN, timeout=timeout)
-        self.assertTrue(rv is not None, 'Packet in message not received')
-        self.assertEqual(len(rv.data),len(pkt), "length of data in packet in is not 0.")
-        logging.info("Packet In received as expected")
 
 
 

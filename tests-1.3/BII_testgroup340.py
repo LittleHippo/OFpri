@@ -12,6 +12,7 @@ To satisfy the basic requirements an OpenFlow enabled device must pass 340.20, 3
 import logging
 import time
 import sys
+import os
 
 import unittest
 import random
@@ -676,15 +677,48 @@ class Testcase_340_260_MultipartPortDescSetPortState(base_tests.SimpleDataPlane)
         rv = delete_all_flows(self.controller)
         self.assertEqual(rv, 0, "Failed to delete all flows")
 
+        default_port, = openflow_ports(1)
+        
         request = ofp.message.port_desc_stats_request()
         stats = get_stats(self, request)
         self.assertTrue(len(stats) >= 4, "Reported ports in port desc is not correct")
 
         for item in stats:
         	if item.port_no in openflow_ports(4):
-        		self.assertEqual(item.state,4, "Reported port state is not correct.")
+        		self.assertEqual((item.state & 1),0, "Reported port state is not correct.")
         	
         logging.info("Reported port state in port desc is correct")
+        
+        """#Bring down the port by shutting the interface connected 
+        try:
+            logging.info("Bringing down the interface ..")
+            print "Manually bring down the first port"
+        
+            #Verify Port Status message is recieved with reason-- Port Deleted
+            logging.info("Verify PortStatus-Down message is recieved on the control plane ")
+            (response, raw) = self.controller.poll(ofp.OFPT_PORT_STATUS, timeout=15)
+            self.assertTrue(response is not None,
+                        'Port Status Message not generated')
+            
+            request = ofp.message.port_desc_stats_request()
+            stats = get_stats(self, request)
+            self.assertTrue(len(stats) >= 4, "Reported ports in port desc is not correct")
+
+            for item in stats:
+                if item.port_no == default_port:
+                    self.assertEqual((item.state & 1),1, "Reported port state is not correct.")
+                else:
+                    self.assertEqual((item.state & 1),0, "Reported port state is not correct.")
+                        
+        #Bring up the port by starting the interface connected
+        finally:
+            logging.info("Bringing up the interface ...")
+            print "Manually bring up the first port"
+            logging.info("Verify PortStatus-Up message is recieved on the control plane ")
+            (response, raw) = self.controller.poll(ofp.OFPT_PORT_STATUS, timeout=15)
+            self.assertTrue(response is not None,
+                        'Port Status Message not generated')"""
+
 
 
 class Testcase_340_270_MultipartPortDescCurrFeatures(base_tests.SimpleDataPlane):
@@ -731,7 +765,7 @@ class Testcase_340_280_MultipartPortDescAdvertisedFeatures(base_tests.SimpleData
 
         for item in stats:
         	if item.port_no in openflow_ports(4):
-        		self.assertEqual(item.advertised, 10303, "Reported advertised features is not correct.")
+        		self.assertEqual(item.advertised, 2080, "Reported advertised features is not correct.")
         	
         logging.info("Reported advertised features in port desc is correct")
 
@@ -756,7 +790,7 @@ class Testcase_340_290_MultipartPortDescSupportedFeatures(base_tests.SimpleDataP
 
         for item in stats:
         	if item.port_no in openflow_ports(4):
-        		self.assertEqual(item.supported, 10303, "Reported supported features is not correct.")
+        		self.assertEqual(item.supported, 2080, "Reported supported features is not correct.")
         	
         logging.info("Reported supported features in port desc is correct")
 
@@ -781,7 +815,7 @@ class Testcase_340_300_MultipartPortDescPeerFeatures(base_tests.SimpleDataPlane)
 
         for item in stats:
         	if item.port_no in openflow_ports(4):
-        		self.assertEqual(item.peer, 10303, "Reported peer features is not correct.")
+        		self.assertEqual(item.peer, 0, "Reported peer features is not correct.")
         	
         logging.info("Reported peer features in port desc is correct")
 

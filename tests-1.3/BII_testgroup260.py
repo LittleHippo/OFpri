@@ -417,6 +417,7 @@ class Testcase_260_100_FlowmodIgnoreCookieMask(base_tests.SimpleDataPlane):
         match1 = ofp.match([ofp.oxm.in_port(in_port)])
         req = ofp.message.flow_add(table_id=table_id,
                                cookie=cookie,
+                               cookie_mask=cookie_mask,
                                match= match1,
                                buffer_id=ofp.OFP_NO_BUFFER,
                                instructions=instructions,
@@ -443,18 +444,30 @@ class Testcase_260_110_FlowmodDeleteTable(base_tests.SimpleDataPlane):
         rv = delete_all_flows(self.controller)
         self.assertEqual(rv, 0, "Failed to delete all flows")
 
-        in_port, out_port, = openflow_ports(2)
+        in_port, out_port,out_port2, = openflow_ports(3)
         table_id=0
         priority=1
         cookie1 = 0x00000011
         actions=[ofp.action.output(port=out_port, max_len=128)]
+        actions2=[ofp.action.output(port=out_port2, max_len=128)]
         instructions=[ofp.instruction.apply_actions(actions=actions)]
+        instructions_mod=[ofp.instruction.apply_actions(actions=actions2)]
         match = ofp.match([ofp.oxm.in_port(in_port)])
         req = ofp.message.flow_add(table_id=table_id,
                                cookie=cookie1,
                                match= match,
                                buffer_id=ofp.OFP_NO_BUFFER,
                                instructions=instructions,
+                               priority=priority)
+        logging.info("Sending flowmod")
+        rv = self.controller.message_send(req)
+        self.assertTrue(rv != -1, "Failed to insert flow")
+        
+        req = ofp.message.flow_modify(table_id=table_id,
+                               cookie=cookie1,
+                               match= match,
+                               buffer_id=ofp.OFP_NO_BUFFER,
+                               instructions=instructions_mod,
                                priority=priority)
         logging.info("Sending flowmod")
         rv = self.controller.message_send(req)
@@ -780,18 +793,14 @@ class Testcase_260_240_FlowmodTimeoutBoth0(base_tests.SimpleDataPlane):
         rv = self.controller.message_send(req)
         self.assertTrue(rv != -1, "Failed to insert flow")
 
-        for i in range(7):
+        for i in range(6):
             pkt = str(simple_tcp_packet())
             logging.info("Sending dataplane packets")
             self.dataplane.send(in_port, pkt)
-            
-            if i == 6:
-                verify_no_packet(self, pkt, out_port)
-            else:
-                verify_packet(self, pkt, out_port)
-            sleep(3)
+            verify_packet(self, pkt, out_port)
+            sleep(2)
 
-        logging.info("Flow did not timeout as expected")
+        logging.info("IDLE_TIMEOUT with HARD_TIMEOUT both 0. Flow did not timeout")
 
 
 
@@ -821,7 +830,6 @@ class Testcase_260_250_FlowmodPriority(base_tests.SimpleDataPlane):
                                instructions=instructions,
                                priority=priority)
         logging.info("Sending flowmod")
-        self.controller.message_send(req)
         rv = self.controller.message_send(req)
         self.assertTrue(rv != -1, "Failed to insert flow")
 
@@ -1054,7 +1062,9 @@ class Testcase_260_320_FlowmodModifyStrict(base_tests.SimpleDataPlane):
                                   match= match,
                                   buffer_id=ofp.OFP_NO_BUFFER,
                                   instructions=instructions,
-                                  priority=priority)
+                                  priority=priority,
+                                  out_port=ofp.const.OFPP_ANY,
+                                  out_group=ofp.const.OFPG_ANY)
         logging.info("Insert flow 1")
         rv = self.controller.message_send(req)
         self.assertTrue(rv != -1, "Failed to insert flow 1")
@@ -1074,7 +1084,9 @@ class Testcase_260_320_FlowmodModifyStrict(base_tests.SimpleDataPlane):
                                   match= match,
                                   buffer_id=ofp.OFP_NO_BUFFER,
                                   instructions=instructions,
-                                  priority=priority)
+                                  priority=priority,
+                                  out_port=ofp.const.OFPP_ANY,
+                                  out_group=ofp.const.OFPG_ANY)
         logging.info("Insert flow 2")
         rv = self.controller.message_send(req)
         self.assertTrue(rv != -1, "Failed to insert flow 2")

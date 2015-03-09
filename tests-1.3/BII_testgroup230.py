@@ -196,27 +196,32 @@ class Testcase_230_50_ActionHeaderMaxLenMax(base_tests.SimpleDataPlane):
         self.assertEqual(rv, 0, "Failed to delete all flows")
         
         in_port, = openflow_ports(1)
+        
         table_id=0
         priority=1
-        actions=[ofp.action.output(port=ofp.OFPP_CONTROLLER, max_len=0xffe5)]
-        instructions=[ofp.instruction.apply_actions(actions=actions)]
-       	match = ofp.match([ofp.oxm.eth_type(0x0800)])
-        req = ofp.message.flow_add(table_id=table_id,
-                               match= match,
-                               buffer_id=ofp.OFP_NO_BUFFER,
-                               instructions=instructions,
-                                priority=priority)
-        logging.info("Sending flowmod")
-        rv = self.controller.message_send(req)
-        self.assertTrue(rv != -1, "Failed to insert flow")
+        max_len_list=[0xffe5,1000,100,10]
+        for max_len in max_len_list:
+            rv = delete_all_flows(self.controller)
+            self.assertEqual(rv, 0, "Failed to delete all flows")
+            actions=[ofp.action.output(port=ofp.OFPP_CONTROLLER, max_len=max_len)]
+            instructions=[ofp.instruction.apply_actions(actions=actions)]
+            match = ofp.match([ofp.oxm.eth_type(0x0800)])
+            req = ofp.message.flow_add(table_id=table_id,
+                                   match= match,
+                                   buffer_id=ofp.OFP_NO_BUFFER,
+                                   instructions=instructions,
+                                    priority=priority)
+            logging.info("Sending flowmod")
+            rv = self.controller.message_send(req)
+            self.assertTrue(rv != -1, "Failed to insert flow")
 
-        pkt = simple_tcp_packet()
-        self.dataplane.send(in_port, str(pkt))
-        logging.info("Sending a dataplane packet")
-        rv, _ = self.controller.poll(exp_msg=ofp.const.OFPT_PACKET_IN)
-        self.assertIsNotNone(rv, "Did not receive packet in message")
-        self.assertEqual(len(rv.data), len(pkt), "length of data in packet in is not correct")
-        logging.info("Got packet in as expected")
+            pkt = simple_tcp_packet()
+            self.dataplane.send(in_port, str(pkt))
+            logging.info("Sending a dataplane packet")
+            rv, _ = self.controller.poll(exp_msg=ofp.const.OFPT_PACKET_IN)
+            self.assertIsNotNone(rv, "Did not receive packet in message")
+            self.assertTrue(len(rv.data)<=max_len, "length of data in packet in is not correct")
+            logging.info("Got packet in as expected")
 
 
 
