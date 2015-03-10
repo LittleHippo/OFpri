@@ -98,27 +98,38 @@ class Testcase_310_70_MultipartFlowStatsTableID(base_tests.SimpleDataPlane):
         self.assertEqual(rv, 0, "Failed to delete all flows")
 
         in_port, out_port, = openflow_ports(2)
-        table_id=0
-        priority=100
-        actions=[ofp.action.output(port=out_port, max_len=128)]
-        instructions=[ofp.instruction.apply_actions(actions=actions)]
-       	match = ofp.match([ofp.oxm.in_port(in_port)])
-        req = ofp.message.flow_add(table_id=table_id,
-                               match= match,
-                               buffer_id=ofp.OFP_NO_BUFFER,
-                               instructions=instructions,
-                               priority=priority)
-        logging.info("Insert flow")
-        rv = self.controller.message_send(req)
-        self.assertTrue(rv != -1, "Failed to insert flow")
         
+        request = ofp.message.features_request()
+        (reply, pkt)= self.controller.transact(request)
+        self.assertIsNotNone(reply, "Did not receive Features Reply Message")
+        tables_no = reply.n_tables
+  
+        for table_id in range(tables_no):
+            priority=100
+            actions=[ofp.action.output(port=out_port, max_len=128)]
+            instructions=[ofp.instruction.apply_actions(actions=actions)]
+            match = ofp.match([ofp.oxm.in_port(in_port)])
+            req = ofp.message.flow_add(table_id=table_id,
+                                   match= match,
+                                   buffer_id=ofp.OFP_NO_BUFFER,
+                                   instructions=instructions,
+                                   priority=priority)
+            logging.info("Insert flow 1")
+            rv = self.controller.message_send(req)
+            self.assertTrue(rv != -1, "Failed to insert flow")
+                 
         stats = get_flow_stats(self,table_id=table_id,match=req.match)
         self.assertEqual(len(stats), 1, "Incorrect flow stats.")
         self.assertEqual(stats[0].table_id,table_id, "Incorrect table ID")
         logging.info("Received multipart reply as expected")
         stats = get_flow_stats(self,table_id=ofp.const.OFPTT_ALL,match=req.match)
+        self.assertEqual(len(stats), tables_no, "Incorrect flow stats.")
+        for item in stats:
+            self.assertTrue(item.table_id in range(tables_no), "Incorrect table id.") 
+        logging.info("Received multipart reply as expected")
+        stats = get_flow_stats(self,table_id=tables_no-1,match=req.match)
         self.assertEqual(len(stats), 1, "Incorrect flow stats.")
-        self.assertEqual(stats[0].table_id,table_id, "Incorrect table ID")
+        self.assertEqual(stats[0].table_id,tables_no-1, "Incorrect table ID")
         logging.info("Received multipart reply as expected")
 
 
@@ -241,9 +252,9 @@ class Testcase_310_100_MultipartFlowStatsCookie(base_tests.SimpleDataPlane):
         self.assertTrue(rv != -1, "Failed to insert flow 2")
         
         cookie_mask=0xffffffffffffffff
-        stats = get_flow_stats(self,table_id=table_id,match=ofp.match(),cookie=cookie2,cookie_mask=cookie_mask)
+        stats = get_flow_stats(self,table_id=table_id,match=ofp.match(),cookie=cookie1,cookie_mask=cookie_mask)
         self.assertEqual(len(stats), 1, "Incorrect flow stats.")
-        self.assertEqual(stats[0].cookie,cookie2, "Incorrect cookie")
+        self.assertEqual(stats[0].cookie,cookie1, "Incorrect cookie")
         logging.info("Received multipart reply as expected")
 
 
@@ -386,10 +397,21 @@ class Testcase_310_150_MultipartFlowStatsNanoDuration(base_tests.SimpleDataPlane
         self.assertTrue(rv != -1, "Failed to insert flow")
         
         time.sleep(2)
-        stats = get_flow_stats(self,table_id=table_id,match=req.match)
-        self.assertEqual(len(stats), 1, "Incorrect flow stats.")
-        self.assertNotEqual(stats[0].duration_nsec,0, "Invalid duration nsec")
-        logging.info("Received multipart reply as expected")
+        for i in range(5):
+            stats = get_flow_stats(self,table_id=table_id,match=req.match)
+            self.assertEqual(len(stats), 1, "Incorrect flow stats.")
+            if i==0 :
+                duration_sec=stats[0].duration_sec
+                duration_nsec=stats[0].duration_nsec
+            else:
+                if stats[0].duration_sec == duration_sec:
+                    self.assertTrue(stats[0].duration_nsec > duration_nsec, "Invalid duration nsec")
+                else:
+                    self.assertTrue(stats[0].duration_nsec < duration_nsec, "Invalid duration nsec")
+            duration_sec=stats[0].duration_sec
+            duration_nsec=stats[0].duration_nsec
+            logging.info("Received multipart reply as expected")
+            time.sleep(0.1)
 
 
 
@@ -633,28 +655,41 @@ class Testcase_310_250_MultipartAggStatsTableID(base_tests.SimpleDataPlane):
         logging.info("Running 310.250 - Aggregate statistics table id test")
         rv = delete_all_flows(self.controller)
         self.assertEqual(rv, 0, "Failed to delete all flows")
+        
+        request = ofp.message.features_request()
+        (reply, pkt)= self.controller.transact(request)
+        self.assertIsNotNone(reply, "Did not receive Features Reply Message")
+        tables_no = reply.n_tables
 
         in_port, out_port, = openflow_ports(2)
-        table_id=0
-        priority=100
-        actions=[ofp.action.output(port=out_port, max_len=128)]
-        instructions=[ofp.instruction.apply_actions(actions=actions)]
-       	match = ofp.match([ofp.oxm.in_port(in_port)])
-        req = ofp.message.flow_add(table_id=table_id,
-                               match= match,
-                               buffer_id=ofp.OFP_NO_BUFFER,
-                               instructions=instructions,
-                               priority=priority)
-        logging.info("Insert flow")
-        rv = self.controller.message_send(req)
-        self.assertTrue(rv != -1, "Failed to insert flow")
+        
+        for table_id in range(tables_no):
+            priority=100
+            actions=[ofp.action.output(port=out_port, max_len=128)]
+            instructions=[ofp.instruction.apply_actions(actions=actions)]
+            match = ofp.match([ofp.oxm.in_port(in_port)])
+            req = ofp.message.flow_add(table_id=table_id,
+                                   match= match,
+                                   buffer_id=ofp.OFP_NO_BUFFER,
+                                   instructions=instructions,
+                                   priority=priority)
+            logging.info("Insert flow")
+            rv = self.controller.message_send(req)
+            self.assertTrue(rv != -1, "Failed to insert flow")
         
         time.sleep(2)
-        request = ofp.message.aggregate_stats_request(table_id=table_id,match=ofp.match(),out_port=ofp.OFPP_ANY)
+        request = ofp.message.aggregate_stats_request(table_id=0,match=ofp.match(),out_port=ofp.OFPP_ANY)
         reply, _=self.controller.transact(request)
         self.assertEqual(reply.flow_count,1, "Incorrect flow_stats entry")
         logging.info("Received multipart reply as expected") 
-
+        request = ofp.message.aggregate_stats_request(table_id=ofp.const.OFPTT_ALL,match=ofp.match(),out_port=ofp.OFPP_ANY)
+        reply, _=self.controller.transact(request)
+        self.assertEqual(reply.flow_count,tables_no, "Incorrect flow_stats entry")
+        logging.info("Received multipart reply as expected") 
+        request = ofp.message.aggregate_stats_request(table_id=tables_no-1,match=ofp.match(),out_port=ofp.OFPP_ANY)
+        reply, _=self.controller.transact(request)
+        self.assertEqual(reply.flow_count,1, "Incorrect flow_stats entry")
+        logging.info("Received multipart reply as expected") 
 
 
 class Testcase_310_260_MultipartAggStatsOutport(base_tests.SimpleDataPlane):
