@@ -31,7 +31,7 @@ from oftest.testutils import *
 from time import sleep
 
 
-class Testcase_340_10_MultipartPortFilter(base_tests.SimpleDataPlane):
+class Testcase_340_20_MultipartPortFilter(base_tests.SimpleDataPlane):
     """
     340.20 - Port filter reserved
     The port_no field optionally filters the stats request to the given port. To request all port statistics, 
@@ -50,11 +50,11 @@ class Testcase_340_10_MultipartPortFilter(base_tests.SimpleDataPlane):
         self.assertTrue(len(stats) >= 4, "Reported ports in port stats is not correct")
 
         for port in openflow_ports(4):
-        	request = ofp.message.port_stats_request(port_no=port)
-        	stats = get_stats(self, request)
-        	self.assertEqual(len(stats), 1, "Port %d is not reported in port stats" %(port))
+            request = ofp.message.port_stats_request(port_no=port)
+            stats = get_stats(self, request)
+            self.assertEqual(len(stats), 1, "Port %d is not reported in port stats" %(port))
 
-	  	logging.info("Reported ports in port stats is correct")
+        logging.info("Reported ports in port stats is correct")
 
 
 
@@ -76,12 +76,12 @@ class Testcase_340_40_MultipartPortFilterStandard(base_tests.SimpleDataPlane):
         self.assertTrue(len(stats) >= 4, "Reported ports in port stats is not correct")
 
         for port in openflow_ports(4):
-        	request = ofp.message.port_stats_request(port_no=port)
-        	stats = get_stats(self, request)
-        	self.assertEqual(len(stats), 1, "Port %d is not reported in port stats" %(port))
-        	self.assertEqual(stats[0].port_no, port, "Received port_no %d in port stats is not correct"%(port))
+            request = ofp.message.port_stats_request(port_no=port)
+            stats = get_stats(self, request)
+            self.assertEqual(len(stats), 1, "Port %d is not reported in port stats" %(port))
+            self.assertEqual(stats[0].port_no, port, "Received port_no %d in port stats is not correct"%(port))
 
-	  	logging.info("Reported port_no in port stats is correct")
+        logging.info("Reported port_no in port stats is correct")
 
 
 
@@ -163,10 +163,10 @@ class Testcase_340_60_MultipartPortStatsTxPackets(base_tests.SimpleDataPlane):
         stats = get_stats(self, request)
         self.assertEqual(len(stats), 1, "Port %d is not reported in port stats" %(out_port))
         if stats[0].tx_packets==0xffffffffffffffff:
-        	logging.warn("Transmitted packets counter is not supported")
+            logging.warn("Transmitted packets counter is not supported")
         else:
-        	self.assertEqual(stats[0].tx_packets-init_tx_pkt, pkt_no, "Transmitted packets in port stats is not correct")
-        	logging.info("Reported transmitted packets in port stats is correct")
+            self.assertEqual(stats[0].tx_packets-init_tx_pkt, pkt_no, "Transmitted packets in port stats is not correct")
+            logging.info("Reported transmitted packets in port stats is correct")
 
 
 
@@ -248,10 +248,10 @@ class Testcase_340_80_MultipartPortStatsTxBytes(base_tests.SimpleDataPlane):
         stats = get_stats(self, request)
         self.assertEqual(len(stats), 1, "Port %d is not reported in port stats" %(out_port))
         if stats[0].tx_bytes==0xffffffffffffffff:
-        	logging.warn("Transmitted bytes counter is not supported")
+            logging.warn("Transmitted bytes counter is not supported")
         else:
-        	self.assertEqual(stats[0].tx_bytes-init_tx_bytes, pkt_no*100, "Transmitted bytes in port stats is not correct")
-        	logging.info("Reported transmitted bytes in port stats is correct")
+            self.assertEqual(stats[0].tx_bytes-init_tx_bytes, pkt_no*100, "Transmitted bytes in port stats is not correct")
+            logging.info("Reported transmitted bytes in port stats is correct")
 
 
 
@@ -293,10 +293,10 @@ class Testcase_340_90_MultipartPortStatsRxDropped(base_tests.SimpleDataPlane):
         stats = get_stats(self, request)
         self.assertEqual(len(stats), 1, "Port %d is not reported in port stats" %(port))
         if stats[0].rx_dropped==0xffffffffffffffff:
-        	logging.warn("Rx_dropped counter is not supported")
+            logging.warn("Rx_dropped counter is not supported")
         else:
-        	self.assertEqual(stats[0].rx_dropped-init_rx_dropped, pkt_no, "Received dropped in port stats is not correct")
-        	logging.info("Reported received dropped in port stats is correct")
+            self.assertEqual(stats[0].rx_dropped-init_rx_dropped, pkt_no, "Received dropped in port stats is not correct")
+            logging.info("Reported received dropped in port stats is correct")
 
 
 
@@ -352,10 +352,10 @@ class Testcase_340_100_MultipartPortStatsTxDropped(base_tests.SimpleDataPlane):
         stats = get_stats(self, request)
         self.assertEqual(len(stats), 1, "Port %d is not reported in port stats" %(port))
         if stats[0].tx_dropped==0xffffffffffffffff:
-        	logging.warn("tx_dropped counter is not supported")
+            logging.warn("tx_dropped counter is not supported")
         else:
-        	self.assertEqual(stats[0].tx_dropped-init_tx_dropped, pkt_no, "Tx_dropped in port stats is not correct")
-        	logging.info("Reported tx_dropped in port stats is correct")
+            self.assertEqual(stats[0].tx_dropped-init_tx_dropped, pkt_no, "Tx_dropped in port stats is not correct")
+            logging.info("Reported tx_dropped in port stats is correct")
 
 
 class Testcase_340_110_MultipartPortStatsRxErrors(base_tests.SimpleDataPlane):
@@ -377,9 +377,9 @@ class Testcase_340_110_MultipartPortStatsRxErrors(base_tests.SimpleDataPlane):
         stats = get_stats(self, request)
         self.assertEqual(len(stats), 1, "Port %d is not reported in port stats" %(port))
         if stats[0].rx_errors==0xffffffffffffffff:
-        	logging.warn("rx_errors counter is not supported")
+            logging.warn("rx_errors counter is not supported")
         else:
-        	logging.info("Received Rx_errors is %d", stats[0].rx_errors)
+            logging.info("Received Rx_errors is %d", stats[0].rx_errors)
 
 
 
@@ -402,9 +402,9 @@ class Testcase_340_120_MultipartPortStatsTxErrors(base_tests.SimpleDataPlane):
         stats = get_stats(self, request)
         self.assertEqual(len(stats), 1, "Port %d is not reported in port stats" %(port))
         if stats[0].tx_errors==0xffffffffffffffff:
-        	logging.warn("tx_errors counter is not supported")
+            logging.warn("tx_errors counter is not supported")
         else:
-        	logging.info("Received tx_errors is %d", stats[0].tx_errors)
+            logging.info("Received tx_errors is %d", stats[0].tx_errors)
 
 
 
@@ -427,9 +427,9 @@ class Testcase_340_130_MultipartPortStatsRxFrameErrors(base_tests.SimpleDataPlan
         stats = get_stats(self, request)
         self.assertEqual(len(stats), 1, "Port %d is not reported in port stats" %(port))
         if stats[0].rx_frame_err==0xffffffffffffffff:
-        	logging.warn("rx_frame_err counter is not supported")
+            logging.warn("rx_frame_err counter is not supported")
         else:
-        	logging.info("Received rx_frame_err is %d", stats[0].rx_frame_err)
+            logging.info("Received rx_frame_err is %d", stats[0].rx_frame_err)
 
 
 
@@ -452,9 +452,9 @@ class Testcase_340_140_MultipartPortStatsRxOverrunErrors(base_tests.SimpleDataPl
         stats = get_stats(self, request)
         self.assertEqual(len(stats), 1, "Port %d is not reported in port stats" %(port))
         if stats[0].rx_over_err==0xffffffffffffffff:
-        	logging.warn("rx_over_err counter is not supported")
+            logging.warn("rx_over_err counter is not supported")
         else:
-        	logging.info("Received rx_over_err is %d", stats[0].rx_over_err)
+            logging.info("Received rx_over_err is %d", stats[0].rx_over_err)
 
 
 
@@ -477,9 +477,9 @@ class Testcase_340_150_MultipartPortStatsRxCRCErrors(base_tests.SimpleDataPlane)
         stats = get_stats(self, request)
         self.assertEqual(len(stats), 1, "Port %d is not reported in port stats" %(port))
         if stats[0].rx_crc_err==0xffffffffffffffff:
-        	logging.warn("rx_crc_err counter is not supported")
+            logging.warn("rx_crc_err counter is not supported")
         else:
-        	logging.info("Received rx_crc_err is %d", stats[0].rx_crc_err)
+            logging.info("Received rx_crc_err is %d", stats[0].rx_crc_err)
 
 
 
@@ -502,9 +502,9 @@ class Testcase_340_160_MultipartPortStatsCollisionErrors(base_tests.SimpleDataPl
         stats = get_stats(self, request)
         self.assertEqual(len(stats), 1, "Port %d is not reported in port stats" %(port))
         if stats[0].collisions==0xffffffffffffffff:
-        	logging.warn("collisions counter is not supported")
+            logging.warn("collisions counter is not supported")
         else:
-        	logging.info("Received collisions is %d", stats[0].collisions)
+            logging.info("Received collisions is %d", stats[0].collisions)
 
 
 
@@ -535,9 +535,9 @@ class Testcase_340_170_MultipartPortStatsDurationSec(base_tests.SimpleDataPlane)
         duration_sec=stats[0].duration_sec
 
         if stats[0].duration_sec==0xffffffff:
-        	logging.warn("duration_sec is not supported")
+            logging.warn("duration_sec is not supported")
         else:
-        	self.assertTrue(duration_sec > duration_sec_orig, "Duration_sec is not increased as expected")
+            self.assertTrue(duration_sec > duration_sec_orig, "Duration_sec is not increased as expected")
 
         logging.info("Duration_sec is increased as expected")
 
@@ -571,12 +571,12 @@ class Testcase_340_180_MultipartPortStatsDurationNsec(base_tests.SimpleDataPlane
         duration_sec=stats[0].duration_sec
 
         if stats[0].duration_nsec==0xffffffff:
-        	logging.warn("duration_nsec is not supported")
+            logging.warn("duration_nsec is not supported")
         else:
-        	self.assertTrue(duration_sec >= duration_sec_orig, "Duration_sec is not increased as expected")  
-        	if duration_sec == duration_sec_orig:
-        		self.assertTrue(duration_nsec >= duration_nsec_orig, "Duration_nsec is not increased as expected") 
-        		logging.info("Duration_nsec is increased as expected")
+            self.assertTrue(duration_sec >= duration_sec_orig, "Duration_sec is not increased as expected")  
+            if duration_sec == duration_sec_orig:
+                self.assertTrue(duration_nsec >= duration_nsec_orig, "Duration_nsec is not increased as expected") 
+                logging.info("Duration_nsec is increased as expected")
 
 
 
@@ -600,8 +600,8 @@ class Testcase_340_200_MultipartPortDescUniquePort(base_tests.SimpleDataPlane):
 
         ports=[]
         for item in stats:
-        	self.assertNotIn(item.port_no, ports, "Reported port_no is not unique")
-        	ports.append(item.port_no)
+            self.assertNotIn(item.port_no, ports, "Reported port_no is not unique")
+            ports.append(item.port_no)
         logging.info("Reported ports in port desc is correct")
 
 
@@ -625,8 +625,8 @@ class Testcase_340_220_MultipartPortDescUniqueHWAddress(base_tests.SimpleDataPla
 
         MAC_Addr=[]
         for item in stats:
-        	self.assertNotIn(item.hw_addr, MAC_Addr, "Reported HW_Addr is not unique")
-        	MAC_Addr.append(item.hw_addr)
+            self.assertNotIn(item.hw_addr, MAC_Addr, "Reported HW_Addr is not unique")
+            MAC_Addr.append(item.hw_addr)
         logging.info("Reported HW_Addr in port desc is correct")
 
 
@@ -649,7 +649,7 @@ class Testcase_340_240_MultipartPortDescPortName(base_tests.SimpleDataPlane):
         self.assertTrue(len(stats) >= 4, "Reported ports in port desc is not correct")
 
         for item in stats:
-        	self.assertIsNotNone(item.name, "Reported port_name is none")
+            self.assertIsNotNone(item.name, "Reported port_name is none")
 
         logging.info("Reported port_name in port desc is correct")
 
@@ -668,7 +668,7 @@ class Testcase_340_260_MultipartPortDescSetPortState(base_tests.SimpleDataPlane)
     """
     340.260 - Port state
     Verify that each ports' state is correctly reported.
-	"""
+    """
 
     @wireshark_capture
     def runTest(self):
@@ -684,12 +684,12 @@ class Testcase_340_260_MultipartPortDescSetPortState(base_tests.SimpleDataPlane)
         self.assertTrue(len(stats) >= 4, "Reported ports in port desc is not correct")
 
         for item in stats:
-        	if item.port_no in openflow_ports(4):
-        		self.assertEqual((item.state & 1),0, "Reported port state is not correct.")
-        	
+            if item.port_no in openflow_ports(4):
+                self.assertEqual((item.state & 1),0, "Reported port state is not correct.")
+            
         logging.info("Reported port state in port desc is correct")
         
-        """#Bring down the port by shutting the interface connected 
+        #Bring down the port by shutting the interface connected 
         try:
             logging.info("Bringing down the interface ..")
             print "Manually bring down the first port"
@@ -717,7 +717,7 @@ class Testcase_340_260_MultipartPortDescSetPortState(base_tests.SimpleDataPlane)
             logging.info("Verify PortStatus-Up message is recieved on the control plane ")
             (response, raw) = self.controller.poll(ofp.OFPT_PORT_STATUS, timeout=15)
             self.assertTrue(response is not None,
-                        'Port Status Message not generated')"""
+                        'Port Status Message not generated')
 
 
 
@@ -739,9 +739,9 @@ class Testcase_340_270_MultipartPortDescCurrFeatures(base_tests.SimpleDataPlane)
         self.assertTrue(len(stats) >= 4, "Reported ports in port desc is not correct")
 
         for item in stats:
-        	if item.port_no in openflow_ports(4):
-        		self.assertEqual(item.curr, 10272, "Reported current features is not correct.")
-        	
+            if item.port_no in openflow_ports(4):
+                self.assertEqual(item.curr, 10272, "Reported current features is not correct.")
+            
         logging.info("Reported current features in port desc is correct")
 
 
@@ -764,9 +764,9 @@ class Testcase_340_280_MultipartPortDescAdvertisedFeatures(base_tests.SimpleData
         self.assertTrue(len(stats) >= 4, "Reported ports in port desc is not correct")
 
         for item in stats:
-        	if item.port_no in openflow_ports(4):
-        		self.assertEqual(item.advertised, 2080, "Reported advertised features is not correct.")
-        	
+            if item.port_no in openflow_ports(4):
+                self.assertEqual(item.advertised, 2080, "Reported advertised features is not correct.")
+            
         logging.info("Reported advertised features in port desc is correct")
 
 
@@ -789,9 +789,9 @@ class Testcase_340_290_MultipartPortDescSupportedFeatures(base_tests.SimpleDataP
         self.assertTrue(len(stats) >= 4, "Reported ports in port desc is not correct")
 
         for item in stats:
-        	if item.port_no in openflow_ports(4):
-        		self.assertEqual(item.supported, 2080, "Reported supported features is not correct.")
-        	
+            if item.port_no in openflow_ports(4):
+                self.assertEqual(item.supported, 2080, "Reported supported features is not correct.")
+            
         logging.info("Reported supported features in port desc is correct")
 
 
@@ -814,9 +814,9 @@ class Testcase_340_300_MultipartPortDescPeerFeatures(base_tests.SimpleDataPlane)
         self.assertTrue(len(stats) >= 4, "Reported ports in port desc is not correct")
 
         for item in stats:
-        	if item.port_no in openflow_ports(4):
-        		self.assertEqual(item.peer, 0, "Reported peer features is not correct.")
-        	
+            if item.port_no in openflow_ports(4):
+                self.assertEqual(item.peer, 0, "Reported peer features is not correct.")
+            
         logging.info("Reported peer features in port desc is correct")
 
 
@@ -839,9 +839,9 @@ class Testcase_340_310_MultipartPortDescCurrSpeed(base_tests.SimpleDataPlane):
         self.assertTrue(len(stats) >= 4, "Reported ports in port desc is not correct")
 
         for item in stats:
-        	if item.port_no in openflow_ports(4):
-        		self.assertEqual(item.curr_speed, 1000000, "Reported current speed is not correct.")
-        	
+            if item.port_no in openflow_ports(4):
+                self.assertEqual(item.curr_speed, 1000000, "Reported current speed is not correct.")
+            
         logging.info("Reported current speed in port desc is correct")
 
 
@@ -864,7 +864,7 @@ class Testcase_340_320_MultipartPortDescMaxSpeed(base_tests.SimpleDataPlane):
         self.assertTrue(len(stats) >= 4, "Reported ports in port desc is not correct")
 
         for item in stats:
-        	if item.port_no in openflow_ports(4):
-        		self.assertEqual(item.max_speed, 1000000, "Reported max_speed is not correct.")
-        	
+            if item.port_no in openflow_ports(4):
+                self.assertEqual(item.max_speed, 1000000, "Reported max_speed is not correct.")
+            
         logging.info("Reported max_speed in port desc is correct")
