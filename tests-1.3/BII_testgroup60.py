@@ -1,3 +1,6 @@
+# Distributed under the OpenFlow Software License (see LICENSE)
+# Copyright (c) 2010 The Board of Trustees of The Leland Stanford Junior University
+# Copyright (c) 2012, 2013 Big Switch Networks, Inc.
 # Copyright (c) 2014, 2015 Beijing Internet Institute(BII)
 ###Testcases implemented for Openflow 1.3 conformance certification test @Author: Pan Zhang
 """
@@ -62,6 +65,23 @@ class Testcase_60_20_OXM_OF_IN_PORT(base_tests.SimpleDataPlane):
         delete_all_flows(self.controller)
         in_port, out_port, bad_port = openflow_ports(3)
         table_id = test_param_get("table",0)
+        
+        logging.info("Inserting table-miss flows")
+        request = ofp.message.flow_add(
+            table_id=table_id,
+            instructions=[
+                ofp.instruction.apply_actions(
+                    actions=[
+                        ofp.action.output(
+                            port=ofp.OFPP_CONTROLLER,
+                            max_len=ofp.OFPCML_NO_BUFFER)])],
+            buffer_id=ofp.OFP_NO_BUFFER,
+            priority=0)
+        self.controller.message_send(request)
+        reply, _ = self.controller.poll(exp_msg = ofp.OFPT_ERROR, timeout = 3)
+        self.assertIsNone(reply, "Received error message, could not install the flow")
+        logging.info("Installed the flow successfully")
+        
         logging.info("Inserting flow sending in_port matching packets to port %d", out_port)
         match = ofp.match([ofp.oxm.in_port(in_port)])
         pkt = simple_tcp_packet()
@@ -77,21 +97,7 @@ class Testcase_60_20_OXM_OF_IN_PORT(base_tests.SimpleDataPlane):
         reply, _ = self.controller.poll(exp_msg = ofp.OFPT_ERROR, timeout = 3)
         self.assertIsNone(reply, "Received error message, could not install the flow")
         logging.info("Installed the flow successfully")
-        logging.info("Inserting another table-miss flows")
-        request = ofp.message.flow_add(
-            table_id=table_id,
-            instructions=[
-                ofp.instruction.apply_actions(
-                    actions=[
-                        ofp.action.output(
-                            port=ofp.OFPP_CONTROLLER,
-                            max_len=ofp.OFPCML_NO_BUFFER)])],
-            buffer_id=ofp.OFP_NO_BUFFER,
-            priority=1)
-        self.controller.message_send(request)
-        reply, _ = self.controller.poll(exp_msg = ofp.OFPT_ERROR, timeout = 3)
-        self.assertIsNone(reply, "Received error message, could not install the flow")
-        logging.info("Installed the flow successfully")
+
         logging.info("Sending a matching packet to match on %d", in_port)
         strpkt=str(pkt)
         self.dataplane.send(in_port, strpkt)
@@ -101,7 +107,7 @@ class Testcase_60_20_OXM_OF_IN_PORT(base_tests.SimpleDataPlane):
         self.dataplane.send(bad_port, strpkt)
         verify_no_packet(self, strpkt, out_port)
         logging.info("Did not receive a packet on %d", out_port)
-        verify_packet_in(self, strpkt, bad_port, ofp.OFPR_ACTION)
+        verify_packet_in(self, strpkt, bad_port, ofp.OFPR_NO_MATCH)
         logging.info("Received the expected packet-in message")
 
 

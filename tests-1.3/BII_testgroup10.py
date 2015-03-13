@@ -86,7 +86,7 @@ class Testcase_10_70_VersionNegotiationSuccess(base_tests.SimpleProtocol):
     @wireshark_capture
     def runTest(self):
         logging.info("Running 10.70 - Version negotiation on version field success test")
-        timeout = 3
+        timeout = 20
         nego_version = 4
         self.controller.start()
         #self.controller.connect(timeout=120)
@@ -195,12 +195,12 @@ class Testcase_10_90_VersionNegotiationBitmap(base_tests.SimpleProtocol):
         version = 1
         req = ofp.message.hello()
         req.version=version
-        bitmap = ofp.common.uint32(0x16) 
+        bitmap = ofp.common.uint32(0x12) 
         hello_elem = ofp.common.hello_elem_versionbitmap(bitmaps=[bitmap])
         req.elements.append(hello_elem)
         self.controller.message_send(req)
         logging.info("Sending Hello msg with bitmap")
-        self.assertTrue(req.elements != [], 'Hello msg does not include Bitmap')
+        self.assertTrue(rv.elements != [], 'Hello msg does not include Bitmap')
         request=ofp.message.echo_request()
         self.controller.message_send(request)
         (rv, pkt) = self.controller.poll(exp_msg=ofp.OFPT_ECHO_REPLY,timeout=5)

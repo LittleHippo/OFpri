@@ -845,7 +845,6 @@ class Testcase_260_250_FlowmodPriority(base_tests.SimpleDataPlane):
                                instructions=instructions,
                                priority=priority)
         logging.info("Sending flowmod")
-        self.controller.message_send(req)
         rv = self.controller.message_send(req)
         self.assertTrue(rv != -1, "Failed to insert flow")
 

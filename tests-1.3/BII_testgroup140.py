@@ -290,6 +290,74 @@ class Testcase_140_40_Add_Reset_Counters(base_tests.SimpleDataPlane):
         self.assertEqual(stats[0].cookie, 1001, "Cookie did not change")
         self.assertEqual(stats[0].packet_count, 0, "The packet count is not reset")
         self.assertEqual(stats[0].byte_count,0, "The byte count is not reset")
+        
+
+class Testcase_140_50_Add_Reset_Counters_Flag_Not_Set(base_tests.SimpleDataPlane):
+    """
+    Purpose
+    Verify counters are replaced when "OFPFC_ADD" is processed and "OFPFF_CHECK_OVERLAP" flag is set and "OFPFF_RESET_COUNTS" flag is not set.
+
+    Methodology
+    Configure and connect DUT to controller. After control channel establishment, add a flow matching on a named field (under the given Pre-requisites for the match). Wait a set period of time. Add a second flow with an identical match, the OFPFF_CHECK_OVERLAP flag not set, the same priority as flow one, but a different cookie value from flow one. Verify that flow one has been removed, that flow two is installed, the second flow's cookie field is set correctly, and the flow's duration counter has reset.
+
+
+    """
+    @wireshark_capture
+    def runTest(self):
+        logging.info("Running testcase 140.50 Add with Reset Counters Flag not Set")
+
+        in_port, out_port = openflow_ports(2)
+        flags = ofp.OFPFF_CHECK_OVERLAP
+
+        actions = [ofp.action.output(out_port)]
+
+        pkt = simple_tcp_packet()
+
+        #logging.info("Running actions test for %s", pp(actions))
+
+        delete_all_flows(self.controller)
+
+        logging.info("Inserting flow")
+        request = ofp.message.flow_add(
+                table_id=test_param_get("table", 0),
+                match=packet_to_flow_match(self, pkt),
+                instructions=[
+                    ofp.instruction.apply_actions(actions)],
+                buffer_id=ofp.OFP_NO_BUFFER,
+                priority=1000, cookie = 1000)
+        self.controller.message_send(request)
+        logging.info("Inserting a flow to forward packet to port %d with cookie 1000", out_port)
+        reply, _ = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
+        self.assertIsNone(reply, "Switch generated an error when inserting flow")
+        #logging.info("Switch generated an error")
+        sleep(5)
+        do_barrier(self.controller)
+        self.dataplane.send(in_port, str(pkt))#send a packet
+        stats = get_flow_stats(self, match = ofp.match(), table_id = 0)
+        self.assertTrue(stats[0].packet_count > 0, "The packet count is not incrmented")
+        self.assertTrue(stats[0].byte_count > 0, "The byte count is not incrmented")
+        replace_packet_count = stats[0].packet_count
+        replace_byte_count = stats[0].byte_count
+
+        request = ofp.message.flow_add(
+                table_id=test_param_get("table", 0),
+                match=packet_to_flow_match(self, pkt),
+                instructions=[
+                    ofp.instruction.apply_actions(actions)],
+                buffer_id=ofp.OFP_NO_BUFFER,
+                priority=1000, cookie = 1001)
+        self.controller.message_send(request)
+        logging.info("Inserting a flow to forward packet to port %d with cookie 1001, flag not set", out_port)
+        reply, _ = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
+        self.assertIsNone(reply, "Switch generated an error when inserting flow")
+        stats = get_flow_stats(self, match = ofp.match(), table_id = 0)
+        table_stats = get_stats(self, ofp.message.table_stats_request())
+        self.assertIsNotNone(stats,"Did not receive flow stats reply messsage")
+        self.assertEqual(table_stats[0].active_count, 1, "active flow count is not 1")
+        self.assertEqual(stats[0].cookie, 1001, "Cookie did not change")
+        self.assertEqual(stats[0].packet_count, replace_packet_count, "The packet count is not replaced")
+        self.assertEqual(stats[0].byte_count,replace_byte_count, "The byte count is not replaced")
+        
 
 class Testcase_140_60_Add_no_flow_removed(base_tests.SimpleDataPlane):
     """
@@ -1284,15 +1352,23 @@ class Testcase_140_220_Delete_all_tables(base_tests.SimpleDataPlane):
 
         delete_all_flows(self.controller)
         
-        request = ofp.message.features_request()
-        (reply, pkt)= self.controller.transact(request)
-        self.assertIsNotNone(reply, "Did not receive Features Reply Message")
-        tables_no = reply.n_tables
+        request = ofp.message.table_features_stats_request()
+        stats = get_stats(self, request)
+        self.assertIsNotNone(stats, "Did not receive table features stats reply.")
+        logging.info("Received table stats reply as expected")
+
+        self.assertEqual(len(stats), tables_no, "Reported table number in table stats is not correct")
+        logging.info("Reported table number in table stats is correct")
+
+        report_tables = []
+        for item in stats:
+            self.assertNotIn(item.table_id, report_tables, "Reported table id is not unique")
+            report_tables.append(item.table_id)
 
         logging.info("Inserting flow")
         pkt = simple_tcp_packet()
         
-        for table_id in range(tables_no):
+        for table_id in report_tables:
             req = ofp.message.flow_add(table_id=table_id,
                                    match=packet_to_flow_match(self, pkt),
                                    buffer_id=ofp.OFP_NO_BUFFER,
@@ -1311,7 +1387,5 @@ class Testcase_140_220_Delete_all_tables(base_tests.SimpleDataPlane):
         logging.info("Deleting the flow from all the tables")
         reply, _ = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
         self.assertIsNone(reply, "Switch generated an error when deleting flow")
-        #stats = get_flow_stats(self, match = ofp.match(), table_id = 0)
-        time.sleep(2)
-        self.dataplane.send(in_port, str(pkt))
-        verify_no_packet(self, str(pkt),out_port)
+        stats = get_flow_stats(self,match=ofp.match(),table_id=ofp.OFPTT_ALL)
+        self.assertEqual(len(stats), 0, "Incorrect flow stats.")
