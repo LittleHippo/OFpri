@@ -16,17 +16,17 @@ import BII_testgroup140
 import BII_testgroup40
 import oftest.packet as scapy
 from loxi.pp import pp
-import oftest.controller as controller
+
 from oftest.testutils import *
 from oftest.parse import parse_ipv6
 from oftest.oflog import *
 from time import sleep
-
+import BII_testgroup10
 import BII_testgroup40
 import BII_testgroup50
 import BII_testgroup60
 
-class Testcase_200_10_basic_OFPT_HELLO(base_tests.SimpleDataPlane):
+class Testcase_200_10_basic_OFPT_HELLO(BII_testgroup10.Testcase_10_70_VersionNegotiationSuccess):
     """
     Purpose
     Check the switch negotiates the correct version with the controller, based on the version field.
@@ -36,58 +36,6 @@ class Testcase_200_10_basic_OFPT_HELLO(base_tests.SimpleDataPlane):
 
 
     """
-    def setUp(self):
-        """
-        Set initial Hello msg to False
-        """
-        base_tests.BaseTest.setUp(self)
-
-        self.controller = controller.Controller(
-            switch=config["switch_ip"],
-            host=config["controller_host"],
-            port=config["controller_port"])
-        self.controller.initial_hello = False
-        self.controller.start()
-
-        try:
-            self.controller.connect(timeout=20)
-            self.controller.keep_alive = True
-
-            if not self.controller.active:
-                raise Exception("Controller startup failed")
-            if self.controller.switch_addr is None:
-                raise Exception("Controller startup failed (no switch addr)")
-            logging.info("Connected " + str(self.controller.switch_addr))
-        except:
-            self.controller.kill()
-            del self.controller
-            raise
-
-    @wireshark_capture
-    def runTest(self):
-        logging.info("Running 10.70 - Version negotiation on version field success test")
-        timeout = 60
-        nego_version = 4
-        (rv, pkt) = self.controller.poll(exp_msg=ofp.OFPT_HELLO, timeout=timeout)
-        self.assertIsNotNone(rv, 'Did not receive Hello msg')
-        self.assertEqual(rv.version,nego_version, 'Received version of Hello msg is not 4')
-        logging.info("Received Hello msg with correct version")
-        reply = ofp.message.hello()
-        reply.version=nego_version
-        self.controller.message_send(reply)
-        logging.info("Sending Hello msg with version 4")
-        request=ofp.message.echo_request()
-        self.controller.message_send(request)
-        (rv, pkt) = self.controller.poll(exp_msg=ofp.OFPT_ECHO_REPLY,timeout=timeout)
-        self.assertIsNotNone(rv, 'Did not receive Echo reply')
-        self.assertEqual(rv.version,nego_version, 'Received version of Hello msg is not 4')
-        logging.info("Received echo reply with correct version")
-
-    def tearDown(self):
-        self.controller.shutdown()
-        self.controller.join()
-        del self.controller
-        base_tests.BaseTest.tearDown(self)
         
         
 
@@ -104,7 +52,7 @@ class Testcase_200_20_basic_OFPT_ERROR(base_tests.SimpleDataPlane):
     def runTest(self):
         logging.info("Running 10.80 - Version negotiation failure test")
         timeout = 5
-        nego_version = 8
+        nego_version = 0
         logging.info("Received Hello msg with correct version")
         request = ofp.message.hello()
         request.version=nego_version
@@ -137,7 +85,7 @@ class Testcase_200_30_basic_ECHO_REQUEST(base_tests.SimpleDataPlane):
         reply,_= self.controller.poll(exp_msg = ofp.OFPT_ECHO_REPLY, timeout = 3)
         self.assertIsNotNone(reply, "Did not receive echo_reply messge")
 
-class Testcase_200_50_basic_OFPT_PACKET_IN(BII_testgroup50.Testcase_50_20_TableMissPacketIn):
+class Testcase_200_50_basic_OFPT_PACKET_IN(base_tests.SimpleDataPlane):
     """
     Purpose
     Verify that an entry with all wildcards, priority 0 and action send to the controller can be created in all tables.
@@ -147,7 +95,37 @@ class Testcase_200_50_basic_OFPT_PACKET_IN(BII_testgroup50.Testcase_50_20_TableM
 
 
     """
+    @wireshark_capture
+    def runTest(self):
+        logging.info("Running 200.50 - Basic Packet in test")
+        logging.info("Delete all flows on DUT")
+        rv = delete_all_flows(self.controller)
+        self.assertEqual(rv, 0, "Failed to delete all flows")
+        
+        priority=0
+        actions=[ofp.action.output(port=ofp.OFPP_CONTROLLER, max_len=128)]
+        instructions=[ofp.instruction.apply_actions(actions=actions)]
+        match = ofp.match([])
+        req = ofp.message.flow_add(table_id=test_param_get("table", 0),
+                                   match= match,
+                                   buffer_id=ofp.OFP_NO_BUFFER,
+                                   instructions=instructions,
+                                   priority=priority)
+        logging.info("Sending Table Miss flowmod")
+        rv = self.controller.message_send(req)
+        self.assertTrue(rv != -1, "Failed to insert Table Miss flow")
+        do_barrier(self.controller)
 
+        timeout = 5
+        port1, = openflow_ports(1)
+        pkt = str(simple_tcp_packet())
+        self.dataplane.send(port1, pkt)
+        logging.info("Sending a dataplane packet")
+        verify_packets(self, pkt, [])
+        rv, raw=self.controller.poll(exp_msg=ofp.const.OFPT_PACKET_IN, timeout=timeout)
+        self.assertTrue(rv is not None, 'Packet in message not received')
+        self.assertEqual(str(rv.data), pkt, ("Received pkt did not match sending pkt."))
+        logging.info("Packet In received as expected")
 
 class Testcase_200_60_basic_OFPT_FLOW_REMOVED(BII_testgroup140.Testcase_140_110_Delete_Flow_removed):
     """
@@ -174,11 +152,31 @@ class Testcase_200_70_basic_OFPT_PORT_STATUS(base_tests.SimpleDataPlane):
     @wireshark_capture
     def runTest(self):
         logging.info("Running testcase 200.70 basic OFPT_PORT_STATUS")
-        logging.info("May suggest test manually")
-        #request = ofp.message.echo_request()
-        #self.controller.message_send(request)
-        #reply,_= self.controller.poll(exp_msg = ofp.OFPT_ECHO_REPLY, timeout = 3)
-        #self.assertIsNotNone(reply, "Did not receive echo_reply messge")
+        logging.info("Delete all flows on DUT")
+        rv = delete_all_flows(self.controller)
+        self.assertEqual(rv, 0, "Failed to delete all flows")
+
+        default_port, = openflow_ports(1)
+              
+        #Bring down the port by shutting the interface connected 
+        try:
+            logging.info("Bringing down the interface ..")
+            print "Manually bring down the first port"
+        
+            #Verify Port Status message is recieved with reason-- Port Deleted
+            logging.info("Verify PortStatus-Down message is recieved on the control plane ")
+            (response, raw) = self.controller.poll(ofp.OFPT_PORT_STATUS, timeout=180)
+            self.assertTrue(response is not None,
+                        'Port Status Message not generated')
+                                   
+        #Bring up the port by starting the interface connected
+        finally:
+            logging.info("Bringing up the interface ...")
+            print "Manually bring up the first port"
+            logging.info("Verify PortStatus-Up message is received on the control plane ")
+            (response, raw) = self.controller.poll(ofp.OFPT_PORT_STATUS, timeout=180)
+            self.assertTrue(response is not None,
+                        'Port Status Message not generated')
 
 class Testcase_200_80_basic_OFPT_FEATURES_REQUEST(BII_testgroup40.Testcase_40_10_FeaturesReplyDatapathID):
     """
@@ -475,7 +473,6 @@ class Testcase_200_230_basic_OFPT_SET_ASYNC(base_tests.SimpleDataPlane):
         in_port, out_port = openflow_ports(2)
         delete_all_flows(self.controller)
         request = ofp.message.async_set(flow_removed_mask_slave = 1)
-        self.controller.message_send(request)
         reply, _ = self.controller.transact(request)
         if reply is None:
             request = ofp.message.async_get_request()

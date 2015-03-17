@@ -1352,7 +1352,7 @@ class Testcase_140_220_Delete_all_tables(base_tests.SimpleDataPlane):
 
         delete_all_flows(self.controller)
         
-        request = ofp.message.table_features_stats_request()
+        """request = ofp.message.table_features_stats_request()
         stats = get_stats(self, request)
         self.assertIsNotNone(stats, "Did not receive table features stats reply.")
         logging.info("Received table stats reply as expected")
@@ -1363,12 +1363,17 @@ class Testcase_140_220_Delete_all_tables(base_tests.SimpleDataPlane):
         report_tables = []
         for item in stats:
             self.assertNotIn(item.table_id, report_tables, "Reported table id is not unique")
-            report_tables.append(item.table_id)
+            report_tables.append(item.table_id)"""
+            
+        request = ofp.message.features_request()
+        (reply, pkt)= self.controller.transact(request)
+        self.assertIsNotNone(reply, "Did not receive Features Reply Message")
+        tables_no = reply.n_tables 
 
         logging.info("Inserting flow")
         pkt = simple_tcp_packet()
         
-        for table_id in report_tables:
+        for table_id in range(tables_no):
             req = ofp.message.flow_add(table_id=table_id,
                                    match=packet_to_flow_match(self, pkt),
                                    buffer_id=ofp.OFP_NO_BUFFER,
@@ -1380,10 +1385,7 @@ class Testcase_140_220_Delete_all_tables(base_tests.SimpleDataPlane):
             do_barrier(self.controller)
             
       
-        request = ofp.message.flow_delete(
-                table_id=ofp.OFPTT_ALL,
-                buffer_id=ofp.OFP_NO_BUFFER,)
-        self.controller.message_send(request)
+        delete_all_flows(self.controller)
         logging.info("Deleting the flow from all the tables")
         reply, _ = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
         self.assertIsNone(reply, "Switch generated an error when deleting flow")

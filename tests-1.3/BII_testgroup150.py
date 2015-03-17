@@ -932,7 +932,7 @@ class Testcase_150_175_undefined_meter(base_tests.SimpleDataPlane):
         in_port, out_port = openflow_ports(2)
 
         delete_all_flows(self.controller)
-        
+               
         request = ofp.message.meter_features_stats_request()
         reply, _= self.controller.transact(request)
         self.assertIsNotNone(reply, "Did not receive meter features reply")
@@ -951,7 +951,7 @@ class Testcase_150_175_undefined_meter(base_tests.SimpleDataPlane):
                 table_id=test_param_get("table", 0),
                 match=packet_to_flow_match(self, pkt),
                 #match = bad_network_mask_match,
-                instructions=[ofp.instruction.meter(meter_id = 1)],
+                instructions=[ofp.instruction.meter(meter_id = reply.features.max_meter + 1)],
                 buffer_id=ofp.OFP_NO_BUFFER,
                 priority=1000)
         self.controller.message_send(request)

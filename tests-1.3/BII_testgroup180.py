@@ -83,6 +83,55 @@ class Testcase_180_10_reference_count(base_tests.SimpleDataPlane):
         self.assertEqual(table_stats[0].active_count, orig_active_count+1, "The active_count counter is not increased by 1")
         self.assertEqual(table_stats[0].lookup_count, orig_lookup_count+3, "The lookup_count counter is not increased by 3")
         self.assertEqual(table_stats[0].matched_count, orig_matched_count+2, "The matched_count counter is not increased by 2")
+        
+        
+        
+class Testcase_180_60_Per_Flow_Duration_Counter(base_tests.SimpleDataPlane):
+    """
+    Purpose
+    Test Duration counter
+
+    Methodology
+    Configure and connect DUT to controller. After control channel establishment, send a multipart_request for flow_stats. Verify that the switch sends a multipart_reply for flow_stats. Record the value in the duration field. Wait 5 seconds. Send another multipart_request for flow_stats. Verify that the switch sends a multipart_reply for flow_stats. Record the value in the duration field. Verify that the duration field has increased by 5.
+
+    """
+    @wireshark_capture
+    def runTest(self):
+        logging.info("Running testcase 180.60 Per Flow Duration Counter")
+
+        in_port, out_port = openflow_ports(2)
+
+        actions = [ofp.action.output(out_port)]
+
+        pkt = simple_tcp_packet()
+
+        delete_all_flows(self.controller)
+
+        logging.info("Inserting flow")
+        request = ofp.message.flow_add(
+                table_id=test_param_get("table", 0),
+                match=packet_to_flow_match(self, pkt),
+                instructions=[
+                    ofp.instruction.apply_actions(actions)],
+                buffer_id=ofp.OFP_NO_BUFFER,
+                priority=1000)
+        self.controller.message_send(request)
+        logging.info("Inserting a flow to forward packet to port %d ", out_port)
+        reply, _ = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
+        self.assertIsNone(reply, "Switch generated an error when inserting flow")
+        #logging.info("Switch generated an error")
+
+        do_barrier(self.controller)
+        flow_stats = get_stats(self, ofp.message.flow_stats_request(table_id = 0, out_group = ofp.OFPG_ANY, out_port = ofp.OFPP_ANY))
+        self.assertIsNotNone(flow_stats,"Did not receive flow stats reply messsage")
+        init_duration_sec = flow_stats[0].duration_sec
+        
+        time.sleep(5)
+        flow_stats = get_stats(self, ofp.message.flow_stats_request(table_id = 0, out_group = ofp.OFPG_ANY, out_port = ofp.OFPP_ANY))
+        self.assertIsNotNone(flow_stats,"Did not receive flow stats reply messsage")
+        self.assertTrue(flow_stats[0].duration_sec==(init_duration_sec + 5),"Duration counter did not increase correctly")
+        
+
 
 
 class Testcase_180_80_per_port_received_packets_counter(BII_testgroup340.Testcase_340_50_MultipartPortStatsRxPackets):
@@ -142,7 +191,7 @@ class Testcase_180_230_correct_packet_drop_counters(base_tests.SimpleDataPlane):
         self.assertIsNone(reply, "Switch generated an error when setting up the port")
         sleep(2)
         self.controller.clear_queue()
-        base_test.SimpleDataPlane.tearDown(self)
+        base_tests.SimpleDataPlane.tearDown(self)
 
 
     @wireshark_capture
@@ -160,6 +209,10 @@ class Testcase_180_230_correct_packet_drop_counters(base_tests.SimpleDataPlane):
         #logging.info("Running actions test for %s", pp(actions))
 
         delete_all_flows(self.controller)
+        
+        table_stats = get_stats(self, ofp.message.table_stats_request())
+        self.assertIsNotNone(table_stats,"Did not receive flow stats reply messsage")
+        initial_matched_count = table_stats[0].matched_count
 
         logging.info("Inserting flow")
         request = ofp.message.flow_add(
@@ -193,12 +246,13 @@ class Testcase_180_230_correct_packet_drop_counters(base_tests.SimpleDataPlane):
         self.dataplane.send(in_port, str(pkt))
         self.dataplane.send(in_port, str(pkt))
 
+        time.sleep(2)
         table_stats = get_stats(self, ofp.message.table_stats_request())
         self.assertIsNotNone(table_stats,"Did not receive flow stats reply messsage")
 
         #self.assertEqual(table_stats[0].active_count, 1, "The active_count counter is not 1")
         #self.assertEqual(table_stats[0].lookup_count, 3, "The lookup_count counter is not 3")
-        self.assertEqual(table_stats[0].matched_count, 2, "The matched_count counter is not 2")
+        self.assertEqual(table_stats[0].matched_count, initial_matched_count+2, "The matched_count counter is not increased by 2")
 
 
         
