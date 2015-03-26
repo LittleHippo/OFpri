@@ -113,8 +113,10 @@ class Testcase_40_50_FeaturesReplyFlowStats(base_tests.SimpleProtocol):
         self.assertEqual(reply.type, ofp.OFPT_FEATURES_REPLY, "Received message is not features reply")
         mask = 1
         cap = mask & int(reply.capabilities)
-        self.assertTrue(cap != 0, "Flow stats not supported by switch")
-        logging.info("Flow stats supported by switch")
+        if cap !=0:
+            logging.info("Flow stats supported by switch")
+        else:
+            logging.info("Flow stats not supported by switch")
 
 
 
@@ -133,8 +135,10 @@ class Testcase_40_60_FeaturesReplyTableStats(base_tests.SimpleProtocol):
         self.assertEqual(reply.type, ofp.OFPT_FEATURES_REPLY, "Received message is not features reply")
         mask = 2
         cap = mask & int(reply.capabilities)
-        self.assertTrue(cap != 0, "Table stats not supported by switch")
-        logging.info("Table stats supported by switch")
+        if cap !=0:
+            logging.info("Table stats supported by switch")
+        else:
+            logging.info("Table stats not supported by switch")
 
 
 
@@ -174,8 +178,11 @@ class Testcase_40_80_FeaturesReplyGroupStats(base_tests.SimpleProtocol):
         self.assertEqual(reply.type, ofp.OFPT_FEATURES_REPLY, "Received message is not features reply")
         mask = 8
         cap = mask & int(reply.capabilities)
-        self.assertTrue(cap != 0, "Group stats not supported by switch")
-        logging.info("Group stats supported by switch")
+        if cap !=0:
+            logging.info("Group stats supported by switch")
+        else:
+            logging.info("Group stats not supported by switch")
+        
 
 
 
@@ -194,8 +201,10 @@ class Testcase_40_90_FeaturesReplyReassemble(base_tests.SimpleProtocol):
         self.assertEqual(reply.type, ofp.OFPT_FEATURES_REPLY, "Received message is not features reply")
         mask = 32
         cap = mask & int(reply.capabilities)
-        self.assertTrue(cap != 0, "Reassemble IP fragments not supported by switch")
-        logging.info("Reassemble IP fragments supported by switch")
+        if cap !=0:
+            logging.info("Reassemble IP fragments supported by switch")
+        else:
+            logging.info("Reassemble IP fragments not supported by switch")
 
 
 
@@ -215,8 +224,10 @@ class Testcase_40_100_FeaturesReplyQueueStats(base_tests.SimpleProtocol):
         self.assertEqual(reply.type, ofp.OFPT_FEATURES_REPLY, "Received message is not features reply")
         mask = 64
         cap = mask & int(reply.capabilities)
-        self.assertTrue(cap != 0, "Queue statistics not supported by switch")
-        logging.info("Queue statistics supported by switch")
+        if cap !=0:
+            logging.info("Queue statistics supported by switch")
+        else:
+            logging.info("Queue statistics not supported by switch")
 
 
 
@@ -236,8 +247,10 @@ class Testcase_40_110_FeaturesReplyBlockLooping(base_tests.SimpleProtocol):
         self.assertEqual(reply.type, ofp.OFPT_FEATURES_REPLY, "Received message is not features reply")
         mask = 256
         cap = mask & int(reply.capabilities)
-        self.assertTrue(cap != 0, "Block looping ports not supported by switch")
-        logging.info("Block looping ports supported by switch")
+        if cap !=0:
+            logging.info("Block looping ports supported by switch")
+        else:
+            logging.info("Block looping ports not supported by switch")
 
 
 
