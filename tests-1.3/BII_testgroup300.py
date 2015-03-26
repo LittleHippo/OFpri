@@ -427,7 +427,7 @@ class Testcase_300_210_MultipartTypeGroupFeatures(base_tests.SimpleDataPlane):
             self.assertEqual(reply.code, ofp.const.OFPBRC_BAD_STAT, "Error code is not OFPBRC_BAD_STAT")
             logging.info("DUT does not support group features and returned error msg as expected")
         else:
-            self.assertEqual(reply.stats_type,ofp.const.OFPST_GROUP_FEATURES,"Received group features reply as expected")
+            self.assertEqual(reply.stats_type,ofp.const.OFPST_GROUP_FEATURES,"Received msg is not group features")
 
 
 
@@ -578,7 +578,7 @@ class Testcase_300_240_MultipartTypeMeterFeatures(base_tests.SimpleDataPlane):
             self.assertEqual(reply.code, ofp.const.OFPBRC_BAD_STAT, "Error code is not OFPBRC_BAD_STAT")
             logging.info("DUT does not support meter features and returned error msg as expected")
         else:
-            self.assertEqual(reply.stats_type,ofp.const.OFPST_METER_FEATURES,"Received meter features reply as expected")
+            self.assertEqual(reply.stats_type,ofp.const.OFPST_METER_FEATURES,"Received msg is not meter features")
 
 
 

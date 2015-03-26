@@ -35,7 +35,7 @@ class Testcase_390_10_packet_out(BII_testgroup200.Testcase_200_110_basic_OFPT_PA
 
 
 
-class Testcase_390_20_packet_out_buffer_id(BII_testgroup200.Testcase_200_110_basic_OFPT_PACKET_OUT):
+class Testcase_390_20_packet_out_buffer_id(base_tests.SimpleDataPlane):
     """
     Purpose
     Verify packets sent via packet_out are received.
@@ -45,6 +45,43 @@ class Testcase_390_20_packet_out_buffer_id(BII_testgroup200.Testcase_200_110_bas
 
 
     """
+    @wireshark_capture
+    def runTest(self):
+        logging.info("Running testcase 390.20 - packet out buffer")
+        in_port, out_port = openflow_ports(2)
+        actions = [ofp.action.output(ofp.OFPP_CONTROLLER, max_len = 0)]
+        pkt = simple_tcp_packet()
+
+        delete_all_flows(self.controller)
+
+        logging.info("Inserting flow")
+        request = ofp.message.flow_add(
+                table_id=test_param_get("table", 0),
+                match=packet_to_flow_match(self, pkt),
+                #match = match,
+                instructions=[
+                    ofp.instruction.apply_actions(actions)],
+                buffer_id=ofp.OFP_NO_BUFFER,
+                priority=0)
+        self.controller.message_send(request)
+        logging.info("Inserting a table miss flow to forward packet to controller")
+        reply, _ = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
+        self.assertIsNone(reply, "Switch generated an error when inserting flow")
+        #logging.info("Switch generated an error")
+
+        do_barrier(self.controller)
+
+        self.dataplane.send(in_port, str(pkt))
+        reply, _ = self.controller.poll(exp_msg = ofp.const.OFPT_PACKET_IN, timeout = 3)
+        self.assertIsNotNone(reply, "Did not receive packet in message")
+        buffer_id = reply.buffer_id
+        
+        request = ofp.message.packet_out(in_port = ofp.OFPP_CONTROLLER,
+            actions = [ofp.action.output(port = out_port)], buffer_id = buffer_id,
+            data = str(pkt))
+
+        self.controller.message_send(request)
+        verify_packet(self, pkt, out_port)
 
 
 class Testcase_390_30_packet_out_in_port(base_tests.SimpleDataPlane):
@@ -274,40 +311,45 @@ class Testcase_390_100_packet_out_actions(base_tests.SimpleDataPlane):
     @wireshark_capture
     def runTest(self):
         logging.info("Running testcase 390.100 packet out actions")
-        in_port, out_port = openflow_ports(2)
-
-        actions = [ofp.action.set_field(ofp.oxm.ipv4_src(0xc0a80105)), ofp.action.output(out_port)]
-
-
-        match = ofp.match([ofp.oxm.in_port(in_port)])
+        in_port, out_port1, out_port2 = openflow_ports(3)
 
         pkt = simple_tcp_packet()
         verify_pkt = simple_tcp_packet(ip_src = '192.168.0.5') #0xc0a80105
 
         delete_all_flows(self.controller)
-        """
-        logging.info("Inserting flow")
-        request = ofp.message.flow_add(
-                table_id=test_param_get("table", 0),
-                #match=packet_to_flow_match(self, pkt),
-                match = match,
-                instructions=[
-                    ofp.instruction.apply_actions(actions)],
-                buffer_id=ofp.OFP_NO_BUFFER,
-                priority=1000)
-        self.controller.message_send(request)
-        logging.info("Inserting a table miss flow to forward packet to controller")
-        reply, _ = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
-        self.assertIsNone(reply, "Switch generated an error when inserting flow")
-        #logging.info("Switch generated an error")
-
-        do_barrier(self.controller)
-        """
-        request = ofp.message.packet_out(in_port = in_port, data = str(pkt), buffer_id = ofp.OFP_NO_BUFFER, actions = actions)
-        self.controller.message_send(request)
+        delete_all_groups(self.controller)
+        msg = ofp.message.group_add(
+        group_type=ofp.OFPGT_ALL,
+        group_id=1,
+        buckets=[
+            ofp.bucket(actions=[ofp.action.output(out_port2)])])
+        self.controller.message_send(msg)
         reply, _ = self.controller.poll(exp_msg = ofp.OFPT_ERROR, timeout = 3)
         self.assertIsNone(reply, "Received an error")
-        verify_packet(self, str(verify_pkt), out_port)
+        
+        request = ofp.message.group_features_stats_request()
+        reply, _= self.controller.transact(request)
+        self.assertIsNotNone(reply, "Did not receive group features reply")
+        if reply.type == ofp.const.OFPT_ERROR:
+            self.assertEqual(reply.err_type, ofp.const.OFPET_BAD_REQUEST, "Error type is not OFPET_BAD_REQUEST")
+            self.assertEqual(reply.code, ofp.const.OFPBRC_BAD_STAT, "Error code is not OFPBRC_BAD_STAT")
+            logging.info("DUT does not support group features and returned error msg as expected")
+            out_port = out_port1
+            no_port = out_port2
+        else:
+            self.assertEqual(reply.stats_type,ofp.const.OFPST_GROUP_FEATURES,"Received msg is not group features")
+            self.assertNotEqual(reply.max_groups_all,0,"Group is not supported by DUT")
+            out_port = out_port2
+            no_port = out_port1
+
+        actions = [ofp.action.set_field(ofp.oxm.ipv4_src(0xc0a80105)), ofp.action.output(out_port1),ofp.action.group(group_id = 1)]
+        request = ofp.message.packet_out(in_port = in_port, data = str(pkt), buffer_id = ofp.OFP_NO_BUFFER, actions = actions)
+        self.controller.message_send(request)
+        verify_packet(self, str(simple_tcp_packet(ip_src = '192.168.1.5')), out_port)
+        verify_no_packet(self, str(simple_tcp_packet(ip_src = '192.168.1.5')), no_port)
+        reply, _ = self.controller.poll(exp_msg = ofp.OFPT_ERROR, timeout = 3)
+        self.assertIsNone(reply, "Received an error")
+        
 
         
 class Testcase_390_40_packet_out_action_field(Testcase_390_100_packet_out_actions):

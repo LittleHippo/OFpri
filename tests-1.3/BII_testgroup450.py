@@ -46,9 +46,9 @@ class Testcase_450_10_HelloMessage(base_tests.SimpleDataPlane):
             host=config["controller_host"],
             port=config["controller_port"])
         self.controller.initial_hello = False
-        self.controller.start()
+        #self.controller.start()
 
-        try:                                                                                                                    
+        """try:                                                                                                                    
             self.controller.connect(timeout=20)                                                                                           
             self.controller.keep_alive = True
             if not self.controller.active:
@@ -59,11 +59,13 @@ class Testcase_450_10_HelloMessage(base_tests.SimpleDataPlane):
         except:
             self.controller.kill()
             del self.controller
-            raise
+            raise"""
 
     @wireshark_capture
     def runTest(self):  
-        logging.info("Running test case Hello Message")      
+        logging.info("Running test case Hello Message")  
+        self.controller.start()
+        self.controller.keep_alive = True
         ofp_field_version = 4
         res, pkt = self.controller.poll(exp_msg=ofp.OFPT_HELLO, timeout=3)
 
@@ -86,73 +88,13 @@ class Testcase_450_10_HelloMessage(base_tests.SimpleDataPlane):
         base_tests.BaseTest.tearDown(self)
 
 
-class Testcase_450_20_HelloElements(base_tests.SimpleDataPlane):
+class Testcase_450_20_HelloElements(BII_testgroup10.Testcase_10_90_VersionNegotiationBitmap):
 
     """
     Tested in 10.90
     450.20 - Version negotiation based on bitmap
     Verify that version negotiation based on bitmap is successful.
     """
-    def setUp(self):
-        """
-        Set initial Hello msg to False
-        """
-        base_tests.BaseTest.setUp(self)
-
-        self.controller = controller.Controller(
-            switch=config["switch_ip"],
-            host=config["controller_host"],
-            port=config["controller_port"])
-        self.controller.initial_hello = False
-        self.controller.start()
-
-        try:
-            #@todo Add an option to wait for a pkt transaction to ensure version
-            # compatibilty?
-            self.controller.connect(timeout=20)
-            # By default, respond to echo requests
-            self.controller.keep_alive = True
-
-            if not self.controller.active:
-                raise Exception("Controller startup failed")
-            if self.controller.switch_addr is None:
-                raise Exception("Controller startup failed (no switch addr)")
-            logging.info("Connected " + str(self.controller.switch_addr))
-        except:
-            self.controller.kill()
-            del self.controller
-            raise
-
-    @wireshark_capture
-    def runTest(self):
-        logging.info("Running 10.90 - Version negotiation based on bitmap test")
-        timeout = 60
-        version = 1
-        (rv, pkt) = self.controller.poll(exp_msg=ofp.OFPT_HELLO, timeout=timeout)
-        self.assertIsNotNone(rv, 'Did not receive Hello msg')
-        self.assertEqual(rv.version,version, 'Received version of Hello msg is not 4')
-        logging.info("Received Hello msg with correct version")
-        reply = ofp.message.hello()
-        reply.version=version
-        bitmap = ofp.common.uint32(0x16) # 10110
-        hello_elem = ofp.common.hello_elem_versionbitmap(bitmaps=[bitmap])
-        req.elements.append(hello_elem)
-        self.controller.message_send(reply)
-        logging.info("Sending Hello msg with bitmap")
-        self.assertTrue(res.elements != [], 'Hello msg does not include Bitmap')
-        request=ofp.message.echo_request()
-        self.controller.message_send(request)
-        (rv, pkt) = self.controller.poll(exp_msg=ofp.OFPT_ECHO_REPLY,timeout=timeout)
-        self.assertIsNotNone(rv, 'Did not receive Echo reply')
-        self.assertEqual(rv.version,version, 'Received version of Hello msg is not 4')
-        logging.info("Version negotiation Success")
-
-    def tearDown(self):
-        self.controller.shutdown()
-        self.controller.join()
-        del self.controller
-        base_tests.BaseTest.tearDown(self)
-
 
 
 
@@ -173,9 +115,9 @@ class Testcase_450_30_HelloMessage2Bitmap(base_tests.SimpleDataPlane):
             host=config["controller_host"],
             port=config["controller_port"])
         self.controller.initial_hello = False
-        self.controller.start()
+        #self.controller.start()
 
-        try:                                                                                                                    
+        """try:                                                                                                                    
             self.controller.connect(timeout=20)                                                                                            
             self.controller.keep_alive = True
             if not self.controller.active:
@@ -186,11 +128,13 @@ class Testcase_450_30_HelloMessage2Bitmap(base_tests.SimpleDataPlane):
         except:
             self.controller.kill()
             del self.controller
-            raise
+            raise"""
 
     @wireshark_capture
     def runTest(self):  
-        logging.info("Running test case Hello Message")      
+        logging.info("Running test case Hello Message")    
+        self.controller.start()
+        self.controller.keep_alive = True        
         ofp_field_version = 4
         res, pkt = self.controller.poll(exp_msg=ofp.OFPT_HELLO, timeout=3)
 

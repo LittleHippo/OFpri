@@ -619,6 +619,7 @@ class Testcase_340_220_MultipartPortDescUniqueHWAddress(base_tests.SimpleDataPla
         rv = delete_all_flows(self.controller)
         self.assertEqual(rv, 0, "Failed to delete all flows")
 
+        port, = openflow_ports(1)
         request = ofp.message.port_desc_stats_request()
         stats = get_stats(self, request)
         self.assertTrue(len(stats) >= 4, "Reported ports in port desc is not correct")
@@ -628,6 +629,19 @@ class Testcase_340_220_MultipartPortDescUniqueHWAddress(base_tests.SimpleDataPla
             self.assertNotIn(item.hw_addr, MAC_Addr, "Reported HW_Addr is not unique")
             MAC_Addr.append(item.hw_addr)
         logging.info("Reported HW_Addr in port desc is correct")
+        
+        request = ofp.message.port_mod(port_no=port, hw_addr=MAC_Addr[0])
+        self.controller.message_send(request)
+        reply, _ = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
+        if reply is not None:
+            logging.info("Switch did not return an error message")
+        else:
+            request = ofp.message.port_desc_stats_request()
+            stats = get_stats(self, request)
+            self.assertEqual(stats[0].hw_addr, MAC_Addr[0], "Reported HW_Addr is changed")
+            logging.info("Reported HW_Addr is not changed")
+
+        
 
 
 
@@ -840,7 +854,7 @@ class Testcase_340_310_MultipartPortDescCurrSpeed(base_tests.SimpleDataPlane):
 
         for item in stats:
             if item.port_no in openflow_ports(4):
-                self.assertEqual(item.curr_speed, 1000000, "Reported current speed is not correct.")
+                self.assertTrue((item.curr_speed>=800000) and (item.curr_speed<=1200000), "Reported current speed is not correct.")
             
         logging.info("Reported current speed in port desc is correct")
 
@@ -865,6 +879,6 @@ class Testcase_340_320_MultipartPortDescMaxSpeed(base_tests.SimpleDataPlane):
 
         for item in stats:
             if item.port_no in openflow_ports(4):
-                self.assertEqual(item.max_speed, 1000000, "Reported max_speed is not correct.")
+                self.assertTrue((item.max_speed>=800000) and (item.max_speed<=1200000), "Reported max_speed is not correct.")
             
         logging.info("Reported max_speed in port desc is correct")

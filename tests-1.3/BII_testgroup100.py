@@ -1,3 +1,6 @@
+# Distributed under the OpenFlow Software License (see LICENSE)
+# Copyright (c) 2010 The Board of Trustees of The Leland Stanford Junior University
+# Copyright (c) 2012, 2013 Big Switch Networks, Inc.
 # Copyright (c) 2014, 2015 Beijing Internet Institute(BII)
 ###Testcases implemented for Openflow 1.3 conformance certification test @Author: Pan Zhang
 """
@@ -121,7 +124,7 @@ class Testcase_100_30_OutputMultiple(base_tests.SimpleDataPlane):
     """
     @wireshark_capture
     def runTest(self):
-        logging.info("Running Testcase 100.30 output to multiple ports")
+        loging.info("Running Testcase 100.30 output to multiple ports")
         ports = openflow_ports(4)
         in_port = ports[0]
         out_ports = ports[1:4]
@@ -307,7 +310,7 @@ class Testcase_100_60_ALL_OFPPC_NO_FWD(base_tests.SimpleDataPlane):
         #logging.info("Switch generated an error")
         do_barrier(self.controller)
 
-        port_config_set(self.controller, port_no = no_fwd_port, config = 0, mask = ofp.OFPPC_NO_FWD)
+        #port_config_set(self.controller, port_no = no_fwd_port, config = 0, mask = ofp.OFPPC_NO_FWD)
 
         (_, config1, _) = port_config_get(self.controller, no_fwd_port)
         self.assertIsNotNone(config1 , "Did not get port config")
@@ -325,12 +328,13 @@ class Testcase_100_60_ALL_OFPPC_NO_FWD(base_tests.SimpleDataPlane):
         self.assertIsNotNone(status,"Did not get a OFPT_PORT_STATUS for a port_mod message")
         self.assertEqual(status.desc.config,config,"Port config not set to initial config")
         sleep(5)
+        pkt = simple_tcp_packet()
         pktstr = str(pkt)
 
         logging.info("Sending packet, expecting output to ports %r", out_ports)
         self.dataplane.send(in_port, pktstr)
         verify_packets(self, pktstr, out_ports)
-        verify_no_other_packet(self,pktstr,no_fwd_port)
+        verify_no_packet(self,pktstr,no_fwd_port)
 
 class Testcase_100_70_Controller(base_tests.SimpleDataPlane):
     """

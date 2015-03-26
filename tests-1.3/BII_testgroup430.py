@@ -160,11 +160,11 @@ class Testcase_430_70_HelloFailData(base_tests.SimpleProtocol):
             host=config["controller_host"],
             port=config["controller_port"])
         self.controller.initial_hello = False
-        self.controller.start()
+        #self.controller.start()
 
-        try:
-            self.controller.connect(timeout=20)
-            self.controller.keep_alive = True
+        """try:
+            #self.controller.connect(timeout=20)
+            #self.controller.keep_alive = True
             if not self.controller.active:
                 raise Exception("Controller startup failed")
             if self.controller.switch_addr is None:
@@ -173,12 +173,15 @@ class Testcase_430_70_HelloFailData(base_tests.SimpleProtocol):
         except:
             self.controller.kill()
             del self.controller
-            raise
+            raise"""
             
     @wireshark_capture
     def runTest(self):
         logging.info("Running Grp430No70 Hello Failed Data")                                    
         logging.info("Sending Hello message(controller -> switch) with version < 4")
+        self.controller.start()
+        self.controller.keep_alive = True
+        
         request = ofp.message.hello()
         request.version=2
         logging.info("Veryfying the switch sends an error")
@@ -311,8 +314,7 @@ class Testcase_430_150_ErrorMessageBadLength(base_tests.SimpleDataPlane):
     @wireshark_capture
     def runTest(self):
         logging.info("Running test case Bad Length")
-        request = ofp.message.barrier_request()
-        request.len=7
+        request = ofp.message.barrier_request(length=7)
         self.controller.message_send(request)
         reply, _  = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
         self.assertIsNotNone(reply, "The switch failed to generate an error.")
@@ -539,8 +541,7 @@ class Testcase_430_260_InvalidActionLen(base_tests.SimpleDataPlane):
         InvalidActionLength=14
         port_a, = openflow_ports(1)
         pkt = str(simple_tcp_packet())
-        act = ofp.action.output(port=port_a,max_len=128)
-        act.length = InvalidActionLength
+        act = ofp.action.output(port=port_a,max_len=128, length=InvalidActionLength)
         msg = ofp.message.packet_out(
                 in_port=ofp.OFPP_CONTROLLER,
                 actions=[act],
@@ -644,18 +645,18 @@ class Testcase_430_300_BadActionBadArgument(BII_testgroup150.Testcase_150_180_ba
     """
 
 
-
+"""
 class Testcase_430_320_BadActionTooMany(base_tests.SimpleProtocol):
-    """ 
+    """ """
     430.320 - Bad action too many
     Verify that if too many actions are included in a request,  the device generates a bad 
     action error with a too many code.
-    """ 
+    """ """
     @wireshark_capture
     def runTest(self):
         logging.info("Running test case Bad Action Too Many")
         logging.info("Please manually implement this testcase")
-
+"""
                                
 
 
@@ -840,7 +841,6 @@ class Testcase_430_590_BadInstructionBadExperimenter(base_tests.SimpleDataPlane)
         in_port,out_port = openflow_ports(2)
         table_id=test_param_get("table", 0)
         priority = 1
-        invalidQueueID = 20
         instructions=[ofp.instruction.experimenter(experimenter=0x10111011)]
         match = ofp.match([ofp.oxm.in_port(in_port)])
         req = ofp.message.flow_add(table_id=table_id,

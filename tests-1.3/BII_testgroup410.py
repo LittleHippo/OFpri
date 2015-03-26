@@ -84,7 +84,7 @@ class Testcase_410_50_default_miss_send_length(base_tests.SimpleDataPlane):
     """
     @wireshark_capture
     def runTest(self):
-        logging.info("Running testcase 390.30 packet out in port")
+        logging.info("Running testcase 410.50 packet out in port")
         in_port, out_port = openflow_ports(2)
         request = ofp.message.get_config_request()
         self.controller.message_send(request)
@@ -116,7 +116,7 @@ class Testcase_410_70_packet_in_buffer_documentation(base_tests.SimpleDataPlane)
     """
     @wireshark_capture
     def runTest(self):
-        logging.info("Running testcase 410.60 action output controller max length no buffer")
+        logging.info("Running testcase 410.70 action output controller max length no buffer")
         logging.info("Vendor must provide this documentation to complete the basic conformance test suite. If the proper documentation is not provided this test case result shall be fail")
 
 
@@ -165,28 +165,28 @@ class Testcase_410_90_packet_in_buffer_timeout(base_tests.SimpleDataPlane):
         do_barrier(self.controller)
 
         self.dataplane.send(in_port, str(pkt))
-        reply, _ = self.controller.poll(exp_msg = ofp.OFPT_PACKET_IN, timeout = 3)
+        reply, _ = self.controller.poll(exp_msg = ofp.const.OFPT_PACKET_IN, timeout = 3)
         self.assertIsNotNone(reply, "Did not receive packet in message")
         first_buffer_id = reply.buffer_id
         sleep(2)
         for i in range(n_max):
             self.dataplane.send(in_port, str(pkt))
-            reply, _ = self.controller.poll(exp_msg = ofp.OFPT_PACKET_IN, timeout = 3)
+            reply, _ = self.controller.poll(exp_msg = ofp.const.OFPT_PACKET_IN, timeout = 3)
             self.assertIsNotNone(reply, "Did not receive packet in message")
             if i < (n_max - 1):
-                self.assertIsNotTrue(reply.buffer_id == ofp.OFP_NO_BUFFER, "Received packet in message with no buffer id")
+                self.assertTrue(reply.buffer_id != ofp.OFP_NO_BUFFER, "Received packet in message with no buffer id")
             else:
                 self.assertEqual(reply.buffer_id, ofp.OFP_NO_BUFFER, "Received packet in message without no buffer id")
 
         sleep(t_timeout - 1)
         self.dataplane.send(in_port, str(pkt))
-        reply, _ = self.controller.poll(exp_msg = ofp.OFPT_PACKET_IN, timeout = 3)
+        reply, _ = self.controller.poll(exp_msg = ofp.const.OFPT_PACKET_IN, timeout = 3)
         self.assertIsNotNone(reply, "Did not receive packet in message")
         self.assertEqual(reply.buffer_id, ofp.OFP_NO_BUFFER, "Received packet in message without no buffer id")
 
         sleep(2)
         self.dataplane.send(in_port, str(pkt))
-        reply, _ = self.controller.poll(exp_msg = ofp.OFPT_PACKET_IN, timeout = 3)
+        reply, _ = self.controller.poll(exp_msg = ofp.const.OFPT_PACKET_IN, timeout = 3)
         self.assertIsNotNone(reply, "Did not receive packet in message")
         self.assertEqual(reply.buffer_id, first_buffer_id, "bufer id is not equal to the first packet's buffer id")
 
@@ -253,7 +253,7 @@ class Testcase_410_140_packet_in_reason_action(base_tests.SimpleDataPlane):
         do_barrier(self.controller)
 
         self.dataplane.send(in_port, str(pkt))
-        reply, _ = self.controller.poll(exp_msg = ofp.OFPT_PACKET_IN, timeout = 3)
+        reply, _ = self.controller.poll(exp_msg = ofp.const.OFPT_PACKET_IN, timeout = 3)
         self.assertIsNotNone(reply, "Did not receive packet in message")
         self.assertEqual(reply.reason, ofp.OFPR_ACTION, "The reason is not OFPR_ACTION")
 
@@ -296,7 +296,7 @@ class Testcase_410_200_packet_in_cookie(base_tests.SimpleDataPlane):
         do_barrier(self.controller)
 
         self.dataplane.send(in_port, str(pkt))
-        reply, _ = self.controller.poll(exp_msg = ofp.OFPT_PACKET_IN, timeout = 3)
+        reply, _ = self.controller.poll(exp_msg = ofp.const.OFPT_PACKET_IN, timeout = 3)
         self.assertIsNotNone(reply, "Did not receive packet in message")
         self.assertEqual(reply.cookie, 1001, "The cookie value is not matched")
 
@@ -339,7 +339,7 @@ class Testcase_410_220_packet_in_cookie_negative_one(base_tests.SimpleDataPlane)
         do_barrier(self.controller)
 
         self.dataplane.send(in_port, str(pkt))
-        reply, _ = self.controller.poll(exp_msg = ofp.OFPT_PACKET_IN, timeout = 3)
+        reply, _ = self.controller.poll(exp_msg = ofp.const.OFPT_PACKET_IN, timeout = 3)
         self.assertIsNotNone(reply, "Did not receive packet in message")
         self.assertEqual(reply.cookie, 0xffffffffffffffff, "The cookie value is not matched")
 
@@ -370,9 +370,8 @@ class Testcase_410_240_packet_in_match(base_tests.SimpleDataPlane):
     def runTest(self):
         logging.info("Running testcase 410.240 packet in match")
         in_port, out_port = openflow_ports(2)
-
+        match = ofp.match([ofp.oxm.in_port(in_port)])
         actions = [ofp.action.output(ofp.OFPP_CONTROLLER, max_len = 128)]
-
         pkt = simple_tcp_packet()
 
         delete_all_flows(self.controller)
@@ -380,8 +379,7 @@ class Testcase_410_240_packet_in_match(base_tests.SimpleDataPlane):
         logging.info("Inserting flow")
         request = ofp.message.flow_add(
                 table_id=test_param_get("table", 0),
-                match=packet_to_flow_match(self, pkt),
-                #match = match,
+                match=match,
                 instructions=[
                     ofp.instruction.apply_actions(actions)],
                 buffer_id=ofp.OFP_NO_BUFFER, 
@@ -395,7 +393,7 @@ class Testcase_410_240_packet_in_match(base_tests.SimpleDataPlane):
         do_barrier(self.controller)
 
         self.dataplane.send(in_port, str(pkt))
-        reply, _ = self.controller.poll(exp_msg = ofp.OFPT_PACKET_IN, timeout = 3)
+        reply, _ = self.controller.poll(exp_msg = ofp.const.OFPT_PACKET_IN, timeout = 3)
         self.assertIsNotNone(reply, "Did not receive packet in message")
         self.assertIsNotNone(reply.match, "Match is empty")
 
@@ -438,6 +436,6 @@ class Testcase_410_250_in_port_match(base_tests.SimpleDataPlane):
         do_barrier(self.controller)
 
         self.dataplane.send(in_port, str(pkt))
-        reply, _ = self.controller.poll(exp_msg = ofp.OFPT_PACKET_IN, timeout = 3)
+        reply, _ = self.controller.poll(exp_msg = ofp.const.OFPT_PACKET_IN, timeout = 3)
         self.assertIsNotNone(reply, "Did not receive packet in message")
         self.assertEqual(reply.match.oxm_list[0].value, in_port,"The in port is not match")

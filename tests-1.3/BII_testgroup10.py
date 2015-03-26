@@ -17,6 +17,7 @@ import sys
 
 import unittest
 import random
+
 from oftest import config
 import oftest.controller as controller
 import ofp
@@ -28,6 +29,7 @@ import oftest.illegal_message as illegal_message
 from oftest.oflog import *
 from oftest.testutils import *
 from time import sleep
+
 
 
 class Testcase_10_10_StartupBehavior(base_tests.DataPlaneOnly):
@@ -126,6 +128,23 @@ class Testcase_10_30_TCPdefaultPort(base_tests.SimpleProtocol):
         logging.info("Received echo reply with port "+str(config["controller_port"]))
 
 
+        
+class Testcase_10_40_TCPNondefaultPort(base_tests.SimpleProtocol):
+    """
+    10.40 - TCP non default Port
+    Test unencrypted control channel establishment on non default port
+    """
+
+    @wireshark_capture
+    def runTest(self):
+        logging.info("Running 10.40 - TCP non default Port test")
+        timeout = 5
+        request=ofp.message.echo_request()
+        self.controller.message_send(request)
+        (rv, pkt) = self.controller.poll(exp_msg=ofp.OFPT_ECHO_REPLY,timeout=timeout)
+        self.assertIsNotNone(rv, 'Did not receive Echo reply')
+        logging.info("Received echo reply with port "+str(config["controller_port"]))
+        
 
 
 class Testcase_10_80_VersionNegotiationFailure(base_tests.SimpleProtocol):
@@ -214,3 +233,232 @@ class Testcase_10_90_VersionNegotiationBitmap(base_tests.SimpleProtocol):
         del self.controller
         base_tests.BaseTest.tearDown(self)
 
+
+        
+class Testcase_10_100_ControlChannelFailureMode(base_tests.SimpleDataPlane):
+    """
+    10.100 - Control channel failure mode
+    Verify the switch enters the correct state after loss of the controller connection.
+    """
+
+    """def setUp(self):
+
+        base_tests.BaseTest.setUp(self)
+
+        self.controller = controller.Controller(
+            switch=config["switch_ip"],
+            host=config["controller_host"],
+            port=config["controller_port"])
+        self.clean_shutdown = False
+        self.controller.initial_hello = True
+        self.controller.start()
+        
+        try:
+            self.controller.connect(timeout=20)
+            self.controller.keep_alive = False
+
+            if not self.controller.active:
+                raise Exception("Controller startup failed")
+            if self.controller.switch_addr is None:
+                raise Exception("Controller startup failed (no switch addr)")
+            logging.info("Connected " + str(self.controller.switch_addr))
+        except:
+            self.controller.kill()
+            del self.controller
+            raise"""
+            
+    def tearDown(self):
+        self.controller.shutdown()
+        self.controller.join()
+        del self.controller
+        base_tests.BaseTest.tearDown(self)
+            
+    @wireshark_capture
+    def runTest(self):
+        logging.info("Running 10.100 - Control channel failure mode test")
+        self.controller.keep_alive = False
+        delete_all_flows(self.controller)
+        in_port, out_port, = openflow_ports(2)
+        table_id = test_param_get("table",0)
+        
+        logging.info("Inserting flow sending in_port matching packets to port %d", out_port)
+        match = ofp.match([ofp.oxm.in_port(in_port)])
+        req = ofp.message.flow_add(table_id = table_id,
+                                    match = match,
+                                    instructions=[ofp.instruction.apply_actions(
+                                        actions = [ofp.action.output(
+                                                                    port = out_port,
+                                                                    max_len = 128)])],
+                                    buffer_id = ofp.OFP_NO_BUFFER,
+                                    priority = 1)
+        self.controller.message_send(req)
+        reply, _ = self.controller.poll(exp_msg = ofp.OFPT_ERROR, timeout = 3)
+        self.assertIsNone(reply, "Received error message, could not install the flow")
+        logging.info("Installed the flow successfully")
+        (response, pkt) = self.controller.poll(exp_msg=ofp.OFPT_ECHO_REQUEST,
+                                               timeout=60)
+        self.assertTrue(response is not None, 
+                               'Switch is not generating Echo-Requests') 
+        logging.info("Received an Echo request, waiting for echo timeout")
+        time.sleep(20)
+        """(response1, pkt1) = self.controller.poll(exp_msg=ofp.OFPT_HELLO,
+                                               timeout=180)
+        self.assertTrue(response1 is not None, 
+                               'Switch did not drop connection due to Echo Timeout') 
+        logging.info("Received an OFPT_HELLO message after echo timeout")"""
+        
+        mode = test_param_get("mode",0)
+        pkt = simple_tcp_packet()
+        strpkt=str(pkt)
+        self.dataplane.send(in_port, strpkt)
+        if mode ==0:
+            verify_packet(self, strpkt, out_port)
+        else:
+            verify_no_packet(self, strpkt, out_port)
+
+
+            
+class Testcase_10_110_FailSecureModeBehavior(base_tests.SimpleDataPlane):
+    """
+    10.110 - Fail secure mode behavior
+    Verify the switch enters the correct state after loss of the controller connection.
+    """
+
+    def tearDown(self):
+        self.controller.shutdown()
+        self.controller.join()
+        del self.controller
+        base_tests.BaseTest.tearDown(self)
+            
+    @wireshark_capture
+    def runTest(self):
+        logging.info("Running 10.110 - Fail secure mode behavior test")
+        self.controller.keep_alive = False
+        delete_all_flows(self.controller)
+        in_port, out_port, = openflow_ports(2)
+        table_id = test_param_get("table",0)
+        
+        logging.info("Inserting flow sending in_port matching packets to port %d", out_port)
+        match = ofp.match([ofp.oxm.in_port(in_port)])
+        req = ofp.message.flow_add(table_id = table_id,
+                                    match = match,
+                                    instructions=[ofp.instruction.apply_actions(
+                                        actions = [ofp.action.output(
+                                                                    port = out_port,
+                                                                    max_len = 128)])],
+                                    buffer_id = ofp.OFP_NO_BUFFER,
+                                    priority = 1,
+                                    hard_timeout=50)
+        self.controller.message_send(req)
+        reply, _ = self.controller.poll(exp_msg = ofp.OFPT_ERROR, timeout = 3)
+        self.assertIsNone(reply, "Received error message, could not install the flow")
+        logging.info("Installed the flow successfully")
+        (response, pkt) = self.controller.poll(exp_msg=ofp.OFPT_ECHO_REQUEST,
+                                               timeout=20)
+        self.assertTrue(response is not None, 
+                               'Switch is not generating Echo-Requests') 
+        logging.info("Received an Echo request, waiting for echo timeout")
+        time.sleep(20)
+        
+        mode = test_param_get("mode",0)
+        pkt = simple_tcp_packet()
+        strpkt=str(pkt)
+        if mode ==0:
+            self.dataplane.send(in_port, strpkt)
+            verify_no_packet_in(self, strpkt, in_port)
+            verify_packet(self, strpkt, out_port)
+            time.sleep(30)
+            self.dataplane.send(in_port, strpkt)
+            verify_no_packet_in(self, strpkt, in_port)
+            verify_no_packet(self, strpkt, out_port)
+        else:
+            logging.info("DUT does not support fail secure mode")
+            
+            
+            
+class Testcase_10_120_FailStandaloneMode(base_tests.SimpleDataPlane):
+    """
+    10.120 - Fail standalone mode - OFPP_Normal - Hybrids
+    We verify correct operation of fail-standalone mode. We currently expect  L2 learning switch behaviour. 
+    If a switch supports other default behavior the test must check for this.
+    """
+
+    def tearDown(self):
+        self.controller.shutdown()
+        self.controller.join()
+        del self.controller
+        base_tests.BaseTest.tearDown(self)
+            
+    @wireshark_capture
+    def runTest(self):
+        logging.info("Running 10.120 - Fail standalone mode - OFPP_Normal - Hybrids")
+        self.controller.keep_alive = False
+        delete_all_flows(self.controller)
+        ports = openflow_ports(4)      
+
+        (response, pkt) = self.controller.poll(exp_msg=ofp.OFPT_ECHO_REQUEST,
+                                               timeout=20)
+        self.assertTrue(response is not None, 
+                               'Switch is not generating Echo-Requests') 
+        logging.info("Received an Echo request, waiting for echo timeout")
+        time.sleep(20)
+        
+        mode = test_param_get("mode",0)
+        pkt = simple_arp_packet()
+        strpkt=str(pkt)
+        if mode ==0:
+            logging.info("DUT does not support fail standalone mode")
+        else:
+            self.dataplane.send(ports[0], strpkt)
+            verify_packets(self, strpkt, ports[1:4])
+
+            
+            
+class Testcase_10_130_FailSecureModeBehavior(base_tests.SimpleDataPlane):
+    """
+    10.130 - Existing flow entries stay active
+    Verify that flows stay active and timeout as configured after control channel re-establishment
+    """
+
+    def tearDown(self):
+        self.controller.shutdown()
+        self.controller.join()
+        del self.controller
+        base_tests.BaseTest.tearDown(self)
+            
+    @wireshark_capture
+    def runTest(self):
+        logging.info("Running 10.130 - Existing flow entries stay active test")
+        delete_all_flows(self.controller)
+        in_port, out_port, = openflow_ports(2)
+        table_id = test_param_get("table",0)
+        
+        logging.info("Inserting flow sending in_port matching packets to port %d", out_port)
+        match = ofp.match([ofp.oxm.in_port(in_port)])
+        req = ofp.message.flow_add(table_id = table_id,
+                                    match = match,
+                                    instructions=[ofp.instruction.apply_actions(
+                                        actions = [ofp.action.output(
+                                                                    port = out_port,
+                                                                    max_len = 128)])],
+                                    buffer_id = ofp.OFP_NO_BUFFER,
+                                    priority = 1,
+                                    hard_timeout=20)
+        self.controller.message_send(req)
+        reply, _ = self.controller.poll(exp_msg = ofp.OFPT_ERROR, timeout = 3)
+        self.assertIsNone(reply, "Received error message, could not install the flow")
+        logging.info("Installed the flow successfully")
+        self.controller.shutdown()    
+        time.sleep(5)
+        
+        self.controller.connect()
+        sleep(5)
+        
+        pkt = simple_tcp_packet()
+        strpkt=str(pkt)
+
+        self.dataplane.send(in_port, strpkt)
+        verify_packet(self, strpkt, out_port)
+        time.sleep(10)
+        self.dataplane.send(in_port, strpkt)
+        verify_no_packet(self, strpkt, out_port)

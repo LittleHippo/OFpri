@@ -131,9 +131,6 @@ class Testcase_210_50_port_administratively_down(base_tests.SimpleDataPlane):
         reply, _ = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
         self.assertIsNone(reply, "Switch generated an error when setting down the port")
 
-        (_, config, _) = port_config_get(self.controller, out_port)
-        self.assertEqual(config, ofp.OFPPC_PORT_DOWN, "The port was not setting down")
-
         self.dataplane.send(out_port, str(pkt)) # send traffic to the port administratively down
 
         verify_no_packet_in(self, str(pkt), out_port)
@@ -214,9 +211,6 @@ class Testcase_210_60_Drop_all_packets_received(base_tests.SimpleDataPlane):
         logging.info("Setting OFPPC_NO_RECV flag for port %d ", out_port)
         reply, _ = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
         self.assertIsNone(reply, "Switch generated an error when setting the flag")
-
-        (_, config, _) = port_config_get(self.controller, out_port)
-        self.assertEqual(config, ofp.OFPPC_NO_RECV, "The port configuration is not OFPPC_NO_RECV")
         
         self.dataplane.send(out_port, str(pkt))
 
@@ -300,9 +294,6 @@ class Testcase_210_70_drop_packets_forwarded(base_tests.SimpleDataPlane):
         logging.info("Setting OFPPC_NO_FWD flag for port %d ", out_port)
         reply, _ = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
         self.assertIsNone(reply, "Switch generated an error when setting the flag")
-
-        (_, config, _) = port_config_get(self.controller, out_port)
-        self.assertEqual(config, ofp.OFPPC_NO_FWD, "The port configuration is not OFPPC_NO_FWD")
         
         self.dataplane.send(out_port, str(pkt))
 
@@ -385,9 +376,6 @@ class Testcase_210_80_do_not_send_packet_in(base_tests.SimpleDataPlane):
         logging.info("Setting OFPPC_NO_PACKET_IN flag for port %d ", out_port)
         reply, _ = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
         self.assertIsNone(reply, "Switch generated an error when setting the flag")
-
-        (_, config, _) = port_config_get(self.controller, out_port)
-        self.assertEqual(config, ofp.OFPPC_NO_PACKET_IN, "The port configuration is not OFPPC_NO_PACKET_IN")
         
         self.dataplane.send(out_port, str(pkt))
 

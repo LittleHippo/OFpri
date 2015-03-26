@@ -83,20 +83,19 @@ class Testcase_250_70_SwitchConfigMaxBytes(base_tests.SimpleDataPlane):
         self.assertIsNotNone(reply, "Did not receive Features Reply Message")
         tables_no = reply.n_tables
 
-        for table_id in range(tables_no):
-        	priority=0
-        	actions=[ofp.action.output(port=ofp.OFPP_CONTROLLER, max_len=128)]
-        	instructions=[ofp.instruction.apply_actions(actions=actions)]
-       	 	match = ofp.match([])
-        	req = ofp.message.flow_add(table_id=table_id,
+        priority=0
+        actions=[ofp.action.output(port=ofp.OFPP_CONTROLLER, max_len=128)]
+        instructions=[ofp.instruction.apply_actions(actions=actions)]
+        match = ofp.match([])
+        req = ofp.message.flow_add(table_id=test_param_get("table", 0),
                                    match= match,
                                    buffer_id=ofp.OFP_NO_BUFFER,
                                    instructions=instructions,
                                    priority=priority)
-        	logging.info("Sending Table Miss flowmod")
-        	rv = self.controller.message_send(req)
-        	self.assertTrue(rv != -1, "Failed to insert Table Miss flow")
-        	do_barrier(self.controller)
+        logging.info("Sending Table Miss flowmod")
+        rv = self.controller.message_send(req)
+        self.assertTrue(rv != -1, "Failed to insert Table Miss flow")
+        do_barrier(self.controller)
 
         request =ofp.message.get_config_request()
         self.controller.message_send(request)

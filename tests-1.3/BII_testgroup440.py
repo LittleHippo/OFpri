@@ -804,9 +804,12 @@ class Testcase_440_610_TableFeaturesFailedBadTable(base_tests.SimpleDataPlane):
     @wireshark_capture
     def runTest(self):
         logging.info("Running test case Table Features Failed Bad Table")
-        table_id = ofp.OFPTT_MAX
-        req = ofp.message.table_features_stats_request()
-        self.controller.message_send(req)
+        request = ofp.message.features_request()
+        (reply, pkt)= self.controller.transact(request)
+        self.assertIsNotNone(reply, "Did not receive Features Reply Message")
+        tables_no = reply.n_tables 
+              
+        req = ofp.message.table_features_stats_request()       
         reply, _ = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
         self.assertIsNotNone(reply, "The switch failed to generate an error.")
         logging.info("Error Message Received")

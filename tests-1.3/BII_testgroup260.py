@@ -411,7 +411,7 @@ class Testcase_260_100_FlowmodIgnoreCookieMask(base_tests.SimpleDataPlane):
         table_id=0
         priority=1
         cookie = 0x00000011
-        cookie_mask = 0xffffffff
+        cookie_mask = 0x00000001
         actions=[ofp.action.output(port=out_port, max_len=128)]
         instructions=[ofp.instruction.apply_actions(actions=actions)]
         match1 = ofp.match([ofp.oxm.in_port(in_port)])
@@ -427,7 +427,7 @@ class Testcase_260_100_FlowmodIgnoreCookieMask(base_tests.SimpleDataPlane):
         self.assertTrue(rv != -1, "Failed to insert flow")
         
         stats = get_flow_stats(self, table_id=table_id,match=ofp.match())
-        self.assertEqual(len(stats), 1, "Statistic is incorrct.")
+        self.assertEqual(len(stats), 1, "Statistic is incorrect.")
         self.assertEqual(stats[0].cookie, cookie, "Invalid cookie value.")
 
 
@@ -789,7 +789,6 @@ class Testcase_260_240_FlowmodTimeoutBoth0(base_tests.SimpleDataPlane):
                                hard_timeout=0,
                                idle_timeout=0)
         logging.info("Sending flowmod")
-        self.controller.message_send(req)
         rv = self.controller.message_send(req)
         self.assertTrue(rv != -1, "Failed to insert flow")
 
@@ -1242,6 +1241,39 @@ class Testcase_260_400_FlowmodNoCounts(Testcase_260_380_FlowmodPacketCount):
     260.400 - OFPFF_NO_PKT_COUNTS and OFPFF_NO_BYT_COUNTS flags in flow statistics.
     Verify how switch handles OFPFF_NO_PKT_COUNTS and OFPFF_NO_BYT_COUNTS
     """
+    @wireshark_capture
+    def runTest(self):
+        logging.info("Running testcase 260.400 - OFPFF_NO_PKT_COUNTS and OFPFF_NO_BYT_COUNTS flags in flow statistics")
+        rv = delete_all_flows(self.controller)
+        self.assertEqual(rv, 0, "Failed to delete all flows")
+
+        in_port, out_port = openflow_ports(2)
+        flags = ofp.OFPFF_NO_PKT_COUNTS|ofp.OFPFF_NO_BYT_COUNTS
+
+        priority=100
+        table_id=0
+        actions=[ofp.action.output(port=out_port, max_len=128)]
+        instructions=[ofp.instruction.apply_actions(actions=actions)]
+        match = ofp.match([ofp.oxm.eth_dst([0x00, 0x01, 0x02, 0x03, 0x04, 0x05])])
+        req = ofp.message.flow_add(table_id=table_id,
+                                  match= match,
+                                  buffer_id=ofp.OFP_NO_BUFFER,
+                                  instructions=instructions,
+                                  priority=priority,
+                                  flags = flags)
+        logging.info("Insert flow")
+        rv = self.controller.message_send(req)
+        self.assertTrue(rv != -1, "Failed to insert flow")
+
+        for i in range(10):
+            pkt = str(simple_tcp_packet(pktlen=200))
+            self.dataplane.send(in_port, pkt)
+
+        time.sleep(2)
+        stats = get_flow_stats(self,match=ofp.match())
+        self.assertTrue((stats[0].packet_count==10) or (stats[0].packet_count==0xffffffffffffffff), "The packet count is incorrect")
+        self.assertTrue((stats[0].byte_count==2000) or (stats[0].byte_count==0xffffffffffffffff), "The byte count is incorrect")
+        logging.info("The packet count and byte count are correct")
 
 
 

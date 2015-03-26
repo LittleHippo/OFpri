@@ -1260,11 +1260,15 @@ class barrier_request(message):
     version = 4
     type = 20
 
-    def __init__(self, xid=None):
+    def __init__(self, xid=None, length=None):
         if xid != None:
             self.xid = xid
         else:
             self.xid = None
+        if length != None:
+            self.length = length
+        else:
+            self.length = None
         return
 
     def pack(self):
@@ -1274,6 +1278,8 @@ class barrier_request(message):
         packed.append(struct.pack("!H", 0)) # placeholder for length at index 2
         packed.append(struct.pack("!L", self.xid))
         length = sum([len(x) for x in packed])
+        if self.length is not None:
+            length=self.length
         packed[2] = struct.pack("!H", length)
         return ''.join(packed)
 
