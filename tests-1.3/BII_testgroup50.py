@@ -72,20 +72,20 @@ class Testcase_50_20_TableMissPacketIn(base_tests.SimpleDataPlane):
         self.assertIsNotNone(reply, "Did not receive Features Reply Message")
         tables_no = reply.n_tables
 
-        for table_id in range(tables_no):
-        	priority=0
-        	actions=[ofp.action.output(port=ofp.OFPP_CONTROLLER, max_len=128)]
-        	instructions=[ofp.instruction.apply_actions(actions=actions)]
-       	 	match = ofp.match([])
-        	req = ofp.message.flow_add(table_id=table_id,
-                                   match= match,
-                                   buffer_id=ofp.OFP_NO_BUFFER,
-                                   instructions=instructions,
-                                   priority=priority)
-        	logging.info("Sending Table Miss flowmod")
-        	rv = self.controller.message_send(req)
-        	self.assertTrue(rv != -1, "Failed to insert Table Miss flow")
-        	do_barrier(self.controller)
+        table_id = test_param_get("table",0)
+        priority=0
+        actions=[ofp.action.output(port=ofp.OFPP_CONTROLLER, max_len=128)]
+        instructions=[ofp.instruction.apply_actions(actions=actions)]
+            match = ofp.match([])
+        req = ofp.message.flow_add(table_id=table_id,
+                               match= match,
+                               buffer_id=ofp.OFP_NO_BUFFER,
+                               instructions=instructions,
+                               priority=priority)
+        logging.info("Sending Table Miss flowmod")
+        rv = self.controller.message_send(req)
+        self.assertTrue(rv != -1, "Failed to insert Table Miss flow")
+        do_barrier(self.controller)
 
         timeout = 5
         port1, = openflow_ports(1)
@@ -119,20 +119,20 @@ class Testcase_50_30_TableMissPacketInReason(base_tests.SimpleDataPlane):
         self.assertIsNotNone(reply, "Did not receive Features Reply Message")
         tables_no = reply.n_tables
 
-        for table_id in range(tables_no):
-        	priority=0
-        	actions=[ofp.action.output(port=ofp.OFPP_CONTROLLER, max_len=128)]
-        	instructions=[ofp.instruction.apply_actions(actions=actions)]
-       	 	match = ofp.match([])
-        	req = ofp.message.flow_add(table_id=table_id,
-                                   match= match,
-                                   buffer_id=ofp.OFP_NO_BUFFER,
-                                   instructions=instructions,
-                                   priority=priority)
-        	logging.info("Sending Table Miss flowmod")
-        	rv = self.controller.message_send(req)
-        	self.assertTrue(rv != -1, "Failed to insert Table Miss flow")
-        	do_barrier(self.controller)
+        table_id = test_param_get("table",0)
+        priority=0
+        actions=[ofp.action.output(port=ofp.OFPP_CONTROLLER, max_len=128)]
+        instructions=[ofp.instruction.apply_actions(actions=actions)]
+            match = ofp.match([])
+        req = ofp.message.flow_add(table_id=table_id,
+                               match= match,
+                               buffer_id=ofp.OFP_NO_BUFFER,
+                               instructions=instructions,
+                               priority=priority)
+        logging.info("Sending Table Miss flowmod")
+        rv = self.controller.message_send(req)
+        self.assertTrue(rv != -1, "Failed to insert Table Miss flow")
+        do_barrier(self.controller)
 
         timeout = 5
         port1, = openflow_ports(1)
@@ -166,20 +166,20 @@ class Testcase_50_40_TableMissClearActions(base_tests.SimpleDataPlane):
         self.assertIsNotNone(reply, "Did not receive Features Reply Message")
         tables_no = reply.n_tables
 
-        for table_id in range(tables_no):
-        	priority=0
-        	actions=[ofp.action.output(port=ofp.OFPP_CONTROLLER, max_len=128)]
-        	instructions=[ofp.instruction.clear_actions()]
-       	 	match = ofp.match([])
-        	req = ofp.message.flow_add(table_id=table_id,
-                                   match= match,
-                                   buffer_id=ofp.OFP_NO_BUFFER,
-                                   instructions=instructions,
-                                   priority=priority)
-        	logging.info("Sending Table Miss flowmod")
-        	rv = self.controller.message_send(req)
-        	self.assertTrue(rv != -1, "Failed to insert Table Miss flow")
-        	do_barrier(self.controller)
+        table_id = test_param_get("table",0)
+        priority=0
+        actions=[ofp.action.output(port=ofp.OFPP_CONTROLLER, max_len=128)]
+        instructions=[ofp.instruction.clear_actions()]
+            match = ofp.match([])
+        req = ofp.message.flow_add(table_id=table_id,
+                               match= match,
+                               buffer_id=ofp.OFP_NO_BUFFER,
+                               instructions=instructions,
+                               priority=priority)
+        logging.info("Sending Table Miss flowmod")
+        rv = self.controller.message_send(req)
+        self.assertTrue(rv != -1, "Failed to insert Table Miss flow")
+        do_barrier(self.controller)
 
         timeout = 5
         port1, = openflow_ports(1)
@@ -212,22 +212,22 @@ class Testcase_50_60_TableMissExpire(base_tests.SimpleDataPlane):
         self.assertIsNotNone(reply, "Did not receive Features Reply Message")
         tables_no = reply.n_tables
 
-        for table_id in range(tables_no):
-        	priority=0
-        	actions=[ofp.action.output(port=ofp.OFPP_CONTROLLER, max_len=128)]
-        	instructions=[ofp.instruction.apply_actions(actions=actions)]
-       	 	match = ofp.match([])
-        	req = ofp.message.flow_add(table_id=table_id,
-                                   match= match,
-                                   buffer_id=ofp.OFP_NO_BUFFER,
-                                   instructions=instructions,
-                                   priority=priority,
-                                   hard_timeout=3,
-                                   idle_timeout=4)
-        	logging.info("Sending Table Miss flowmod")
-        	rv = self.controller.message_send(req)
-        	self.assertTrue(rv != -1, "Failed to insert Table Miss flow")
-        	do_barrier(self.controller)
+        table_id = test_param_get("table",0)
+        priority=0
+        actions=[ofp.action.output(port=ofp.OFPP_CONTROLLER, max_len=128)]
+        instructions=[ofp.instruction.apply_actions(actions=actions)]
+            match = ofp.match([])
+        req = ofp.message.flow_add(table_id=table_id,
+                               match= match,
+                               buffer_id=ofp.OFP_NO_BUFFER,
+                               instructions=instructions,
+                               priority=priority,
+                               hard_timeout=3,
+                               idle_timeout=4)
+        logging.info("Sending Table Miss flowmod")
+        rv = self.controller.message_send(req)
+        self.assertTrue(rv != -1, "Failed to insert Table Miss flow")
+        do_barrier(self.controller)
 
         time.sleep(5)
         stats = get_flow_stats(self,match=ofp.match())
