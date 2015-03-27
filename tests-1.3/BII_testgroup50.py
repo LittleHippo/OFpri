@@ -76,7 +76,7 @@ class Testcase_50_20_TableMissPacketIn(base_tests.SimpleDataPlane):
         priority=0
         actions=[ofp.action.output(port=ofp.OFPP_CONTROLLER, max_len=128)]
         instructions=[ofp.instruction.apply_actions(actions=actions)]
-            match = ofp.match([])
+        match = ofp.match([])
         req = ofp.message.flow_add(table_id=table_id,
                                match= match,
                                buffer_id=ofp.OFP_NO_BUFFER,
@@ -123,7 +123,7 @@ class Testcase_50_30_TableMissPacketInReason(base_tests.SimpleDataPlane):
         priority=0
         actions=[ofp.action.output(port=ofp.OFPP_CONTROLLER, max_len=128)]
         instructions=[ofp.instruction.apply_actions(actions=actions)]
-            match = ofp.match([])
+        match = ofp.match([])
         req = ofp.message.flow_add(table_id=table_id,
                                match= match,
                                buffer_id=ofp.OFP_NO_BUFFER,
@@ -170,7 +170,7 @@ class Testcase_50_40_TableMissClearActions(base_tests.SimpleDataPlane):
         priority=0
         actions=[ofp.action.output(port=ofp.OFPP_CONTROLLER, max_len=128)]
         instructions=[ofp.instruction.clear_actions()]
-            match = ofp.match([])
+        match = ofp.match([])
         req = ofp.message.flow_add(table_id=table_id,
                                match= match,
                                buffer_id=ofp.OFP_NO_BUFFER,
@@ -216,7 +216,7 @@ class Testcase_50_60_TableMissExpire(base_tests.SimpleDataPlane):
         priority=0
         actions=[ofp.action.output(port=ofp.OFPP_CONTROLLER, max_len=128)]
         instructions=[ofp.instruction.apply_actions(actions=actions)]
-            match = ofp.match([])
+        match = ofp.match([])
         req = ofp.message.flow_add(table_id=table_id,
                                match= match,
                                buffer_id=ofp.OFP_NO_BUFFER,
