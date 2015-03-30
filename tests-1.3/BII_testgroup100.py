@@ -124,7 +124,7 @@ class Testcase_100_30_OutputMultiple(base_tests.SimpleDataPlane):
     """
     @wireshark_capture
     def runTest(self):
-        loging.info("Running Testcase 100.30 output to multiple ports")
+        logging.info("Running Testcase 100.30 output to multiple ports")
         ports = openflow_ports(4)
         in_port = ports[0]
         out_ports = ports[1:4]
