@@ -28,6 +28,7 @@ import BII_testgroup320
 from oftest.oflog import *
 from oftest.testutils import *
 from time import sleep
+from loxi.of13.common import table_feature_prop
 
 
 class Testcase_320_10_MultipartTableStatsCount(base_tests.SimpleDataPlane):
@@ -260,10 +261,10 @@ class Testcase_320_50_MultipartTableStatsMatchedCount(base_tests.SimpleDataPlane
 
 
 class Testcase_320_60_MultipartTableFeatures(base_tests.SimpleDataPlane):
-    """
+    """ 
     320.60 - OFPMP_TABLE_FEATURES multipart type allows a controller to both query for existing tables and ask the switch to reconfigure its tables
     Verify that the oft_multipart_reply returns correct information without error
-    """
+    """ 
 
     @wireshark_capture
     def runTest(self):
@@ -376,12 +377,12 @@ class Testcase_320_150_MultipartTableFeaturesPropertyTypes(base_tests.SimpleData
             for i in table_feature_prop.subtypes.keys()[:-2]:
 
                 if i % 2 == 0:
-                    required_prop.append(k)
+                    required_prop.append(i)
 
             for prop in item.properties:
                 reported_prop.append(prop.type)
 
-            for prop in required_properties:
+            for prop in required_prop:
                 if prop not in reported_prop:
                     missing_prop.append(prop)
 
@@ -934,6 +935,6 @@ class Testcase_320_520_MultipartTableFeaturesPropertyApplyActionsMiss(base_tests
             if prop.type == ofp.const.OFPTFPT_APPLY_ACTIONS:
                 action = prop
             elif prop.type == ofp.const.OFPTFPT_APPLY_ACTIONS_MISS:
-                action = props
+                action = prop
 
         self.assertIsNotNone(action, "NO reported actions found")
