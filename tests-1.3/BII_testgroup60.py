@@ -137,7 +137,7 @@ class Testcase_60_20_OXM_OF_IN_PORT(base_tests.SimpleDataPlane):
         self.dataplane.send(bad_port, strpkt)
         verify_no_packet(self, strpkt, out_port)
         logging.info("Did not receive a packet on %d", out_port)
-        verify_packet_in(self, strpkt, bad_port, ofp.OFPR_NO_MATCH)
+        verify_packet_in(self, strpkt, bad_port, None)
         logging.info("Received the expected packet-in message")
 
 
@@ -307,7 +307,7 @@ class Testcase_60_50_ETH_TYPE(MatchTest):
             "ipv4/tcp": simple_tcp_packet(),
             "ipv4/udp": simple_udp_packet(),
             "ipv4/icmp": simple_icmp_packet(),
-            "vlan tagged": simple_tcp_packet(dl_vlan_enable=True, vlan_vid=2, vlan_pcp=3),
+            #"vlan tagged": simple_tcp_packet(dl_vlan_enable=True, vlan_vid=2, vlan_pcp=3),
         }
 
         nonmatching = {
