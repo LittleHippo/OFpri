@@ -808,8 +808,15 @@ class Testcase_440_610_TableFeaturesFailedBadTable(base_tests.SimpleDataPlane):
         (reply, pkt)= self.controller.transact(request)
         self.assertIsNotNone(reply, "Did not receive Features Reply Message")
         tables_no = reply.n_tables 
-              
-        req = ofp.message.table_features_stats_request()       
+        bad_table = tables_no + 1
+        
+        req = ofp.message.table_features_stats_request()
+        reply, _ = self.controller.transact(req)
+        self.assertIsNotNone(reply, "Did not receive table_features_stats_reply")
+        self.assertTrue(len(reply.entries) > 0,"No entry included in table features reply")
+        reply.entries[0].table_id = bad_table
+        entry = [reply.entries[0]]
+        req = ofp.message.table_features_stats_request(entries=entry)       
         reply, _ = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
         self.assertIsNotNone(reply, "The switch failed to generate an error.")
         logging.info("Error Message Received")
@@ -818,3 +825,153 @@ class Testcase_440_610_TableFeaturesFailedBadTable(base_tests.SimpleDataPlane):
         self.assertEqual(reply.code, ofp.const.OFPTFFC_BAD_TABLE, "Error Code is not OFPTFFC_BAD_TABLE")
         logging.info("Received Error code is OFPTFFC_BAD_TABLE")
         
+        
+        
+        
+class Testcase_440_630_TableFeaturesFailedBadType(base_tests.SimpleDataPlane):
+    """
+    440.630 - Table features failed bad type
+    Verify the correct error message is generated when a table features request specifies a bad property type.
+    """
+    @wireshark_capture
+    def runTest(self):
+        logging.info("Running test case 440.630 - Table Features Failed Bad Type")       
+        req = ofp.message.table_features_stats_request()
+        reply, _ = self.controller.transact(req)
+        self.assertIsNotNone(reply, "Did not receive table_features_stats_reply")
+        self.assertTrue(len(reply.entries) > 0,"No entry included in table features reply")
+        reply.entries[0].properties[0].type = 16
+        entry = [reply.entries[0]]
+        req = ofp.message.table_features_stats_request(entries=entry)       
+        reply, _ = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
+        self.assertIsNotNone(reply, "The switch failed to generate an error.")
+        logging.info("Error Message Received")
+        self.assertEqual(reply.err_type,ofp.const.OFPET_TABLE_FEATURES_FAILED, " Error type is not OFPET_TABLE_FEATURES_FAILED")
+        logging.info("Received OFPET_TABLE_FEATURES_FAILED")
+        self.assertEqual(reply.code, ofp.const.OFPTFFC_BAD_TYPE, "Error Code is not OFPTFFC_BAD_TYPE")
+        logging.info("Received Error code is OFPTFFC_BAD_TYPE")
+
+        
+        
+class Testcase_440_640_TableFeaturesFailedBadLength(base_tests.SimpleDataPlane):
+    """
+    440.640 - Table features failed bad length
+    Verify the correct error message is generated when a table features request specifies a bad length.
+    """
+    @wireshark_capture
+    def runTest(self):
+        logging.info("Running test case 440.640 - Table features failed bad length")
+        
+        req = ofp.message.table_features_stats_request()
+        reply, _ = self.controller.transact(req)
+        self.assertIsNotNone(reply, "Did not receive table_features_stats_reply")
+        self.assertTrue(len(reply.entries) > 0,"No entry included in table features reply")
+        reply.entries[0].properties[0].length = 2
+        entry = [reply.entries[0]]
+        req = ofp.message.table_features_stats_request(entries=entry)       
+        reply, _ = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
+        self.assertIsNotNone(reply, "The switch failed to generate an error.")
+        logging.info("Error Message Received")
+        self.assertEqual(reply.err_type,ofp.const.OFPET_TABLE_FEATURES_FAILED, " Error type is not OFPET_TABLE_FEATURES_FAILED")
+        logging.info("Received OFPET_TABLE_FEATURES_FAILED")
+        self.assertEqual(reply.code, ofp.const.OFPTFFC_BAD_LEN, "Error Code is not OFPTFFC_BAD_LEN")
+        logging.info("Received Error code is OFPTFFC_BAD_LEN")
+        
+        
+        
+class Testcase_440_650_TableFeaturesFailedBadAgument(base_tests.SimpleDataPlane):
+    """
+    440.650 - Table features failed bad argument
+    Verify the correct error message is generated when a table features request specifies a bad argument.
+    """
+    @wireshark_capture
+    def runTest(self):
+        logging.info("Running test case 440.650 - Table features failed bad argument")
+        
+        req = ofp.message.table_features_stats_request()
+        reply, _ = self.controller.transact(req)
+        self.assertIsNotNone(reply, "Did not receive table_features_stats_reply")
+        self.assertTrue(len(reply.entries) > 0,"No entry included in table features reply")
+        for i in range(len(reply.entries[0].properties)):
+            if reply.entries[0].properties[i].type == ofp.const.OFPTFPT_WRITE_ACTIONS:
+                action_ids = []
+                action_ids.append(action_id.copy_ttl_in())
+                action_ids.append(action_id.copy_ttl_out())
+                action_ids.append(action_id.dec_mpls_ttl())
+                action_ids.append(action_id.dec_nw_ttl())
+                action_ids.append(action_id.group())
+                action_ids.append(action_id.pop_mpls())
+                action_ids.append(action_id.pop_pbb())
+                action_ids.append(action_id.pop_vlan())
+                action_ids.append(action_id.set_mpls_ttl())
+                action_ids.append(action_id.set_queue())
+                action_ids.append(action_id.set_field())
+                reply.entries[0].properties[i].action_ids = action_ids
+        entry = [reply.entries[0]]
+        req = ofp.message.table_features_stats_request(entries=entry)       
+        reply, _ = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
+        self.assertIsNotNone(reply, "The switch failed to generate an error.")
+        logging.info("Error Message Received")
+        self.assertEqual(reply.err_type,ofp.const.OFPET_TABLE_FEATURES_FAILED, " Error type is not OFPET_TABLE_FEATURES_FAILED")
+        logging.info("Received OFPET_TABLE_FEATURES_FAILED")
+        self.assertEqual(reply.code, ofp.const.OFPTFFC_BAD_ARGUMENT, "Error Code is not OFPTFFC_BAD_ARGUMENT")
+        logging.info("Received Error code is OFPTFFC_BAD_ARGUMENT")
+        
+        
+        
+class Testcase_440_670_TableFeaturesFailedData(base_tests.SimpleDataPlane):
+    """
+    440.610 - Table features failed bad table
+    Verify table features failed errors include up to 64 bytes of the offending request.
+    """
+    @wireshark_capture
+    def runTest(self):
+        logging.info("Running test case 440.670 - Table features failed data")
+        request = ofp.message.features_request()
+        (reply, pkt)= self.controller.transact(request)
+        self.assertIsNotNone(reply, "Did not receive Features Reply Message")
+        tables_no = reply.n_tables 
+        bad_table = tables_no + 1
+        
+        req = ofp.message.table_features_stats_request()
+        reply, _ = self.controller.transact(req)
+        self.assertIsNotNone(reply, "Did not receive table_features_stats_reply")
+        self.assertTrue(len(reply.entries) > 0,"No entry included in table features reply")
+        reply.entries[0].table_id = bad_table
+        entry = [reply.entries[0]]
+        req = ofp.message.table_features_stats_request(entries=entry)       
+        reply, _ = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
+        self.assertIsNotNone(reply, "The switch failed to generate an error.")
+        logging.info("Error Message Received")
+        self.assertEqual(reply.err_type,ofp.const.OFPET_TABLE_FEATURES_FAILED, " Error type is not OFPET_TABLE_FEATURES_FAILED")
+        logging.info("Received OFPET_TABLE_FEATURES_FAILED")
+        self.assertEqual(reply.code, ofp.const.OFPTFFC_BAD_TABLE, "Error Code is not OFPTFFC_BAD_TABLE")
+        logging.info("Received Error code is OFPTFFC_BAD_TABLE")
+        if len(reply.data) < 64:
+            self.assertEqual(req.pack(), reply.data, "Incorrect data field")
+        else:
+            self.assertEqual(req.pack()[:len(reply.data)], reply.data, "Incorrect data field")
+        
+
+        
+class Testcase_440_680_ExperimenterErrorMsg(base_tests.SimpleDataPlane):
+    """
+    440.680 - Experimenter error message
+    Verify the correct error message is generated when a bad experimenter type is specified.
+    """
+    @wireshark_capture
+    def runTest(self):
+        logging.info("Running test case 440.680 - Experimenter error message")
+        experimenter = test_param_get("experimenter", 0x4f4e4600)
+        experimenter_type = 0xffff00ff 
+        req = ofp.message.experimenter(experimenter=experimenter,subtype=experimenter_type)
+        self.controller.message_send(req)      
+        reply, _ = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
+        self.assertIsNotNone(reply, "The switch failed to generate an error.")
+        logging.info("Error Message Received")
+        if reply.err_type == ofp.OFPET_BAD_REQUEST :
+            self.assertEqual(reply.code, ofp.const.OFPBRC_BAD_EXPERIMENTER, "Error Code is not OFPBRC_BAD_EXPERIMENTER")
+            logging.info("Switch did not support experimenter")
+        else :
+            self.assertEqual(reply.err_type,ofp.const.OFPET_EXPERIMENTER, " Error type is not OFPET_EXPERIMENTER")
+            logging.info("Received error type was correct")
