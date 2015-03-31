@@ -161,7 +161,7 @@ class Testcase_140_20_No_Overlap_Check(base_tests.SimpleDataPlane):
                 instructions=[
                     ofp.instruction.apply_actions(actions)],
                 buffer_id=ofp.OFP_NO_BUFFER,
-                priority=1000, flags = flags)
+                priority=1000)
         self.controller.message_send(request)
         logging.info("Inserting a flow to forwarded packet to port %d with priority 1000 overlapped match field and OVERLAP flag set", out_port)
         reply, _ = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
