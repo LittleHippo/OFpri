@@ -328,7 +328,7 @@ class Testcase_60_50_ETH_TYPE(MatchTest):
             "ipv6/tcp": simple_tcpv6_packet(),
             "ipv6/udp": simple_udpv6_packet(),
             "ipv6/icmp": simple_icmpv6_packet(),
-            "vlan tagged": simple_tcpv6_packet(vlan_vid=2, vlan_pcp=3),
+            #"vlan tagged": simple_tcpv6_packet(vlan_vid=2, vlan_pcp=3),
         }
 
         nonmatching = {
