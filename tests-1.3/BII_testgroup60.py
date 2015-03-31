@@ -23,11 +23,10 @@ import oftest.packet as scapy
 from oftest.testutils import *
 from oftest.parse import parse_ipv6
 from oftest.oflog import *
+from loxi.of13.oxm import *
 
 class Testcase_60_10_list_matches_per_table(base_tests.SimpleDataPlane):
     """
-    TODO: Table feature reply message is usually too large to buffer, need to modify internal framework in order to get enough memory space to store the reply message
-
     Purpose
     Different tables may support different match fields. Here, we check that the 13 required match fields are each supported in at least one table. We also gather the information what match groups are supported per table.
 
@@ -48,7 +47,38 @@ class Testcase_60_10_list_matches_per_table(base_tests.SimpleDataPlane):
         req = ofp.message.table_features_stats_request()
         res = get_stats(self,req)
         self.assertIsNotNone(res, "Didn't receive table stats information.")
-        #TODO: Table feature reply message is usually too large to buffer, need to modify internal framework in order to get enough memory space to store the reply message
+        supported_matches_fields = [] 
+        optional_matches_fields = [] 
+        unknown_matches_fields = [] 
+        unsupported_matches_fields = [] 
+        for stats in res:
+            for prop in stats.properties:
+                if prop.type == ofp.const.OFPTFPT_MATCH:
+                    for oxm_id in prop.oxm_ids:
+                        if oxm_id.value not in oxm.subtypes.keys():
+                            unknown_matches_fields.append(oxm_id.value)
+                        elif oxm.subtypes[oxm_id.value].__name__ in required_match_fields:
+                            if oxm.subtypes[oxm_id.value].__name__ not in supported_matches_fields:
+                                supported_matches_fields.append(oxm.subtypes[oxm_id.value].__name__)
+                        elif oxm.subtypes[oxm_id.value].__name__ not in required_match_fields:
+                            if oxm.subtypes[oxm_id.value].__name__ not in optional_matches_fields:
+                                optional_matches_fields.append(oxm.subtypes[oxm_id.value].__name__)
+        
+        
+        for match in supported_matches_fields:
+            if match or match.endswith("_masked") in required_match_fields:
+                logging.info("Support by DUT : %s " %match)
+            else:
+                logging.info("Not Support by DUT : %s " %match)
+                unsupported_matches_fields.append(match)
+        
+        if len(optional_matches_fields) != 0:
+            for match in optional_matches_fields:
+                logging.info("Optional Support by DUT : %s " %match)
+        
+        self.assertEqual(len(unsupported_matches_fields), 0, "Some required match fields are not supported by DUT.")
+        logging.info("All the required match fields are supported by DUT.")
+       
 
 class Testcase_60_20_OXM_OF_IN_PORT(base_tests.SimpleDataPlane):
     """
@@ -277,7 +307,7 @@ class Testcase_60_50_ETH_TYPE(MatchTest):
             "ipv4/tcp": simple_tcp_packet(),
             "ipv4/udp": simple_udp_packet(),
             "ipv4/icmp": simple_icmp_packet(),
-            #"vlan tagged": simple_tcp_packet(dl_vlan_enable=True, vlan_vid=2, vlan_pcp=3),
+            "vlan tagged": simple_tcp_packet(dl_vlan_enable=True, vlan_vid=2, vlan_pcp=3),
         }
 
         nonmatching = {
