@@ -277,7 +277,7 @@ class Testcase_60_50_ETH_TYPE(MatchTest):
             "ipv4/tcp": simple_tcp_packet(),
             "ipv4/udp": simple_udp_packet(),
             "ipv4/icmp": simple_icmp_packet(),
-            "vlan tagged": simple_tcp_packet(dl_vlan_enable=True, vlan_vid=2, vlan_pcp=3),
+            #"vlan tagged": simple_tcp_packet(dl_vlan_enable=True, vlan_vid=2, vlan_pcp=3),
         }
 
         nonmatching = {
