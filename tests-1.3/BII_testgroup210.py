@@ -138,6 +138,11 @@ class Testcase_210_50_port_administratively_down(base_tests.SimpleDataPlane):
         request = ofp.message.packet_out(in_port = ofp.OFPP_CONTROLLER, data = str(pkt), buffer_id = ofp.OFP_NO_BUFFER, actions = actions_out)
         self.controller.message_send(request)
         verify_no_packet(self, str(pkt), out_port)
+        
+        #bring the port back up
+        request = ofp.message.port_mod(port_no = out_port, hw_addr = hard_addr, config = 0, mask = 0)
+        self.controller.message_send(request)
+
 
 
 class Testcase_210_60_Drop_all_packets_received(base_tests.SimpleDataPlane):
