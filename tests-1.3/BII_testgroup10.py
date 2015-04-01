@@ -49,7 +49,60 @@ class Testcase_10_10_StartupBehavior(base_tests.DataPlaneOnly):
         logging.info("No packet has been forworded as expected")
         
    
+class Testcase_10_20_Certificate_configuration_TLS(base_tests.EncryptedProtocol):
+	"""
+	10.20 - Certificate configuration for TLS
+	Purpose
+    Check the configuration for TLS encrypted control plane connections.
 
+	Methodology
+    Configure test framework and switch for an TLS encrypted control channel. Prepare necessary management plane if necessary (pki).
+
+	"""
+	def runTest(self):
+		logging.info("Running 10.20 Certificate configuration for TLS")
+		req = ofp.message.echo_request()
+		rv, _ = self.controller.transact(req)
+		self.assertEqual(rv.type, ofp.OFPT_ECHO_REPLY, "Did not receive echo reply message")
+		logging.info("Received Echo Reply from the switch")
+		
+class Testcase_10_50_TLS_with_default_TCP_port(base_tests.EncryptedProtocol):
+	"""
+    Purpose
+    Test encrypted control channel establishment on default port
+
+    Methodology
+    Reference controller must be running and reachable at configured IP and Port 6653. Configure DUT to connect with reference controller using encrypted TLS. If required, manually configure switch to connect to controller using TCP port 6653.
+
+
+	"""
+	def runTest(self):
+		logging.info("Running 10.50 TLS with default TCP port")
+		self.assertEqual(config["controller_port"], 6653)
+		req = ofp.message.echo_request()
+		rv, _ = self.controller.transact(req)
+		self.assertEqual(rv.type, ofp.OFPT_ECHO_REPLY, "Did not receive echo reply message")
+		logging.info("Received Echo Reply from the switch")
+		
+class Testcase_10_60_TLS_with_nondefault_TCP_port(base_tests.EncryptedProtocol):
+	"""
+    Purpose
+    Test encrypted control channel establishment on non-default port
+
+    Methodology
+    Reference controller must be running and reachable at configured IP and Port unequal 6653. Configure DUT to connect with reference controller using encrypted TLS. Manually configure switch to connect to controller using configured TCP port.
+
+
+
+	"""
+	def runTest(self):
+		logging.info("Running 10.60 TLS with non default TCP port")
+		#self.assertEqual(config["controller_port"], 6653)
+		req = ofp.message.echo_request()
+		rv, _ = self.controller.transact(req)
+		self.assertEqual(rv.type, ofp.OFPT_ECHO_REPLY, "Did not receive echo reply message")
+		logging.info("Received Echo Reply from the switch")
+	
 class Testcase_10_70_VersionNegotiationSuccess(base_tests.SimpleProtocol):
     """
     10.70 - Version negotiation on version field success
