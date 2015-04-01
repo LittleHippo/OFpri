@@ -1369,21 +1369,21 @@ class Testcase_140_220_Delete_all_tables(base_tests.SimpleDataPlane):
         request = ofp.message.features_request()
         (reply, pkt)= self.controller.transact(request)
         self.assertIsNotNone(reply, "Did not receive Features Reply Message")
-        tables_no = reply.n_tables 
+        #tables_no = reply.n_tables 
 
         logging.info("Inserting flow")
         pkt = simple_tcp_packet()
         
-        for table_id in range(tables_no):
-            req = ofp.message.flow_add(table_id=table_id,
+        #for table_id in range(tables_no):
+        req = ofp.message.flow_add(table_id=0,
                                    match=packet_to_flow_match(self, pkt),
                                    buffer_id=ofp.OFP_NO_BUFFER,
                                    instructions=[ofp.instruction.apply_actions(actions)],
                                    priority = 100)
-            logging.info("Inserting a flow to table %d ", table_id)
-            rv = self.controller.message_send(req)
-            self.assertTrue(rv != -1, "Failed to insert flow to table %d "%table_id)
-            do_barrier(self.controller)
+        logging.info("Inserting a flow to table %d ", 0)
+        rv = self.controller.message_send(req)
+        self.assertTrue(rv != -1, "Failed to insert flow to table %d "%0)
+        do_barrier(self.controller)
             
       
         delete_all_flows(self.controller)
