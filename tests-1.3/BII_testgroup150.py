@@ -168,9 +168,9 @@ class Testcase_150_20_TableID_OFPTT_ALL(base_tests.SimpleDataPlane):
 
         self.dataplane.send(in_port, str(pkt))
         verify_packet(self, str(pkt),out_port)
-
+"""
 class Testcase_150_30_Table_full(base_tests.SimpleDataPlane):
-    """
+    
 
     TODO: May suggest to the spec develop team about the real situation
     Purpose
@@ -179,13 +179,13 @@ class Testcase_150_30_Table_full(base_tests.SimpleDataPlane):
     Methodology
     Configure and connect DUT to controller. After control channel establishment, keep sending OFPFC_ADD flow_mod messages until no further flow can be added due to lack of space. Now, send  another OFPFC_ADD request, verify the switch sends ofp_error_msg with OFPET_flow_MOD_FAILED type and OFPFMFC_TABLE_FULL code.  Verify that the flow got not added to the flow tables.
 
-    """
+
     @wireshark_capture
     def runTest(self):
         logging.info("Running testcase 150.30 Table full")
         logging.info("This testcase can not be effectively executed")
 
-
+"""
 class Testcase_150_40_unknown_instruction(base_tests.SimpleDataPlane):
     """
     Purpose
