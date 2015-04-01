@@ -75,6 +75,9 @@ CONFIG_DEFAULT = {
     "platform_dir"       : os.path.join(ROOT_DIR, "platforms"),
     "interfaces"         : [],
     "openflow_version"   : "1.3",
+	"certfile"			 : None,
+	"keyfile"			 : None,
+
 
     # Logging options
     "log_file"           : "oft.log",
@@ -161,7 +164,7 @@ prefixing them with the '^' character.
                       help="Proceed even if oftest is not run as root")
     parser.add_option("--publish",action="store_true", dest="publish",default=False,
                       help="Use --publish with no value")
-
+	
     group = optparse.OptionGroup(parser, "Test selection options")
     group.add_option("-T", "--test-spec", "--test-list", help="Tests to run, separated by commas")
     group.add_option("-f", "--test-file", help="File of tests to run, one per line")
@@ -175,6 +178,9 @@ prefixing them with the '^' character.
                       type="int", help="Port number to listen on (default %default)")
     group.add_option("-S", "--switch-ip", dest="switch_ip",
                       help="If set, actively connect to this switch by IP")
+    group.add_option("--certfile", help = "Path of TLS certification file",
+						type="string", dest="certfile")
+    group.add_option("--keyfile", help = "Path of TLS key file", type="string", dest="keyfile")
     group.add_option("-P", "--platform", help="Platform module name (default %default)")
     group.add_option("-a", "--platform-args", help="Custom arguments for the platform")
     group.add_option("--platform-dir", type="string", help="Directory containing platform modules")

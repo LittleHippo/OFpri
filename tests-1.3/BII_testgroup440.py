@@ -74,16 +74,15 @@ class Testcase_440_10_BadMatchData(base_tests.SimpleDataPlane):
         logging.info("Received error message contains at least 64 bytes data.")
 
 
-
+"""
 class Testcase_440_30_FlowmodFailedTableFull(BII_testgroup150.Testcase_150_30_Table_full):
 
-    """
+    
     Tested in 150.30
     440.30 - Flow mod failed table full
     Verify how "OFPFC_ADD" is handled if table has no space.
-    """
-
-
+    
+"""
 
 
 
@@ -816,8 +815,7 @@ class Testcase_440_610_TableFeaturesFailedBadTable(base_tests.SimpleDataPlane):
         self.assertTrue(len(reply.entries) > 0,"No entry included in table features reply")
         reply.entries[0].table_id = bad_table
         entry = [reply.entries[0]]
-        req = ofp.message.table_features_stats_request(entries=entry) 
-        self.controller.message_send(req)
+        req = ofp.message.table_features_stats_request(entries=entry)       
         reply, _ = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
         self.assertIsNotNone(reply, "The switch failed to generate an error.")
         logging.info("Error Message Received")
@@ -843,8 +841,7 @@ class Testcase_440_630_TableFeaturesFailedBadType(base_tests.SimpleDataPlane):
         self.assertTrue(len(reply.entries) > 0,"No entry included in table features reply")
         reply.entries[0].properties[0].type = 16
         entry = [reply.entries[0]]
-        req = ofp.message.table_features_stats_request(entries=entry) 
-        self.controller.message_send(req)
+        req = ofp.message.table_features_stats_request(entries=entry)       
         reply, _ = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
         self.assertIsNotNone(reply, "The switch failed to generate an error.")
         logging.info("Error Message Received")
@@ -870,8 +867,7 @@ class Testcase_440_640_TableFeaturesFailedBadLength(base_tests.SimpleDataPlane):
         self.assertTrue(len(reply.entries) > 0,"No entry included in table features reply")
         reply.entries[0].properties[0].length = 2
         entry = [reply.entries[0]]
-        req = ofp.message.table_features_stats_request(entries=entry) 
-        self.controller.message_send(req)
+        req = ofp.message.table_features_stats_request(entries=entry)       
         reply, _ = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
         self.assertIsNotNone(reply, "The switch failed to generate an error.")
         logging.info("Error Message Received")
@@ -898,21 +894,20 @@ class Testcase_440_650_TableFeaturesFailedBadAgument(base_tests.SimpleDataPlane)
         for i in range(len(reply.entries[0].properties)):
             if reply.entries[0].properties[i].type == ofp.const.OFPTFPT_WRITE_ACTIONS:
                 action_ids = []
-                action_ids.append(ofp.action_id.copy_ttl_in())
-                action_ids.append(ofp.action_id.copy_ttl_out())
-                action_ids.append(ofp.action_id.dec_mpls_ttl())
-                action_ids.append(ofp.action_id.dec_nw_ttl())
-                action_ids.append(ofp.action_id.group())
-                action_ids.append(ofp.action_id.pop_mpls())
-                action_ids.append(ofp.action_id.pop_pbb())
-                action_ids.append(ofp.action_id.pop_vlan())
-                action_ids.append(ofp.action_id.set_mpls_ttl())
-                action_ids.append(ofp.action_id.set_queue())
-                action_ids.append(ofp.action_id.set_field())
+                action_ids.append(action_id.copy_ttl_in())
+                action_ids.append(action_id.copy_ttl_out())
+                action_ids.append(action_id.dec_mpls_ttl())
+                action_ids.append(action_id.dec_nw_ttl())
+                action_ids.append(action_id.group())
+                action_ids.append(action_id.pop_mpls())
+                action_ids.append(action_id.pop_pbb())
+                action_ids.append(action_id.pop_vlan())
+                action_ids.append(action_id.set_mpls_ttl())
+                action_ids.append(action_id.set_queue())
+                action_ids.append(action_id.set_field())
                 reply.entries[0].properties[i].action_ids = action_ids
         entry = [reply.entries[0]]
-        req = ofp.message.table_features_stats_request(entries=entry)   
-        self.controller.message_send(req)
+        req = ofp.message.table_features_stats_request(entries=entry)       
         reply, _ = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
         self.assertIsNotNone(reply, "The switch failed to generate an error.")
         logging.info("Error Message Received")
@@ -943,8 +938,7 @@ class Testcase_440_670_TableFeaturesFailedData(base_tests.SimpleDataPlane):
         self.assertTrue(len(reply.entries) > 0,"No entry included in table features reply")
         reply.entries[0].table_id = bad_table
         entry = [reply.entries[0]]
-        req = ofp.message.table_features_stats_request(entries=entry)   
-        self.controller.message_send(req)
+        req = ofp.message.table_features_stats_request(entries=entry)       
         reply, _ = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
         self.assertIsNotNone(reply, "The switch failed to generate an error.")
         logging.info("Error Message Received")

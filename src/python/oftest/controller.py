@@ -25,7 +25,7 @@ to be no clean way to interrupt an accept call.  Using select that also listens
 on an administrative socket and can shut down the socket might work.
 
 """
-
+import ssl
 import sys
 import os
 import socket
@@ -97,7 +97,7 @@ class Controller(Thread):
     @var dbg_state Debug indication of state
     """
 
-    def __init__(self, switch=None, host='127.0.0.1', port=6653, max_pkts=1024):
+    def __init__(self, switch=None, host='127.0.0.1', port=6653, max_pkts=1024, keyfile = None, certfile = None):
         Thread.__init__(self)
         # Socket related
         self.rcv_size = RCV_SIZE_DEFAULT
@@ -107,7 +107,9 @@ class Controller(Thread):
         self.connect_cv = Condition()
         self.message_cv = Condition()
         self.tx_lock = Lock()
-
+        self.keyfile = keyfile
+        self.certfile = certfile
+		
         # Used to wake up the event loop from another thread
         self.waker = ofutils.EventDescriptor()
 
@@ -338,7 +340,11 @@ class Controller(Thread):
                 self.logger.warning("Error on listen socket accept")
                 return -1
             self.logger.info(self.host+":"+str(self.port)+": Incoming connection from "+str(addr))
-
+            if self.keyfile and self.certfile:
+				try:
+						sock = ssl.wrap_socket(sock, server_side = True, keyfile = self.keyfile, certfile = self.certfile)
+				except ssl.SSLError as err:
+					self.logger.info(err)
             with self.connect_cv:
                 (self.switch_socket, self.switch_addr) = (sock, addr)
                 self.switch_socket.setsockopt(socket.IPPROTO_TCP,
@@ -673,10 +679,13 @@ class Controller(Thread):
 
         self.logger.debug("Msg out: version %d class %s len %d xid %d",
                           msg.version, type(msg).__name__, len(outpkt), msg.xid)
-
-        with self.tx_lock:
-            if self.switch_socket.sendall(outpkt) is not None:
-                raise AssertionError("failed to send message to switch")
+        if self.keyfile and self.certfile:
+			with self.tx_lock:
+				self.switch_socket.sendall(outpkt)
+        else:
+            with self.tx_lock:
+                if self.switch_socket.sendall(outpkt) is not None:
+                    raise AssertionError("failed to send message to switch")
 
         return 0 # for backwards compatibility
 

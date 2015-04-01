@@ -122,6 +122,53 @@ class SimpleDataPlane(SimpleProtocol):
             self.dataplane.stop_pcap()
         SimpleProtocol.tearDown(self)
 
+		
+class EncryptedProtocol(SimpleProtocol):
+    """
+    """
+    def setUp(self):
+        BaseTest.setUp(self)
+
+        if config["keyfile"] is None:
+            raise Exception("TLS keyfile path was not specified.")
+        elif not os.path.isfile(config["keyfile"]):
+            raise Exception("TLS keyfile path does not exist.")
+        if config["certfile"] is None:
+            raise Exception("TLS certfile path was not specified.")
+        elif not os.path.isfile(config["certfile"]):
+            raise Exception("TLS certfile path does not exist.")
+
+        self.controller = controller.Controller(
+            switch=config["switch_ip"],
+            host=config["controller_host"],
+            port=config["controller_port"],
+            keyfile=config["keyfile"],
+            certfile=config["certfile"])
+        self.controller.start()
+
+        try:
+            self.controller.connect(timeout=20)
+
+            self.controller.keep_alive = True
+
+            if not self.controller.active:
+                raise Exception("Controller startup failed")
+            if self.controller.switch_addr is None:
+                raise Exception("Controller startup failed (no switch addr)")
+            logging.info("Connected " + str(self.controller.switch_addr))
+            request = ofp.message.features_request()
+            reply, pkt = self.controller.transact(request)
+            self.assertTrue(reply is not None,
+                            "Did not complete features_request for handshake")
+            if reply.version == 1:
+                self.supported_actions = reply.actions
+                logging.info("Supported actions: " + hex(self.supported_actions))
+        except:
+            self.controller.kill()
+            del self.controller
+            raise
+	
+		
 class DataPlaneOnly(BaseTest):
     """
     Root class that sets up only the dataplane
