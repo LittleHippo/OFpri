@@ -74,15 +74,15 @@ class Testcase_440_10_BadMatchData(base_tests.SimpleDataPlane):
         logging.info("Received error message contains at least 64 bytes data.")
 
 
-
+"""
 class Testcase_440_30_FlowmodFailedTableFull(BII_testgroup150.Testcase_150_30_Table_full):
 
-    """
+    
     Tested in 150.30
     440.30 - Flow mod failed table full
     Verify how "OFPFC_ADD" is handled if table has no space.
-    """
-
+    
+"""
 
 
 
