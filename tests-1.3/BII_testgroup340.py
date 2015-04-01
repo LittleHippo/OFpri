@@ -710,7 +710,7 @@ class Testcase_340_260_MultipartPortDescSetPortState(base_tests.SimpleDataPlane)
         
             #Verify Port Status message is recieved with reason-- Port Deleted
             logging.info("Verify PortStatus-Down message is recieved on the control plane ")
-            (response, raw) = self.controller.poll(ofp.OFPT_PORT_STATUS, timeout=15)
+            (response, raw) = self.controller.poll(ofp.OFPT_PORT_STATUS, timeout=180)
             self.assertTrue(response is not None,
                         'Port Status Message not generated')
             
@@ -729,7 +729,7 @@ class Testcase_340_260_MultipartPortDescSetPortState(base_tests.SimpleDataPlane)
             logging.info("Bringing up the interface ...")
             print "Manually bring up the first port"
             logging.info("Verify PortStatus-Up message is recieved on the control plane ")
-            (response, raw) = self.controller.poll(ofp.OFPT_PORT_STATUS, timeout=15)
+            (response, raw) = self.controller.poll(ofp.OFPT_PORT_STATUS, timeout=180)
             self.assertTrue(response is not None,
                         'Port Status Message not generated')
 
