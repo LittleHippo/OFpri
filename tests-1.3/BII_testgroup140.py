@@ -85,6 +85,7 @@ class Testcase_140_10_Overlap_Check(base_tests.SimpleDataPlane):
         self.controller.message_send(request)
         logging.info("Inserting a flow to forwarded packet to port %d with priority 1000 and OVERLAP flag set", out_port)
         reply, _ = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
+        self.assertIsNotNone(reply, "Did not receive error message.")
         #self.assertIsNone(reply, "Switch generated an error when inserting flow") 
         self.assertEqual(reply.err_type, ofp.OFPET_FLOW_MOD_FAILED, "The response type is not flow_mod_failed")
         logging.info("The DUT responded with the correct error type %s", reply.type)
