@@ -65,4 +65,50 @@ class Testcase_130_220_Set_Output(base_tests.SimpleDataPlane):
         self.dataplane.send(in_port, pktstr)
         verify_packets(self, pktstr, [out_port])
 
-    
+class Testcase_130_250_Action_set_order(base_tests.SimpleDataPlane):
+    """
+    Purpose
+    Order in which action is applied for action sets.
+
+    Methodology
+    Configure and connect DUT to controller. After control channel establishment, add a flow matching on a named field (under the given Pre-requisites for the match), the flow populates the action set with at least two supported actions in inverse order of table 5.10. Verify switch executes actions according to table 5.10 regardless of the order they were added. If the device only supports the output action, the result of this test may be considered a pass.
+	"""
+    @wireshark_capture
+    def runTest(self):
+        logging.info("Running Testcase 130.250 action set order")
+        in_port, out_port = openflow_ports(2)
+
+        actions = [ofp.action.output(out_port), ofp.action.set_field(ofp.oxm.eth_src([0x00,0x07,0x06,0x05,0x04,0x03]))]
+		
+        pkt = simple_tcp_packet()
+
+        #logging.info("Running actions test for %s", pp(actions))
+
+        delete_all_flows(self.controller)
+
+        logging.info("Inserting flow")
+        request = ofp.message.flow_add(
+                table_id=test_param_get("table", 0),
+                match=packet_to_flow_match(self, pkt),
+                instructions=[
+                    ofp.instruction.write_actions(actions)],
+                buffer_id=ofp.OFP_NO_BUFFER,
+                priority=1000)
+        self.controller.message_send(request)
+        logging.info("Inserting a flow to forwarded packet to port %d", out_port)
+        reply, _ = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
+        self.assertIsNone(reply, "Switch generated an error when inserting flow")
+        #logging.info("Switch generated an error")
+
+        do_barrier(self.controller)
+
+        pktstr = str(pkt)
+
+        logging.info("Sending packet, expecting output to port %d", out_port)
+        self.dataplane.send(in_port, pktstr)
+        #verify_packets(self, pktstr, [out_port])
+        exp_pkt = str(simple_tcp_packet(eth_src = '00:07:06:05:04:03'))
+        verify_packet(self, exp_pkt, out_port)
+		
+		
+		
