@@ -1206,7 +1206,7 @@ class Testcase_150_260_bad_instruction(base_tests.SimpleDataPlane):
         #logging.info("Inserting a flow with illegal value")
         reply, _ = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
         self.assertIsNotNone(reply, "The switch did not generate an OFPT_ERROR.")
-        self.assertEqual(reply.err_type, ofp.OFPET_BAD_ISTRUCTION,
+        self.assertEqual(reply.err_type, ofp.OFPET_BAD_INSTRUCTION,
                          ("Error type %d was received, but we expected "
                           "OFPET_BAD_ISTRUCTION.") % reply.err_type)
         self.assertEqual(reply.code, ofp.OFPBIC_BAD_LEN,
