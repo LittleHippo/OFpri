@@ -1085,6 +1085,7 @@ class Testcase_150_230_bad_action(base_tests.SimpleDataPlane):
     430.320
 
     """
+    @wireshark_capture
     def runTest(self):
         logging.info("Running test case Bad Action Too Many")
         delete_all_flows(self.controller)
