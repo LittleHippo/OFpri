@@ -1098,14 +1098,15 @@ class Testcase_150_230_bad_action(base_tests.SimpleDataPlane):
                 ])
         act1 = ofp.action.set_field(ofp.oxm.ipv4_src(167772361))
         act2 = ofp.action.output(port=port_b,max_len=128)
-        actions = act1, act2
+        actions = [act1, act2]
         # add a lot of actions
         no = 167772167
         for i in range(167772162, no):
             act1 = ofp.action.set_field(ofp.oxm.ipv4_src(i))
             act2 = ofp.action.output(port=port_b,max_len=128)
-            actions = actions, act1, act2
-        instructions = [ofp.instruction.apply_actions(actions=[actions])]
+            actions.append(act1)
+            actions.append(act2)
+        instructions = [ofp.instruction.apply_actions(actions=actions)]
         flow_mod_msg = ofp.message.flow_add(table_id=table_id,
                                        match=match,
                                        buffer_id=ofp.OFP_NO_BUFFER,
