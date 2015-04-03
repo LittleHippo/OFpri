@@ -27,8 +27,7 @@ from oftest.oflog import *
 from oftest.testutils import *
 from time import sleep
 from loxi.of13.oxm import *
-import match_field as match_field
-import write_match as write_match
+
 
 
 class Testcase_330_20_TableFeaturesWildcards(base_tests.SimpleDataPlane):
@@ -83,7 +82,7 @@ class Testcase_330_20_TableFeaturesWildcards(base_tests.SimpleDataPlane):
         #logging.info("oxm_id that is reported by the DUT tested in match.py")
         for oxm_id in reported_oxm_ids:
             try:
-                getattr(match_field,oxm_id)(self,in_port,out_port)
+                getattr(ofp.match_field,oxm_id)(self,in_port,out_port)
                 
             except AttributeError:
                 logging.warn("No method defined for oxm {0}".format(oxm_id))
@@ -131,7 +130,7 @@ class Testcase_330_30_TableFeaturesWriteSetField(base_tests.SimpleDataPlane):
         #logging.info("oxm_id that is reported by the DUT tested in write_match.py")
         for oxm_id in reported_oxm_ids:
             try:
-                getattr(write_match,oxm_id)(self,table_id,in_port,out_port,instructions_type="write")
+                getattr(ofp.write_match,oxm_id)(self,table_id,in_port,out_port,instructions_type="write")
                 
             except AttributeError:
                 logging.warn("No function defined for oxm %s",oxm_id)
@@ -176,7 +175,7 @@ class Testcase_330_40_TableFeaturesWriteSetFieldMiss(base_tests.SimpleDataPlane)
                        
         for oxm_id in reported_oxm_ids:
             try:
-                getattr(write_match,oxm_id)(self,table_id,in_port,out_port,instructions_type="write",table_miss=True)
+                getattr(ofp.write_match,oxm_id)(self,table_id,in_port,out_port,instructions_type="write",table_miss=True)
                 
             except AttributeError:
                 logging.warn("No function defined for oxm %s",oxm_id)
@@ -222,7 +221,7 @@ class Testcase_330_50_TableFeaturesApplySetField(base_tests.SimpleDataPlane):
                        
         for oxm_id in reported_oxm_ids:
             try:
-                getattr(write_match,oxm_id)(self,table_id,in_port,out_port,instructions_type="apply")
+                getattr(ofp.write_match,oxm_id)(self,table_id,in_port,out_port,instructions_type="apply")
                 
             except AttributeError:
                 logging.warn("No function defined for oxm %s",oxm_id)
@@ -267,7 +266,7 @@ class Testcase_330_60_TableFeaturesApplySetFieldMiss(base_tests.SimpleDataPlane)
                        
         for oxm_id in reported_oxm_ids:
             try:
-                getattr(write_match,oxm_id)(self,table_id,in_port,out_port,instructions_type="apply")
+                getattr(ofp.write_match,oxm_id)(self,table_id,in_port,out_port,instructions_type="apply")
                 
             except AttributeError:
                 logging.warn("No function defined for oxm %s",oxm_id)
@@ -313,7 +312,7 @@ class Testcase_330_70_TableFeaturesMatch(base_tests.SimpleDataPlane):
                        
         for oxm_id in reported_oxm_ids:
             try:
-                getattr(match_field,oxm_id)(self,in_port,out_port,table_id=table_id,match=True,table_miss=True)
+                getattr(ofp.match_field,oxm_id)(self,in_port,out_port,table_id=table_id,match=True,table_miss=True)
                 
             except AttributeError:
                 logging.warn("No function defined for oxm %s",oxm_id)
@@ -358,7 +357,7 @@ class Testcase_330_80_TableFeaturesMatchandWildcard(base_tests.SimpleDataPlane):
                        
         for oxm_id in reported_oxm_ids:
             try:
-                getattr(match_field,oxm_id)(self,in_port,out_port,table_id=table_id,match=True,table_miss=False)
+                getattr(ofp.match_field,oxm_id)(self,in_port,out_port,table_id=table_id,match=True,table_miss=False)
                 
             except AttributeError:
                 logging.warn("No function defined for oxm %s",oxm_id)
