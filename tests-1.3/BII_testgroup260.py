@@ -619,7 +619,7 @@ class Testcase_260_190_FlowmodIdleTimeout(base_tests.SimpleDataPlane):
         self.dataplane.send(in_port, pkt)
         verify_packet(self, pkt, out_port)
 
-        time.sleep(5)
+        time.sleep(5.1)
         stats = get_flow_stats(self,match=ofp.match())
         self.assertEqual(len(stats), 0, "Flow did not timeout")
         logging.info("Flow timeout as expected")
