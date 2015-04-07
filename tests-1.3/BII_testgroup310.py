@@ -303,7 +303,7 @@ class Testcase_310_110_MultipartFlowStatsCookieMask(base_tests.SimpleDataPlane):
         cookie3=3
         actions=[ofp.action.output(port=out_port, max_len=128)]
         instructions=[ofp.instruction.apply_actions(actions=actions)]
-       	match = ofp.match([ofp.oxm.in_port(in_port3)])
+        match = ofp.match([ofp.oxm.in_port(in_port3)])
         req = ofp.message.flow_add(table_id=table_id,
                                match= match,
                                cookie=cookie3,
@@ -315,10 +315,12 @@ class Testcase_310_110_MultipartFlowStatsCookieMask(base_tests.SimpleDataPlane):
         self.assertTrue(rv != -1, "Failed to insert flow 3")
 
         cookie_mask=0xfffffffffffffffe
+        cookie_list=[cookie2, cookie3]
         stats = get_flow_stats(self,table_id=table_id,match=ofp.match(),cookie=cookie2,cookie_mask=cookie_mask)
         self.assertEqual(len(stats), 2, "Incorrect flow stats.")
-        self.assertEqual(stats[0].cookie,cookie2, "Incorrect cookie")
-        self.assertEqual(stats[1].cookie,cookie3, "Incorrect cookie")
+        self.assertIn(stats[0].cookie,cookie_list, "Incorrect cookie")
+        cookie_list.remove(stats[0].cookie)
+        self.assertIn(stats[1].cookie,cookie_list, "Incorrect cookie")
         logging.info("Received multipart reply as expected")
 
 
