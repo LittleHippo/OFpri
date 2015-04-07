@@ -108,29 +108,27 @@ class Testcase_320_30_MultipartTableStatsActiveEntries(base_tests.SimpleDataPlan
 
         in_port,out_port, = openflow_ports(2)
 
-        for table_id in range(tables_no):
-        	priority=100
-        	actions=[ofp.action.output(port=out_port, max_len=128)]
-        	instructions=[ofp.instruction.apply_actions(actions=actions)]
-       	 	match = ofp.match([ofp.oxm.in_port(in_port)])
-        	req = ofp.message.flow_add(table_id=table_id,
-                                   match= match,
-                                   buffer_id=ofp.OFP_NO_BUFFER,
-                                   instructions=instructions,
-                                   priority=priority,
-                                   hard_timeout=0)
-        	logging.info("Sending flowmod msg")
-        	rv = self.controller.message_send(req)
-        	self.assertTrue(rv != -1, "Failed to insert flow")
-        	do_barrier(self.controller)
+        table_id = test_param_get("table",0)
+        priority=100
+        actions=[ofp.action.output(port=out_port, max_len=128)]
+        instructions=[ofp.instruction.apply_actions(actions=actions)]
+        match = ofp.match([ofp.oxm.in_port(in_port)])
+        req = ofp.message.flow_add(table_id=table_id,
+                               match= match,
+                               buffer_id=ofp.OFP_NO_BUFFER,
+                               instructions=instructions,
+                               priority=priority,
+                               hard_timeout=0)
+        logging.info("Sending flowmod msg")
+        rv = self.controller.message_send(req)
+        self.assertTrue(rv != -1, "Failed to insert flow")
+        do_barrier(self.controller)
 
         request = ofp.message.table_stats_request()
         logging.info("Sending table stats request")
         stats = get_stats(self, request)
 
-        for table_id in range(tables_no):
-        	self.assertEqual(stats[table_id].active_count, 1, "Table stats active flow count is not correct")
-
+        self.assertEqual(stats[table_id].active_count, 1, "Table stats active flow count is not correct")
         logging.info("Table stats active flow count is correct")
 
 
