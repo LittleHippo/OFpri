@@ -539,7 +539,6 @@ class Testcase_300_240_MultipartTypeMeterFeatures(base_tests.SimpleDataPlane):
 
     @wireshark_capture
     def runTest(self):
-        logging = get_logger()
         logging.info("Running 300.240 - Multipart type meter features test")
         rv = delete_all_flows(self.controller)
         self.assertEqual(rv, 0, "Failed to delete all flows")
