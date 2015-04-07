@@ -60,9 +60,9 @@ class Testcase_260_40_FlowmodCookies(base_tests.SimpleDataPlane):
         priority=1
         actions=[ofp.action.output(port=out_port, max_len=128)]
         instructions=[ofp.instruction.apply_actions(actions=actions)]
-       	match1 = ofp.match([ofp.oxm.in_port(in_port1)])
+        match1 = ofp.match([ofp.oxm.in_port(in_port1)])
         req = ofp.message.flow_add(table_id=table_id,
-        	                     cookie=cookie,
+                               cookie=cookie,
                                match= match1,
                                buffer_id=ofp.OFP_NO_BUFFER,
                                instructions=instructions,
@@ -75,9 +75,9 @@ class Testcase_260_40_FlowmodCookies(base_tests.SimpleDataPlane):
         self.dataplane.send(in_port1, pkt)
         verify_packet(self, pkt, out_port)
 
-       	match2 = ofp.match([ofp.oxm.in_port(in_port2)])
+        match2 = ofp.match([ofp.oxm.in_port(in_port2)])
         req = ofp.message.flow_add(table_id=table_id,
-        	                     cookie=cookie,
+                               cookie=cookie,
                                match= match2,
                                buffer_id=ofp.OFP_NO_BUFFER,
                                instructions=instructions,
@@ -92,7 +92,7 @@ class Testcase_260_40_FlowmodCookies(base_tests.SimpleDataPlane):
         cookie2 = 12
         match3 = ofp.match([ofp.oxm.in_port(in_port3)])
         req = ofp.message.flow_add(table_id=table_id,
-        	                     cookie=cookie2,
+                               cookie=cookie2,
                                match= match3,
                                buffer_id=ofp.OFP_NO_BUFFER,
                                instructions=instructions,
@@ -121,6 +121,9 @@ class Testcase_260_40_FlowmodCookies(base_tests.SimpleDataPlane):
         logging.info("Sending a packet to match on port %s.", in_port2)
         self.dataplane.send(in_port2, pkt)
         verify_no_packet(self, pkt, out_port)
+        logging.info("Sending a packet to match on port %s.", in_port3)
+        self.dataplane.send(in_port3, pkt)
+        verify_packet(self, pkt, out_port)
 
 
 
