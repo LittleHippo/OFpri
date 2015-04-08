@@ -137,7 +137,7 @@ class Testcase_420_30_flow_removed_message_reason_idle_timeout(base_tests.Simple
         self.dataplane.send(in_port, str(pkt))
         verify_no_packet(self, str(pkt),out_port)
 
-class Testcase_420_30_flow_removed_message_reason_hard_timeout(base_tests.SimpleDataPlane):
+class Testcase_420_40_flow_removed_message_reason_hard_timeout(base_tests.SimpleDataPlane):
     """    
     Purpose
     Verify when a flow is removed because of a hard timeout, the reason field of a flow removed message is OFPRR_HARD_TIMEOUT.
