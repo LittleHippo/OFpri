@@ -74,15 +74,15 @@ class Testcase_440_10_BadMatchData(base_tests.SimpleDataPlane):
         logging.info("Received error message contains at least 64 bytes data.")
 
 
-"""
+
 class Testcase_440_30_FlowmodFailedTableFull(BII_testgroup150.Testcase_150_30_Table_full):
 
-    
+    """
     Tested in 150.30
     440.30 - Flow mod failed table full
     Verify how "OFPFC_ADD" is handled if table has no space.
-    
-"""
+    """
+
 
 
 
@@ -390,7 +390,7 @@ class Testcase_440_290_PortModFailedBadAdvertise(base_tests.SimpleDataPlane):
         for item in stats:
             if item.port_no in openflow_ports(1):
                 hw_addr.append(item.hw_addr)
-        invalidAdvertise = 0x0000ffff
+        invalidAdvertise = 0xffff0000
         req = ofp.message.port_mod(port_no=port1, 
                                 hw_addr=hw_addr[0],
                                 advertise=invalidAdvertise)
@@ -451,7 +451,7 @@ class Testcase_440_320_TableModFailedBadTable(base_tests.SimpleDataPlane):
         self.assertIsNotNone(reply, "Did not receive Echo Reply")
         self.assertEqual(reply.type, ofp.OFPT_ECHO_REPLY, "Response is not echo reply")
         table_id=ofp.const.OFPTT_MAX
-        request = ofp.message.table_mod(table_id=table_id)
+        request = ofp.message.table_mod(table_id=table_id,config=ofp.const.OFPTC_DEPRECATED_MASK)
         reply, _ = self.controller.transact(request)
         self.assertIsNotNone(reply, "The switch failed to generate an error.")
         logging.info("Error Message Received")
@@ -489,7 +489,7 @@ class Testcase_440_350_TableModFailedData(base_tests.SimpleDataPlane):
         self.assertIsNotNone(reply, "Did not receive Echo Reply")
         self.assertEqual(reply.type, ofp.OFPT_ECHO_REPLY, "Response is not echo reply")
         table_id=ofp.const.OFPTT_MAX
-        request = ofp.message.table_mod(table_id=table_id)
+        request = ofp.message.table_mod(table_id=table_id, config=ofp.const.OFPTC_DEPRECATED_MASK)
         reply, _ = self.controller.transact(request)
         self.assertIsNotNone(reply, "The switch failed to generate an error.")
         logging.info("Error Message Received")
@@ -550,6 +550,7 @@ class Testcase_440_370_QueueOPFailedBadQueue(base_tests.SimpleDataPlane):
         request = ofp.message.queue_stats_request(port_no=port1, queue_id=invalidQueue)
         reply, _ = self.controller.transact(request)
         self.assertIsNotNone(reply, "The switch failed to generate an error.")
+        self.assertTrue(reply.type == ofp.OFPT_ERROR,"The switch failed to generated an error.")
         logging.info("Error Message Received")
         self.assertEqual(reply.err_type,ofp.const.OFPET_QUEUE_OP_FAILED, " Error type is not OFPET_QUEUE_OP_FAILED")
         logging.info("Received OFPET_QUEUE_OP_FAILED")
@@ -602,7 +603,7 @@ class Testcase_440_400_SwitchConfigFailedBadFlags(base_tests.SimpleDataPlane):
         self.assertIsNotNone(reply, "Did not receive Echo Reply")
         self.assertEqual(reply.type, ofp.OFPT_ECHO_REPLY, "Response is not echo reply")
         
-        invalidFlags = 5
+        invalidFlags = 128
         req = ofp.message.set_config(flags=invalidFlags)
         self.controller.message_send(req)
         reply, _ = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
@@ -813,6 +814,8 @@ class Testcase_440_610_TableFeaturesFailedBadTable(base_tests.SimpleDataPlane):
         req = ofp.message.table_features_stats_request()
         reply, _ = self.controller.transact(req)
         self.assertIsNotNone(reply, "Did not receive table_features_stats_reply")
+        self.assertFalse(reply.type == ofp.OFPT_ERROR,"The switch generated an error.")
+        self.assertTrue(reply.type == ofp.OFPT_STATS_REPLY,"The switch responded an reply with wrong type.")
         self.assertTrue(len(reply.entries) > 0,"No entry included in table features reply")
         reply.entries[0].table_id = bad_table
         entry = [reply.entries[0]]
@@ -840,6 +843,8 @@ class Testcase_440_630_TableFeaturesFailedBadType(base_tests.SimpleDataPlane):
         req = ofp.message.table_features_stats_request()
         reply, _ = self.controller.transact(req)
         self.assertIsNotNone(reply, "Did not receive table_features_stats_reply")
+        self.assertFalse(reply.type == ofp.OFPT_ERROR,"The switch generated an error.")
+        self.assertTrue(reply.type == ofp.OFPT_STATS_REPLY,"The switch responded an reply with wrong type.")
         self.assertTrue(len(reply.entries) > 0,"No entry included in table features reply")
         reply.entries[0].properties[0].type = 16
         entry = [reply.entries[0]]
@@ -867,6 +872,8 @@ class Testcase_440_640_TableFeaturesFailedBadLength(base_tests.SimpleDataPlane):
         req = ofp.message.table_features_stats_request()
         reply, _ = self.controller.transact(req)
         self.assertIsNotNone(reply, "Did not receive table_features_stats_reply")
+        self.assertFalse(reply.type == ofp.OFPT_ERROR,"The switch generated an error.")
+        self.assertTrue(reply.type == ofp.OFPT_STATS_REPLY,"The switch responded an reply with wrong type.")
         self.assertTrue(len(reply.entries) > 0,"No entry included in table features reply")
         reply.entries[0].properties[0].length = 2
         entry = [reply.entries[0]]
@@ -894,6 +901,8 @@ class Testcase_440_650_TableFeaturesFailedBadAgument(base_tests.SimpleDataPlane)
         req = ofp.message.table_features_stats_request()
         reply, _ = self.controller.transact(req)
         self.assertIsNotNone(reply, "Did not receive table_features_stats_reply")
+        self.assertFalse(reply.type == ofp.OFPT_ERROR,"The switch generated an error.")
+        self.assertTrue(reply.type == ofp.OFPT_STATS_REPLY,"The switch responded an reply with wrong type.")
         self.assertTrue(len(reply.entries) > 0,"No entry included in table features reply")
         for i in range(len(reply.entries[0].properties)):
             if reply.entries[0].properties[i].type == ofp.const.OFPTFPT_WRITE_ACTIONS:
@@ -940,6 +949,8 @@ class Testcase_440_670_TableFeaturesFailedData(base_tests.SimpleDataPlane):
         req = ofp.message.table_features_stats_request()
         reply, _ = self.controller.transact(req)
         self.assertIsNotNone(reply, "Did not receive table_features_stats_reply")
+        self.assertFalse(reply.type == ofp.OFPT_ERROR,"The switch generated an error.")
+        self.assertTrue(reply.type == ofp.OFPT_STATS_REPLY,"The switch responded an reply with wrong type.")
         self.assertTrue(len(reply.entries) > 0,"No entry included in table features reply")
         reply.entries[0].table_id = bad_table
         entry = [reply.entries[0]]
