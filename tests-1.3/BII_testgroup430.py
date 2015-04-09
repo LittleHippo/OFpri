@@ -106,12 +106,6 @@ class Testcase_430_30_ErrorMessageXid(base_tests.SimpleDataPlane):
     logging.info("Polling for expected error message.")
     err, raw = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
     self.assertIsNotNone(err, "The switch failed to generate an error.")
-    self.assertEqual(err.err_type, ofp.const.OFPET_FLOW_MOD_FAILED,
-                        ("Error type %d was received, but we expected "
-                        "OFPET_FLOW_MOD_FAILED.") % err.err_type)
-    self.assertEqual(err.code, ofp.const.OFPFMFC_BAD_TABLE_ID,
-                        ("Flow mod failed code %d was received, but we "
-                        "expected OFPFMFC_BAD_TABLE_ID.") % err.code)
     self.assertTrue(err.xid == del_req.xid, "Error message have a different XID than the flow")
     logging.info("The DUT generated error with appropriate type and code")
 
@@ -489,7 +483,10 @@ class Testcase_430_230_ErrorMessageBadRequest64Bytes(base_tests.SimpleDataPlane)
         logging.info("Received OFPET_BAD_REQUEST")
         self.assertEqual(reply.code, ofp.const.OFPBRC_BAD_VERSION, "Error Code is not OFPBRC_BAD_VERSION")
         logging.info("Received Error code is OFPBRC_BAD_VERSION")
-        self.assertTrue(len(reply.data) >= 64, "Data field of error message should include at least 64 bytes")
+        if len(request.data) >= 64:
+            self.assertTrue(len(reply.data) >= 64, "Data field of error message should include at least 64 bytes")
+        else:
+            self.assertEqual(reply.data , request.pack(), "Data field of error message should include at least 64 bytes")
         logging.info("The DUT generated error with appropriate type and code")
 
 
@@ -726,7 +723,7 @@ class Testcase_430_500_BadActionBadSetType(base_tests.SimpleDataPlane):
         priority = 1
         actions=[ofp.action.set_field(ofp.oxm.arp_spa(167772361)), ofp.action.output(port=out_port,max_len=128)]
         instructions=[ofp.instruction.apply_actions(actions=actions)]
-        match = ofp.match([ofp.oxm.in_port(in_port)])
+        match = ofp.match([ofp.oxm.in_port(in_port), ofp.oxm.eth_type(0x0806)])
         req = ofp.message.flow_add(table_id=table_id,
                                    match=match,
                                    buffer_id=ofp.OFP_NO_BUFFER,
