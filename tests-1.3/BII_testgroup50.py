@@ -203,10 +203,12 @@ class Testcase_50_60_TableMissExpire(base_tests.SimpleDataPlane):
     @wireshark_capture
     def runTest(self):
         logging.info("Running 50.60 - Entry timeout test")
+
         logging.info("Delete all flows on DUT")
         rv = delete_all_flows(self.controller)
         self.assertEqual(rv, 0, "Failed to delete all flows")
-        
+        port1, = openflow_ports(1)
+        pkt = str(simple_tcp_packet())
         request = ofp.message.features_request()
         (reply, pkt)= self.controller.transact(request)
         self.assertIsNotNone(reply, "Did not receive Features Reply Message")
@@ -222,16 +224,37 @@ class Testcase_50_60_TableMissExpire(base_tests.SimpleDataPlane):
                                buffer_id=ofp.OFP_NO_BUFFER,
                                instructions=instructions,
                                priority=priority,
-                               hard_timeout=3,
-                               idle_timeout=4)
+                               hard_timeout=15,
+                               idle_timeout=5)
         logging.info("Sending Table Miss flowmod")
         rv = self.controller.message_send(req)
         self.assertTrue(rv != -1, "Failed to insert Table Miss flow")
-        do_barrier(self.controller)
+        #do_barrier(self.controller)
+        for i in range (0,19):
+            self.dataplane.send(port1, pkt)
+            if i < 15:
+                verify_packet_in(self, pkt, port1, reason = None)
+            else:
+                verify_no_packet_in(self,pkt,port1)
+            time.sleep(1)
 
-        time.sleep(5)
-        stats = get_flow_stats(self,match=ofp.match())
-        self.assertEqual(len(stats), 0, "Table Miss flow did not timeout")
+        req = ofp.message.flow_add(table_id=table_id,
+                               match= match,
+                               buffer_id=ofp.OFP_NO_BUFFER,
+                               instructions=instructions,
+                               priority=priority,
+                               hard_timeout=15,
+                               idle_timeout=5)
+        logging.info("Sending Table Miss flowmod")
+        rv = self.controller.message_send(req)
+        self.assertTrue(rv != -1, "Failed to insert Table Miss flow")
+        self.dataplane.send(port1, pkt)
+        verify_packet_in(self, pkt, port1, reason = None)
+        time.sleep(6)
+        self.dataplane.send(port1, pkt)
+        verify_no_packet_in(self,pkt,port1)
+        #stats = get_flow_stats(self,match=ofp.match())
+        #self.assertEqual(len(stats), 0, "Table Miss flow did not timeout")
         logging.info("Table Miss expired as expected")
 
 
