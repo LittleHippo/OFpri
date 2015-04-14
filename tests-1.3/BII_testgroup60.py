@@ -712,3 +712,72 @@ class Testcase_60_140_OXM_OF_UDP_DST(MatchTest):
 
         self.verify_match(match, matching, nonmatching)
 
+class Testcase_IPv4_DST_CIDR_masking(MatchTest):
+    """
+    Purpose
+    Verify the switch is able to match on the previously named field as a single header field match (under the given Pre-requisites for the match).
+
+    Methodology
+    Configure and connect DUT to controller. After control channel establishment, add a flow matching on the named field (under the given Pre-requisites for the match), action is forwarding to an output port. Send a matching packet on the data plane. Verify the packet is received only at the port specified in the flow action. Send a non-matching packet, verify the flow does not forward it, but a table-miss is triggered.
+
+    """
+    @wireshark_capture
+    def runTest(self):
+        logging.info("Running Testcase for matching on IPv4 CIDR masking")
+        match = ofp.match([
+            ofp.oxm.eth_type(0x0800),
+            # 192.168.0.0/20 (255.255.240.0)
+            ofp.oxm.ipv4_dst_masked(0xc0a80000, 0xfffff000),
+        ])
+
+        matching = {
+            "192.168.0.1": simple_tcp_packet(ip_dst='192.168.0.1'),
+            "192.168.0.2": simple_tcp_packet(ip_dst='192.168.0.2'),
+            "192.168.4.2": simple_tcp_packet(ip_dst='192.168.4.2'),
+            "192.168.0.0": simple_tcp_packet(ip_dst='192.168.0.0'),
+            "192.168.15.255": simple_tcp_packet(ip_dst='192.168.15.255'),
+        }
+
+        nonmatching = {
+            "192.168.16.0": simple_tcp_packet(ip_dst='192.168.16.0'),
+            "192.167.255.255": simple_tcp_packet(ip_dst='192.167.255.255'),
+            "192.168.31.1": simple_tcp_packet(ip_dst='192.168.31.1'),
+        }
+
+        self.verify_match(match, matching, nonmatching)
+
+class Testcase_IPv6_DST_CIDR_Masking(MatchTest):
+    """
+    Purpose
+    Verify the switch is able to match on the previously named field as a single header field match (under the given Pre-requisites for the match).
+
+    Methodology
+    Configure and connect DUT to controller. After control channel establishment, add a flow matching on the named field (under the given Pre-requisites for the match), action is forwarding to an output port. Send a matching packet on the data plane. Verify the packet is received only at the port specified in the flow action. Send a non-matching packet, verify the flow does not forward it, but a table-miss is triggered.
+
+
+    """
+    @wireshark_capture
+    def runTest(self):
+        logging.info("Running Testcase   for matching on IPv6 dst CIDR masking")
+        flow =       "2001:0db8:85a3::"
+        mask =       "ffff:ffff:fffe::"
+        correct1 =   "2001:0db8:85a3::8a2e:0370:7331"
+        correct2 =   "2001:0db8:85a2::ffff:ffff:ffff"
+        incorrect1 = "2001:0db8:85a1::"
+
+        match = ofp.match([
+            ofp.oxm.eth_type(0x86dd),
+            ofp.oxm.ipv6_dst_masked(parse_ipv6(flow), parse_ipv6(mask)),
+        ])
+
+        matching = {
+            "flow": simple_tcpv6_packet(ipv6_dst=flow),
+            "correct1": simple_tcpv6_packet(ipv6_dst=correct1),
+            "correct2": simple_tcpv6_packet(ipv6_dst=correct2),
+        }
+
+        nonmatching = {
+            "incorrect1": simple_tcpv6_packet(ipv6_dst=incorrect1),
+        }
+
+        self.verify_match(match, matching, nonmatching)
