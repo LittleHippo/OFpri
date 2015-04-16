@@ -1173,7 +1173,7 @@ class Testcase_260_380_FlowmodPacketCount(base_tests.SimpleDataPlane):
 
         priority=100
         table_id=0
-        actions=[ofp.action.output(port=out_port, max_len=128)]
+        actions=[ofp.action.output(port = ofp.OFPP_CONTROLLER, max_len = 128)]
         instructions=[ofp.instruction.apply_actions(actions=actions)]
         match = ofp.match([ofp.oxm.eth_dst([0x00, 0x01, 0x02, 0x03, 0x04, 0x05])])
         req = ofp.message.flow_add(table_id=table_id,
@@ -1214,7 +1214,7 @@ class Testcase_260_390_FlowmodByteCount(base_tests.SimpleDataPlane):
 
         priority=100
         table_id=0
-        actions=[ofp.action.output(port=out_port, max_len=128)]
+        actions=[ofp.action.output(port = ofp.OFPP_CONTROLLER, max_len = 128)]
         instructions=[ofp.instruction.apply_actions(actions=actions)]
         match = ofp.match([ofp.oxm.eth_dst([0x00, 0x01, 0x02, 0x03, 0x04, 0x05])])
         req = ofp.message.flow_add(table_id=table_id,
@@ -1235,7 +1235,6 @@ class Testcase_260_390_FlowmodByteCount(base_tests.SimpleDataPlane):
         stats = get_flow_stats(self,match=ofp.match())
         self.assertTrue((stats[0].byte_count==2000) or (stats[0].byte_count==0xffffffffffffffff), "The byte count is incorrect")
         logging.info("The byte count is correct")
-
 
 
 class Testcase_260_400_FlowmodNoCounts(Testcase_260_380_FlowmodPacketCount):
