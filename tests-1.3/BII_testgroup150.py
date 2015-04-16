@@ -11,12 +11,12 @@ import logging
 
 from oftest import config
 import oftest.base_tests as base_tests
+import oftest.parse as parse
 import ofp
 import oftest.packet as scapy
 from loxi.pp import pp
 
 from oftest.testutils import *
-from oftest.parse import parse_ipv6
 from oftest.oflog import *
 from time import sleep
 
@@ -168,9 +168,9 @@ class Testcase_150_20_TableID_OFPTT_ALL(base_tests.SimpleDataPlane):
 
         self.dataplane.send(in_port, str(pkt))
         verify_packet(self, str(pkt),out_port)
-"""
+
 class Testcase_150_30_Table_full(base_tests.SimpleDataPlane):
-    
+    """
 
     TODO: May suggest to the spec develop team about the real situation
     Purpose
@@ -179,13 +179,62 @@ class Testcase_150_30_Table_full(base_tests.SimpleDataPlane):
     Methodology
     Configure and connect DUT to controller. After control channel establishment, keep sending OFPFC_ADD flow_mod messages until no further flow can be added due to lack of space. Now, send  another OFPFC_ADD request, verify the switch sends ofp_error_msg with OFPET_flow_MOD_FAILED type and OFPFMFC_TABLE_FULL code.  Verify that the flow got not added to the flow tables.
 
-
+    """
+    
+    def tearDown(self):
+        delete_all_flows(self.controller)
+        do_barrier(self.controller, timeout=15)
+        base_tests.SimpleProtocol.tearDown(self)
+        
     @wireshark_capture
     def runTest(self):
         logging.info("Running testcase 150.30 Table full")
-        logging.info("This testcase can not be effectively executed")
+        delete_all_flows(self.controller)
+        
+        in_port, out_port = openflow_ports(2)
+        flow_count = 0
+        max_flow_num = test_param_get("maxflow", 2000)
+        if max_flow_num > 2000:
+            logging.info("This testcase is not applicable")
+        else:
+            actions = [ofp.action.output(out_port)]
+            instructions = [ofp.instruction.apply_actions(actions)]
+            priority = 1
+            buffer_id = ofp.OFP_NO_BUFFER
+            table_id = test_param_get("table", 0)
+            
+            for i in range(1, 10):
+                for j in range(1, 10):
+                    for k in range(1, 20):
+                        match = ofp.match([ofp.oxm.eth_src(parse.parse_mac("00:01:02:" +str(k) + ":" +str(j)+ ":" + str(i)))])
+                        req = ofp.message.flow_add(table_id=table_id,
+                                               match= match,
+                                               buffer_id=ofp.OFP_NO_BUFFER,
+                                               instructions=instructions,
+                                               priority=priority)
+                        self.controller.message_send(req)
+                        flow_count += 1
+                        logging.info("Install flow %d", flow_count)
+                        sleep(0.1)
+                        
+                        if flow_count % 20 == 0:
+                            logging.info("Checking for table_full error")
+                            err,_ = self.controller.poll(ofp.OFPT_ERROR, 1 )
+                            if err is not None:
+                                logging.info("Received error message from DUT")
+                                self.assertEqual(err.err_type, ofp.const.OFPET_FLOW_MOD_FAILED,
+                                                 "Error type was not OFPET_FLOW_MOD_FAILED")
+                                self.assertEqual(err.code, ofp.const.OFPFMFC_TABLE_FULL,
+                                                 "Error code was not OFPFMFC_TABLE_FULL")
+                                logging.info("Received error message with correct type and code")
+                                return
+                            elif flow_count >= (max_flow_num + 100):
+                                self.assertEqual(1,0,"Switch failed to generate an error")
+                                return
+                                
+            self.assertEqual(1,0,"Switch failed to generate an error")
 
-"""
+
 class Testcase_150_40_unknown_instruction(base_tests.SimpleDataPlane):
     """
     Purpose
@@ -436,7 +485,7 @@ class Testcase_150_80_Bad_match_field(base_tests.SimpleDataPlane):
                                          (oxm_field << 9) |
                                          (oxm_mask << 8) |
                                          (oxm_len)))
-        
+
         delete_all_flows(self.controller)
 
     
@@ -663,7 +712,7 @@ class Testcase_150_130_unsupported_mask(base_tests.SimpleDataPlane):
                 table_id=test_param_get("table", 0),
                 #match=packet_to_flow_match(self, pkt),
                 match = bad_network_mask_match,
-                instructions=[ofp.instruction.apply_actions(actions = [ofp.action.output(out_port)])],
+                instructions=[ofp.instruction.apply_actions(actions = [ofp.action.output(out_port, max_len=128)])],
                 buffer_id=ofp.OFP_NO_BUFFER,
                 priority=1000)
         self.controller.message_send(request)
@@ -1085,7 +1134,6 @@ class Testcase_150_230_bad_action(base_tests.SimpleDataPlane):
     430.320
 
     """
-    @wireshark_capture
     def runTest(self):
         logging.info("Running test case Bad Action Too Many")
         delete_all_flows(self.controller)
@@ -1210,7 +1258,7 @@ class Testcase_150_260_bad_instruction(base_tests.SimpleDataPlane):
         self.assertIsNotNone(reply, "The switch did not generate an OFPT_ERROR.")
         self.assertEqual(reply.err_type, ofp.OFPET_BAD_INSTRUCTION,
                          ("Error type %d was received, but we expected "
-                          "OFPET_BAD_ISTRUCTION.") % reply.err_type)
+                          "OFPET_BAD_INSTRUCTION.") % reply.err_type)
         self.assertEqual(reply.code, ofp.OFPBIC_BAD_LEN,
                          ("Bad instruction code %d was received, but we "
                           "expected OFPBIC_BAD_LEN.") % reply.code)
