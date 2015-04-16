@@ -79,9 +79,12 @@ class Testcase_100_20_SinglePort(base_tests.SimpleDataPlane):
     @wireshark_capture
     def runTest(self):
         logging.info("Running Testcase 100.20 Single Port")
-        in_port, out_port = openflow_ports(2)
-
-        actions = [ofp.action.output(out_port)]
+        #in_port, out_port = openflow_ports(2)
+        ports = openflow_ports(4)
+        in_port = ports[0]
+        out_ports = ports[1:4]
+        
+        actions = [ofp.action.output(ports[1])]
 
         pkt = simple_tcp_packet()
 
@@ -98,7 +101,7 @@ class Testcase_100_20_SinglePort(base_tests.SimpleDataPlane):
                 buffer_id=ofp.OFP_NO_BUFFER,
                 priority=1000)
         self.controller.message_send(request)
-        logging.info("Inserting a flow to forwarded packet to port %d", out_port)
+        logging.info("Inserting a flow to forwarded packet to port %d", ports[1])
         reply, _ = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
         self.assertIsNone(reply, "Switch generated an error when inserting flow")
         #logging.info("Switch generated an error")
@@ -107,9 +110,39 @@ class Testcase_100_20_SinglePort(base_tests.SimpleDataPlane):
 
         pktstr = str(pkt)
 
-        logging.info("Sending packet, expecting output to port %d", out_port)
+        logging.info("Sending packet, expecting output to port %d", ports[1])
         self.dataplane.send(in_port, pktstr)
-        verify_packets(self, pktstr, [out_port])
+        verify_packets(self, pktstr, [ports[1]])
+        
+        actions = [ofp.action.output(port = ofp.OFPP_ALL, max_len = 128)]
+
+        pkt = simple_tcp_packet()
+
+        #logging.info("Running actions test for %s", pp(actions))
+
+        delete_all_flows(self.controller)
+
+        logging.info("Inserting flow")
+        request = ofp.message.flow_add(
+                table_id=test_param_get("table", 0),
+                match=packet_to_flow_match(self, pkt),
+                instructions=[
+                    ofp.instruction.apply_actions(actions)],
+                buffer_id=ofp.OFP_NO_BUFFER,
+                priority=1000)
+        self.controller.message_send(request)
+        logging.info("Inserting a flow to forwarded packet to port %r", out_ports)
+        reply, _ = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
+        self.assertIsNone(reply, "Switch generated an error when inserting flow")
+        #logging.info("Switch generated an error")
+
+        do_barrier(self.controller)
+
+        pktstr = str(pkt)
+
+        logging.info("Sending packet, expecting output to port %r", out_ports)
+        self.dataplane.send(in_port, pktstr)
+        verify_packets(self, pktstr,[ports[1],ports[2],ports[3]])
 
         
 class Testcase_100_30_OutputMultiple(base_tests.SimpleDataPlane):
@@ -178,7 +211,9 @@ class Testcase_100_40_Single_OutputMultiple(base_tests.SimpleDataPlane):
 
         #actions = [ofp.action.output(x) for x in out_ports]
         actions=[ofp.action.output(port = ofp.OFPP_ALL, max_len = 128),
-                 ofp.action.output(port = ofp.OFPP_IN_PORT, max_len = 128)]
+                 ofp.action.output(port = ofp.OFPP_IN_PORT, max_len = 128),
+                 ofp.action.output(port = ofp.OFPP_CONTROLLER, max_len = 128)
+                ]
 
         pkt = simple_tcp_packet()
 
@@ -206,6 +241,7 @@ class Testcase_100_40_Single_OutputMultiple(base_tests.SimpleDataPlane):
         logging.info("Sending packet, expecting output to ports %r", out_ports)
         self.dataplane.send(in_port, pktstr)
         verify_packets(self, pktstr, ports)
+        verify_packet_in(self,pktstr,in_port,ofp.OFPR_ACTION,self.controller)
 
 
 
@@ -255,7 +291,7 @@ class Testcase_100_50_ALL(base_tests.SimpleDataPlane):
 
         logging.info("Sending packet, expecting output to ports %r", out_ports)
         self.dataplane.send(in_port, pktstr)
-        verify_packets(self, pktstr, [out_ports])
+        verify_packets(self, pktstr, out_ports)
 
 class Testcase_100_60_ALL_OFPPC_NO_FWD(base_tests.SimpleDataPlane):
     """
