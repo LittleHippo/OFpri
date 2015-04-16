@@ -710,7 +710,7 @@ class Testcase_260_230_FlowmodHard_IdleTimeout(base_tests.SimpleDataPlane):
         table_id=0
         priority=1
         cookie1 = 0x00000011
-        actions=[ofp.action.output(port=out_port, max_len=128)]
+        actions=[ofp.action.output(port = ofp.OFPP_CONTROLLER, max_len = 128)]
         instructions=[ofp.instruction.apply_actions(actions=actions)]
         match = ofp.match([ofp.oxm.in_port(in_port)])
         req = ofp.message.flow_add(table_id=table_id,
@@ -729,12 +729,12 @@ class Testcase_260_230_FlowmodHard_IdleTimeout(base_tests.SimpleDataPlane):
         pkt = str(simple_tcp_packet())
         logging.info("Sending dataplane packet")
         self.dataplane.send(in_port, pkt)
-        verify_packet(self, pkt, out_port)
+        verify_packet_in(self,pkt,in_port,ofp.OFPR_ACTION,self.controller)
 
         sleep(3)
 
         self.dataplane.send(in_port, pkt)
-        verify_no_packet(self, pkt, out_port)
+        verify_no_packet_in(self,pkt,in_port,self.controller)
 
         rv = delete_all_flows(self.controller)
         self.assertEqual(rv, 0, "Failed to delete all flows")
@@ -754,13 +754,13 @@ class Testcase_260_230_FlowmodHard_IdleTimeout(base_tests.SimpleDataPlane):
         for i in range(5):
             pkt = str(simple_tcp_packet())
             logging.info("Sending dataplane packets")
+            sleep(1)
             self.dataplane.send(in_port, pkt)
             
             if i == 4:
-                verify_no_packet(self, pkt, out_port)
+                verify_no_packet_in(self,pkt,in_port,self.controller)
             else:
-                verify_packet(self, pkt, out_port)
-            sleep(1)
+                verify_packet_in(self,pkt,in_port,ofp.OFPR_ACTION,self.controller)
 
         logging.info("Flow timeout as expected")
 
@@ -781,7 +781,7 @@ class Testcase_260_240_FlowmodTimeoutBoth0(base_tests.SimpleDataPlane):
         in_port, out_port, = openflow_ports(2)
         table_id=0
         priority=1
-        actions=[ofp.action.output(port=out_port, max_len=128)]
+        actions=[ofp.action.output(port = ofp.OFPP_CONTROLLER, max_len = 128)]
         instructions=[ofp.instruction.apply_actions(actions=actions)]
         match = ofp.match([ofp.oxm.in_port(in_port)])
         req = ofp.message.flow_add(table_id=table_id,
@@ -799,7 +799,7 @@ class Testcase_260_240_FlowmodTimeoutBoth0(base_tests.SimpleDataPlane):
             pkt = str(simple_tcp_packet())
             logging.info("Sending dataplane packets")
             self.dataplane.send(in_port, pkt)
-            verify_packet(self, pkt, out_port)
+            verify_packet_in(self,pkt,in_port,ofp.OFPR_ACTION,self.controller)
             sleep(2)
 
         logging.info("IDLE_TIMEOUT with HARD_TIMEOUT both 0. Flow did not timeout")
