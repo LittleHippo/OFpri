@@ -866,7 +866,6 @@ class Testcase_260_260_FlowmodModifyDeleteBuffer(BII_testgroup230.Testcase_230_6
     """
 
 
-
 class Testcase_260_270_FlowmodBufferID(base_tests.SimpleDataPlane):
     """
     260.270 - Valid BUFFER_ID in FLOW_MOD
@@ -880,7 +879,9 @@ class Testcase_260_270_FlowmodBufferID(base_tests.SimpleDataPlane):
         rv = delete_all_flows(self.controller)
         self.assertEqual(rv, 0, "Failed to delete all flows")
         
-        port1, out_port, = openflow_ports(2)
+        ports = openflow_ports(3)
+        port1 = ports[0]
+        out_ports = ports[1:3]
         priority=1
         table_id=0
         actions=[ofp.action.output(port=ofp.OFPP_CONTROLLER, max_len=128)]
@@ -905,7 +906,7 @@ class Testcase_260_270_FlowmodBufferID(base_tests.SimpleDataPlane):
         logging.info("Packet In received as expected")
 
         buffer_id=rv.buffer_id
-        actions = [ofp.action.output(port=out_port, max_len=128)]
+        actions = [ofp.action.output(port=ports[1], max_len=128)]
         instructions = [ofp.instruction.apply_actions(actions=actions)]
         match = ofp.match([ofp.oxm.eth_type(0x0800)])
         req = ofp.message.flow_add(buffer_id=buffer_id,
@@ -917,8 +918,11 @@ class Testcase_260_270_FlowmodBufferID(base_tests.SimpleDataPlane):
         rv = self.controller.message_send(req)
         self.assertTrue(rv != -1, "Failed to insert flow")
 
-        verify_packet(self, pkt, out_port)
+        verify_packet(self, pkt, ports[1])
         logging.info("Received packet out as expected")
+        verify_no_packet(self,pkt,ports[2])
+        logging.info("Negative check for pkt on other ports")
+
 
 
 
