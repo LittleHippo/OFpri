@@ -350,8 +350,8 @@ class Testcase_440_280_PortModFailedBadConfig(base_tests.SimpleDataPlane):
         for item in stats:
             if item.port_no in openflow_ports(1):
                 hw_addr.append(item.hw_addr)
-        invalidConfig = 256
-        mask = 256
+        invalidConfig = 2
+        mask = 2
         req = ofp.message.port_mod(port_no=port1, 
                                 hw_addr=hw_addr[0],
                                 config=invalidConfig, 
