@@ -23,12 +23,12 @@ import oftest.dataplane as dataplane
 import oftest.parse as parse
 import oftest.base_tests as base_tests
 import oftest.illegal_message as illegal_message
-import BII_testgroup320
 
 from oftest.oflog import *
 from oftest.testutils import *
 from time import sleep
 from loxi.of13.common import table_feature_prop
+from loxi.of13.action_test import *
 
 
 class Testcase_320_10_MultipartTableStatsCount(base_tests.SimpleDataPlane):
@@ -546,7 +546,7 @@ class Testcase_320_240_MultipartTableFeaturesMaxEntries(base_tests.SimpleDataPla
         self.assertIsNotNone(stats, "Did not receive table features stats reply.")
 
         request = ofp.message.table_features_stats_request()
-        stats = get_stats(testcase, req)
+        stats = get_stats(self, request)
         self.assertIsNotNone(stats, "Did not receive table stats reply.")
         FlowMax = stats[0].max_entries
 
@@ -564,7 +564,7 @@ class Testcase_320_240_MultipartTableFeaturesMaxEntries(base_tests.SimpleDataPla
                                    buffer_id=ofp.OFP_NO_BUFFER,
                                    instructions=instructions,
                                    priority=priority)
-            self.controller.message_send(req)
+            self.controller.message_send(request)
             verify_no_errors(self.controller)
             request = ofp.message.barrier_request()
 
@@ -584,15 +584,15 @@ class Testcase_320_240_MultipartTableFeaturesMaxEntries(base_tests.SimpleDataPla
             instructions=[ofp.instruction.apply_actions(actions=actions)]
             match = ofp.match([
                     ofp.oxm.eth_type(0x0800),
-                    ofp.oxm.ipv4_src(parse_ip("192.168.0.1")),
-                    ofp.oxm.ipv4_dst(parse_ip("192.168.0.2"))
+                    ofp.oxm.ipv4_src(parse.parse_ip("192.168.0.1")),
+                    ofp.oxm.ipv4_dst(parse.parse_ip("192.168.0.2"))
                 ])
             request = ofp.message.flow_add(table_id=table_id,
                                    match= match,
                                    buffer_id=ofp.OFP_NO_BUFFER,
                                    instructions=instructions,
                                    priority=priority)
-            self.controller.message_send(req)
+            self.controller.message_send(request)
             verify_no_errors(self.controller)
             request = ofp.message.barrier_request()
 
@@ -600,7 +600,7 @@ class Testcase_320_240_MultipartTableFeaturesMaxEntries(base_tests.SimpleDataPla
 
 
 
-class Testcase_320_250_MultipartTableFeaturesReportedOrder(BII_testgroup320.Testcase_320_190_MultipartTableFeaturesOrder):
+class Testcase_320_250_MultipartTableFeaturesReportedOrder(Testcase_320_190_MultipartTableFeaturesOrder):
     """
     Tested in 320.190
     320.250 - Table features reported order
@@ -609,7 +609,7 @@ class Testcase_320_250_MultipartTableFeaturesReportedOrder(BII_testgroup320.Test
 
 
 
-class Testcase_320_270_MultipartTableFeaturesPropertyType(BII_testgroup320.Testcase_320_150_MultipartTableFeaturesPropertyTypes):
+class Testcase_320_270_MultipartTableFeaturesPropertyType(Testcase_320_150_MultipartTableFeaturesPropertyTypes):
     """
     Tested in 320.150
     320.270 - Table features property type
@@ -618,7 +618,7 @@ class Testcase_320_270_MultipartTableFeaturesPropertyType(BII_testgroup320.Testc
 
 
 
-class Testcase_320_280_MultipartTableFeaturesPropertyInstruction(BII_testgroup320.Testcase_320_150_MultipartTableFeaturesPropertyTypes):
+class Testcase_320_280_MultipartTableFeaturesPropertyInstruction(Testcase_320_150_MultipartTableFeaturesPropertyTypes):
     """
     Tested in 320.150
     320.280 - Table features property instruction
@@ -627,7 +627,7 @@ class Testcase_320_280_MultipartTableFeaturesPropertyInstruction(BII_testgroup32
 
 
 
-class Testcase_320_290_MultipartTableFeaturesPropertyInstructionMiss(BII_testgroup320.Testcase_320_150_MultipartTableFeaturesPropertyTypes):
+class Testcase_320_290_MultipartTableFeaturesPropertyInstructionMiss(Testcase_320_150_MultipartTableFeaturesPropertyTypes):
     """
     Tested in 320.150
     320.290 - Table features property instruction miss
@@ -636,7 +636,7 @@ class Testcase_320_290_MultipartTableFeaturesPropertyInstructionMiss(BII_testgro
 
 
 
-class Testcase_320_300_MultipartTableFeaturesPropertyNextTables(BII_testgroup320.Testcase_320_150_MultipartTableFeaturesPropertyTypes):
+class Testcase_320_300_MultipartTableFeaturesPropertyNextTables(Testcase_320_150_MultipartTableFeaturesPropertyTypes):
     """
     Tested in 320.150
     320.300 - Table features property next tables
@@ -645,7 +645,7 @@ class Testcase_320_300_MultipartTableFeaturesPropertyNextTables(BII_testgroup320
 
 
 
-class Testcase_320_320_MultipartTableFeaturesPropertyWriteActions(BII_testgroup320.Testcase_320_150_MultipartTableFeaturesPropertyTypes):
+class Testcase_320_320_MultipartTableFeaturesPropertyWriteActions(Testcase_320_150_MultipartTableFeaturesPropertyTypes):
     """
     Tested in 320.150
     320.320 - Table features property write actions
@@ -654,7 +654,7 @@ class Testcase_320_320_MultipartTableFeaturesPropertyWriteActions(BII_testgroup3
 
 
 
-class Testcase_320_330_MultipartTableFeaturesPropertyWriteActionsMiss(BII_testgroup320.Testcase_320_150_MultipartTableFeaturesPropertyTypes):
+class Testcase_320_330_MultipartTableFeaturesPropertyWriteActionsMiss(Testcase_320_150_MultipartTableFeaturesPropertyTypes):
     """
     Tested in 320.150
     320.330 - Table features property write actions miss
@@ -663,7 +663,7 @@ class Testcase_320_330_MultipartTableFeaturesPropertyWriteActionsMiss(BII_testgr
 
 
 
-class Testcase_320_340_MultipartTableFeaturesPropertyApplyActions(BII_testgroup320.Testcase_320_150_MultipartTableFeaturesPropertyTypes):
+class Testcase_320_340_MultipartTableFeaturesPropertyApplyActions(Testcase_320_150_MultipartTableFeaturesPropertyTypes):
     """
     Tested in 320.150
     320.340 - Table features property apply actions
@@ -672,7 +672,7 @@ class Testcase_320_340_MultipartTableFeaturesPropertyApplyActions(BII_testgroup3
 
 
 
-class Testcase_320_350_MultipartTableFeaturesPropertyApplyActionsMiss(BII_testgroup320.Testcase_320_150_MultipartTableFeaturesPropertyTypes):
+class Testcase_320_350_MultipartTableFeaturesPropertyApplyActionsMiss(Testcase_320_150_MultipartTableFeaturesPropertyTypes):
     """
     Tested in 320.150
     320.350 - Table features property apply actions miss
@@ -681,7 +681,7 @@ class Testcase_320_350_MultipartTableFeaturesPropertyApplyActionsMiss(BII_testgr
 
 
 
-class Testcase_320_360_MultipartTableFeaturesPropertyMatch(BII_testgroup320.Testcase_320_150_MultipartTableFeaturesPropertyTypes):
+class Testcase_320_360_MultipartTableFeaturesPropertyMatch(Testcase_320_150_MultipartTableFeaturesPropertyTypes):
     """
     Tested in 320.150
     320.360 - Table features property match
@@ -690,7 +690,7 @@ class Testcase_320_360_MultipartTableFeaturesPropertyMatch(BII_testgroup320.Test
 
 
 
-class Testcase_320_370_MultipartTableFeaturesPropertyWildcards(BII_testgroup320.Testcase_320_150_MultipartTableFeaturesPropertyTypes):
+class Testcase_320_370_MultipartTableFeaturesPropertyWildcards(Testcase_320_150_MultipartTableFeaturesPropertyTypes):
     """
     Tested in 320.150
     320.370 - Table features property wildcards
@@ -699,7 +699,7 @@ class Testcase_320_370_MultipartTableFeaturesPropertyWildcards(BII_testgroup320.
 
 
 
-class Testcase_320_380_MultipartTableFeaturesPropertyWriteSetField(BII_testgroup320.Testcase_320_150_MultipartTableFeaturesPropertyTypes):
+class Testcase_320_380_MultipartTableFeaturesPropertyWriteSetField(Testcase_320_150_MultipartTableFeaturesPropertyTypes):
     """
     Tested in 320.150
     320.380 - Table features property write set field
@@ -708,7 +708,7 @@ class Testcase_320_380_MultipartTableFeaturesPropertyWriteSetField(BII_testgroup
 
 
 
-class Testcase_320_390_MultipartTableFeaturesPropertyWriteSetFieldMiss(BII_testgroup320.Testcase_320_150_MultipartTableFeaturesPropertyTypes):
+class Testcase_320_390_MultipartTableFeaturesPropertyWriteSetFieldMiss(Testcase_320_150_MultipartTableFeaturesPropertyTypes):
     """
     Tested in 320.150
     320.390 - Table features property write set field miss
@@ -717,7 +717,7 @@ class Testcase_320_390_MultipartTableFeaturesPropertyWriteSetFieldMiss(BII_testg
 
 
 
-class Testcase_320_400_MultipartTableFeaturesPropertyWriteApplySetField(BII_testgroup320.Testcase_320_150_MultipartTableFeaturesPropertyTypes):
+class Testcase_320_400_MultipartTableFeaturesPropertyWriteApplySetField(Testcase_320_150_MultipartTableFeaturesPropertyTypes):
     """
     Tested in 320.150
     320.400 - Table features property apply set field
@@ -726,7 +726,7 @@ class Testcase_320_400_MultipartTableFeaturesPropertyWriteApplySetField(BII_test
 
 
 
-class Testcase_320_410_MultipartTableFeaturesPropertyWriteApplySetFieldMiss(BII_testgroup320.Testcase_320_150_MultipartTableFeaturesPropertyTypes):
+class Testcase_320_410_MultipartTableFeaturesPropertyWriteApplySetFieldMiss(Testcase_320_150_MultipartTableFeaturesPropertyTypes):
     """
     Tested in 320.150
     320.410 - Table features property apply set field miss
@@ -735,7 +735,7 @@ class Testcase_320_410_MultipartTableFeaturesPropertyWriteApplySetFieldMiss(BII_
 
 
 
-class Testcase_320_420_MultipartTableFeaturesPropertyExperimenter(BII_testgroup320.Testcase_320_150_MultipartTableFeaturesPropertyTypes):
+class Testcase_320_420_MultipartTableFeaturesPropertyExperimenter(Testcase_320_150_MultipartTableFeaturesPropertyTypes):
     """
     Tested in 320.150
     320.420 - Table features property experimenter
@@ -744,7 +744,7 @@ class Testcase_320_420_MultipartTableFeaturesPropertyExperimenter(BII_testgroup3
 
 
 
-class Testcase_320_430_MultipartTableFeaturesPropertyExperimenterMiss(BII_testgroup320.Testcase_320_150_MultipartTableFeaturesPropertyTypes):
+class Testcase_320_430_MultipartTableFeaturesPropertyExperimenterMiss(Testcase_320_150_MultipartTableFeaturesPropertyTypes):
     """
     Tested in 320.150
     320.430 - Table features property experimenter miss
@@ -765,7 +765,7 @@ class Testcase_320_440_MultipartTableFeaturesPropertyMissSuffix(base_tests.Simpl
         logging.info("Tested in group 330")
 
 
-class Testcase_320_450_MultipartTableFeaturesProperyEmptyList(BII_testgroup320.Testcase_320_150_MultipartTableFeaturesPropertyTypes):
+class Testcase_320_450_MultipartTableFeaturesProperyEmptyList(Testcase_320_150_MultipartTableFeaturesPropertyTypes):
     """
     320.450 - Table features property empty list
     Verify that all table feature prop types are reported for each table.
@@ -855,6 +855,25 @@ class Testcase_320_480_MultipartTableFeaturesPropertyNextTables(base_tests.Simpl
 
 
 
+class switch(object):
+    def __init__(self, value):
+        self.value = value
+        self.fall = False
+    def __iter__(self):
+        yield self.match
+        raise StopIteration
+    def match(self, *args):
+        if self.fall or not args:
+            return True
+        elif self.value in args: 
+            self.fall = True
+            return True
+        else:
+            return False
+            
+
+            
+            
 class Testcase_320_500_MultipartTableFeaturesPropertyWriteActionsMiss(base_tests.SimpleDataPlane):
     """
     320.500 - Table features property write actions miss
@@ -868,18 +887,83 @@ class Testcase_320_500_MultipartTableFeaturesPropertyWriteActionsMiss(base_tests
         rv = delete_all_flows(self.controller)
         self.assertEqual(rv, 0, "Failed to delete all flows")
 
+        ports = openflow_ports(4)
+        table_id = test_param_get("table", 0)
         request = ofp.message.table_features_stats_request()
         logging.info("Sending table stats request")
         stats = get_stats(self, request)
         self.assertIsNotNone(stats, "Did not receive table features stats reply.")      
         
+        instruction_write_action = None
+        instruction_write_action_miss = None
         for prop in stats[0].properties:
             if prop.type == ofp.const.OFPTFPT_WRITE_ACTIONS:
-                instruction = prop
+                instruction_write_action = prop
             elif prop.type == ofp.const.OFPTFPT_WRITE_ACTIONS_MISS:
-                instruction = prop
-
-        self.assertIsNotNone(instruction, "NO reported actions found")
+                instruction_write_action_miss = prop
+                
+        if instruction_write_action_miss == None:
+            instruction_write_action_miss = instruction
+        self.assertIsNotNone(instruction_write_action_miss,"Failed to retrieve OFPTFPT_WRITE_ACTIONS_MISS.")
+       
+        for action_id in instruction_write_action_miss.action_ids:
+            action_type = action_id.type
+            
+            for case in switch(action_type):
+                if case(ofp.const.OFPAT_OUTPUT):
+                    ofp.action_test.test_output(self, table_id, ports, ofp.const.OFPTFPT_WRITE_ACTIONS_MISS)
+                    break
+                if case(ofp.const.OFPAT_COPY_TTL_OUT):
+                    ofp.action_test.test_copy_ttl_out(self,table_id,ports,ofp.const.OFPTFPT_WRITE_ACTIONS_MISS)
+                    break
+                if case(ofp.const.OFPAT_COPY_TTL_IN):
+                    ofp.action_test.test_copy_ttl_in(self,table_id,ports,ofp.const.OFPTFPT_WRITE_ACTIONS_MISS)
+                    break
+                if case(ofp.const.OFPAT_SET_MPLS_TTL):
+                    ofp.action_test.test_set_mpls_ttl(self,table_id,ports,ofp.const.OFPTFPT_WRITE_ACTIONS_MISS)
+                    break
+                if case(ofp.const.OFPAT_DEC_MPLS_TTL):
+                    ofp.action_test.test_dec_mpls_ttl(self,table_id,ports,ofp.const.OFPTFPT_WRITE_ACTIONS_MISS)
+                    break
+                if case(a_type == ofp.const.OFPAT_PUSH_VLAN):
+                    ofp.action_test.test_push_vlan(self,table_id,ports,ofp.const.OFPTFPT_WRITE_ACTIONS_MISS)
+                    break
+                if case(ofp.const.OFPAT_POP_VLAN):
+                    ofp.action_test.test_pop_vlan(self,table_id,ports,ofp.const.OFPTFPT_WRITE_ACTIONS_MISS)
+                    break
+                if case(ofp.const.OFPAT_PUSH_MPLS):
+                    ofp.action_test.test_push_mpls(self,table_id,ports,ofp.const.OFPTFPT_WRITE_ACTIONS_MISS)
+                    break
+                if case(ofp.const.OFPAT_POP_MPLS):
+                    ofp.action_test.test_pop_mpls(self,table_id,ports,ofp.const.OFPTFPT_WRITE_ACTIONS_MISS)
+                    break
+                if case(ofp.const.OFPAT_SET_QUEUE):
+                    ofp.action_test.test_set_queue(self,table_id,ports,ofp.const.OFPTFPT_WRITE_ACTIONS_MISS)
+                    break
+                if case(ofp.const.OFPAT_GROUP):
+                    ofp.action_test.test_group(self,table_id,ports,ofp.const.OFPTFPT_WRITE_ACTIONS_MISS)
+                    break
+                if case(ofp.const.OFPAT_SET_NW_TTL):
+                    ofp.action_test.test_set_nw_ttl(self,table_id,ports,ofp.const.OFPTFPT_WRITE_ACTIONS_MISS)
+                    break
+                if case(ofp.const.OFPAT_DEC_NW_TTL):
+                    ofp.action_test.test_dec_nw_ttl(self,table_id,ports,ofp.const.OFPTFPT_WRITE_ACTIONS_MISS)
+                    break
+                if case(ofp.const.OFPAT_SET_FIELD):
+                    ofp.action_test.test_set_field(self,table_id,ports,ofp.const.OFPTFPT_WRITE_ACTIONS_MISS)
+                    break
+                if case(ofp.const.OFPAT_PUSH_PBB):
+                    logging.warn("Skipping table_miss PUSH_PBB action check.")
+                    break
+                if case(ofp.const.OFPAT_POP_PBB):
+                    logging.warn("Skipping table_miss POP_PBB action check.")
+                    break
+                if case(ofp.const.OFPAT_EXPERIMENTER):
+                    logging.warn("Skipping table_miss EXPERIMENTER action check.")
+                    break
+                if case(): 
+                    logging.warn("Skipping unknown table_miss action check.")
+                    
 
 
 
@@ -895,19 +979,82 @@ class Testcase_320_510_MultipartTableFeaturesPropertyApplyActions(base_tests.Sim
         logging.info("Delete all flows on DUT")
         rv = delete_all_flows(self.controller)
         self.assertEqual(rv, 0, "Failed to delete all flows")
+        
+        ports = openflow_ports(4)
+        table_id = test_param_get("table", 0)
 
         request = ofp.message.table_features_stats_request()
         logging.info("Sending table stats request")
         stats = get_stats(self, request)
         self.assertIsNotNone(stats, "Did not receive table features stats reply.")      
         
+        instruction_apply_action = None
+        instruction_apply_action_miss = None
         for prop in stats[0].properties:
             if prop.type == ofp.const.OFPTFPT_APPLY_ACTIONS:
-                action = prop
-            else:
-                action = None
+                instruction_apply_action = prop
+            elif prop.type == ofp.const.OFPTFPT_APPLY_ACTIONS:
+                instruction_miss_apply_action = prop
 
-        self.assertIsNotNone(action, "NO reported actions found")
+        self.assertIsNotNone(instruction_apply_action, "Failed to retrieve OFPTFPT_APPLY_ACTIONS.")
+        
+        for action_id in instruction_apply_action.action_ids:
+            action_type = action_id.type
+            
+            for case in switch(action_type):
+                if case(ofp.const.OFPAT_OUTPUT):
+                    ofp.action_test.test_output(self, table_id, ports, ofp.const.OFPTFPT_APPLY_ACTIONS)
+                    break
+                if case(ofp.const.OFPAT_COPY_TTL_OUT):
+                    ofp.action_test.test_copy_ttl_out(self,table_id,ports,ofp.const.OFPTFPT_APPLY_ACTIONS)
+                    break
+                if case(ofp.const.OFPAT_COPY_TTL_IN):
+                    ofp.action_test.test_copy_ttl_in(self,table_id,ports,ofp.const.OFPTFPT_APPLY_ACTIONS)
+                    break
+                if case(ofp.const.OFPAT_SET_MPLS_TTL):
+                    ofp.action_test.test_set_mpls_ttl(self,table_id,ports,ofp.const.OFPTFPT_APPLY_ACTIONS)
+                    break
+                if case(ofp.const.OFPAT_DEC_MPLS_TTL):
+                    ofp.action_test.test_dec_mpls_ttl(self,table_id,ports,ofp.const.OFPTFPT_APPLY_ACTIONS)
+                    break
+                if case(a_type == ofp.const.OFPAT_PUSH_VLAN):
+                    ofp.action_test.test_push_vlan(self,table_id,ports,ofp.const.OFPTFPT_APPLY_ACTIONS)
+                    break
+                if case(ofp.const.OFPAT_POP_VLAN):
+                    ofp.action_test.test_pop_vlan(self,table_id,ports,ofp.const.OFPTFPT_APPLY_ACTIONS)
+                    break
+                if case(ofp.const.OFPAT_PUSH_MPLS):
+                    ofp.action_test.test_push_mpls(self,table_id,ports,ofp.const.OFPTFPT_APPLY_ACTIONS)
+                    break
+                if case(ofp.const.OFPAT_POP_MPLS):
+                    ofp.action_test.test_pop_mpls(self,table_id,ports,ofp.const.OFPTFPT_APPLY_ACTIONS)
+                    break
+                if case(ofp.const.OFPAT_SET_QUEUE):
+                    ofp.action_test.test_set_queue(self,table_id,ports,ofp.const.OFPTFPT_APPLY_ACTIONS)
+                    break
+                if case(ofp.const.OFPAT_GROUP):
+                    ofp.action_test.test_group(self,table_id,ports,ofp.const.OFPTFPT_APPLY_ACTIONS)
+                    break
+                if case(ofp.const.OFPAT_SET_NW_TTL):
+                    ofp.action_test.test_set_nw_ttl(self,table_id,ports,ofp.const.OFPTFPT_APPLY_ACTIONS)
+                    break
+                if case(ofp.const.OFPAT_DEC_NW_TTL):
+                    ofp.action_test.test_dec_nw_ttl(self,table_id,ports,ofp.const.OFPTFPT_APPLY_ACTIONS)
+                    break
+                if case(ofp.const.OFPAT_SET_FIELD):
+                    ofp.action_test.test_set_field(self,table_id,ports,ofp.const.OFPTFPT_APPLY_ACTIONS)
+                    break
+                if case(ofp.const.OFPAT_PUSH_PBB):
+                    logging.warn("Skipping table_miss PUSH_PBB action check.")
+                    break
+                if case(ofp.const.OFPAT_POP_PBB):
+                    logging.warn("Skipping table_miss POP_PBB action check.")
+                    break
+                if case(ofp.const.OFPAT_EXPERIMENTER):
+                    logging.warn("Skipping table_miss EXPERIMENTER action check.")
+                    break
+                if case(): 
+                    logging.warn("Skipping unknown action check.")
 
 
 
@@ -923,16 +1070,172 @@ class Testcase_320_520_MultipartTableFeaturesPropertyApplyActionsMiss(base_tests
         logging.info("Delete all flows on DUT")
         rv = delete_all_flows(self.controller)
         self.assertEqual(rv, 0, "Failed to delete all flows")
+        
+        ports = openflow_ports(4)
+        table_id = test_param_get("table", 0)
+
+        request = ofp.message.table_features_stats_request()
+        logging.info("Sending table stats request")
+        stats = get_stats(self, request)
+        self.assertIsNotNone(stats, "Did not receive table features stats reply.")      
+               
+        instruction_apply_action = None
+        instruction_apply_action_miss = None
+        for prop in stats[0].properties:
+            if prop.type == ofp.const.OFPTFPT_APPLY_ACTIONS:
+                instruction_apply_action = prop
+            elif prop.type == ofp.const.OFPTFPT_APPLY_ACTIONS_MISS:
+                instruction_apply_action_miss = prop
+                
+        if instruction_apply_action_miss == None:
+            instruction_apply_action_miss = instruction
+        self.assertIsNotNone(instruction_apply_action_miss,"Failed to retrieve OFPTFPT_APPLY_ACTIONS_MISS.")
+       
+        for action_id in instruction_apply_action_miss.action_ids:
+            action_type = action_id.type
+            
+            for case in switch(action_type):
+                if case(ofp.const.OFPAT_OUTPUT):
+                    ofp.action_test.test_output(self, table_id, ports, ofp.const.OFPTFPT_APPLY_ACTIONS_MISS)
+                    break
+                if case(ofp.const.OFPAT_COPY_TTL_OUT):
+                    ofp.action_test.test_copy_ttl_out(self,table_id,ports,ofp.const.OFPTFPT_APPLY_ACTIONS_MISS)
+                    break
+                if case(ofp.const.OFPAT_COPY_TTL_IN):
+                    ofp.action_test.test_copy_ttl_in(self,table_id,ports,ofp.const.OFPTFPT_APPLY_ACTIONS_MISS)
+                    break
+                if case(ofp.const.OFPAT_SET_MPLS_TTL):
+                    ofp.action_test.test_set_mpls_ttl(self,table_id,ports,ofp.const.OFPTFPT_APPLY_ACTIONS_MISS)
+                    break
+                if case(ofp.const.OFPAT_DEC_MPLS_TTL):
+                    ofp.action_test.test_dec_mpls_ttl(self,table_id,ports,ofp.const.OFPTFPT_APPLY_ACTIONS_MISS)
+                    break
+                if case(a_type == ofp.const.OFPAT_PUSH_VLAN):
+                    ofp.action_test.test_push_vlan(self,table_id,ports,ofp.const.OFPTFPT_APPLY_ACTIONS_MISS)
+                    break
+                if case(ofp.const.OFPAT_POP_VLAN):
+                    ofp.action_test.test_pop_vlan(self,table_id,ports,ofp.const.OFPTFPT_APPLY_ACTIONS_MISS)
+                    break
+                if case(ofp.const.OFPAT_PUSH_MPLS):
+                    ofp.action_test.test_push_mpls(self,table_id,ports,ofp.const.OFPTFPT_APPLY_ACTIONS_MISS)
+                    break
+                if case(ofp.const.OFPAT_POP_MPLS):
+                    ofp.action_test.test_pop_mpls(self,table_id,ports,ofp.const.OFPTFPT_APPLY_ACTIONS_MISS)
+                    break
+                if case(ofp.const.OFPAT_SET_QUEUE):
+                    ofp.action_test.test_set_queue(self,table_id,ports,ofp.const.OFPTFPT_APPLY_ACTIONS_MISS)
+                    break
+                if case(ofp.const.OFPAT_GROUP):
+                    ofp.action_test.test_group(self,table_id,ports,ofp.const.OFPTFPT_APPLY_ACTIONS_MISS)
+                    break
+                if case(ofp.const.OFPAT_SET_NW_TTL):
+                    ofp.action_test.test_set_nw_ttl(self,table_id,ports,ofp.const.OFPTFPT_APPLY_ACTIONS_MISS)
+                    break
+                if case(ofp.const.OFPAT_DEC_NW_TTL):
+                    ofp.action_test.test_dec_nw_ttl(self,table_id,ports,ofp.const.OFPTFPT_APPLY_ACTIONS_MISS)
+                    break
+                if case(ofp.const.OFPAT_SET_FIELD):
+                    ofp.action_test.test_set_field(self,table_id,ports,ofp.const.OFPTFPT_APPLY_ACTIONS_MISS)
+                    break
+                if case(ofp.const.OFPAT_PUSH_PBB):
+                    logging.warn("Skipping table_miss PUSH_PBB action check.")
+                    break
+                if case(ofp.const.OFPAT_POP_PBB):
+                    logging.warn("Skipping table_miss POP_PBB action check.")
+                    break
+                if case(ofp.const.OFPAT_EXPERIMENTER):
+                    logging.warn("Skipping table_miss EXPERIMENTER action check.")
+                    break
+                if case(): 
+                    logging.warn("Skipping unknown table_miss action check.")
+                    
+      
+      
+class Testcase_320_540_MultipartTableFeaturesPropertyWriteActions(base_tests.SimpleDataPlane):
+    """
+    320.540 - Table features property write actions
+    Verify all reported actions can be used with the write actions instruction.
+    """
+
+    @wireshark_capture
+    def runTest(self):
+        logging.info("Running 320.540 - Table features property write actions test")
+        logging.info("Delete all flows on DUT")
+        rv = delete_all_flows(self.controller)
+        self.assertEqual(rv, 0, "Failed to delete all flows")
+        
+        ports = openflow_ports(4)
+        table_id = test_param_get("table", 0)
 
         request = ofp.message.table_features_stats_request()
         logging.info("Sending table stats request")
         stats = get_stats(self, request)
         self.assertIsNotNone(stats, "Did not receive table features stats reply.")      
         
+        instruction_write_action = None
+        instruction_write_action_miss = None
         for prop in stats[0].properties:
-            if prop.type == ofp.const.OFPTFPT_APPLY_ACTIONS:
-                action = prop
-            elif prop.type == ofp.const.OFPTFPT_APPLY_ACTIONS_MISS:
-                action = prop
+            if prop.type == ofp.const.OFPTFPT_WRITE_ACTIONS:
+                instruction_write_action = prop
+            elif prop.type == ofp.const.OFPTFPT_WRITE_ACTIONS:
+                instruction_miss_write_action = prop
 
-        self.assertIsNotNone(action, "NO reported actions found")
+        self.assertIsNotNone(instruction_write_action, "Failed to retrieve OFPTFPT_WRITE_ACTIONS.")
+        
+        for action_id in instruction_write_action.action_ids:
+            action_type = action_id.type
+            
+            for case in switch(action_type):
+                if case(ofp.const.OFPAT_OUTPUT):
+                    ofp.action_test.test_output(self, table_id, ports, ofp.const.OFPTFPT_WRITE_ACTIONS)
+                    break
+                if case(ofp.const.OFPAT_COPY_TTL_OUT):
+                    ofp.action_test.test_copy_ttl_out(self,table_id,ports,ofp.const.OFPTFPT_WRITE_ACTIONS)
+                    break
+                if case(ofp.const.OFPAT_COPY_TTL_IN):
+                    ofp.action_test.test_copy_ttl_in(self,table_id,ports,ofp.const.OFPTFPT_WRITE_ACTIONS)
+                    break
+                if case(ofp.const.OFPAT_SET_MPLS_TTL):
+                    ofp.action_test.test_set_mpls_ttl(self,table_id,ports,ofp.const.OFPTFPT_WRITE_ACTIONS)
+                    break
+                if case(ofp.const.OFPAT_DEC_MPLS_TTL):
+                    ofp.action_test.test_dec_mpls_ttl(self,table_id,ports,ofp.const.OFPTFPT_WRITE_ACTIONS)
+                    break
+                if case(a_type == ofp.const.OFPAT_PUSH_VLAN):
+                    ofp.action_test.test_push_vlan(self,table_id,ports,ofp.const.OFPTFPT_WRITE_ACTIONS)
+                    break
+                if case(ofp.const.OFPAT_POP_VLAN):
+                    ofp.action_test.test_pop_vlan(self,table_id,ports,ofp.const.OFPTFPT_WRITE_ACTIONS)
+                    break
+                if case(ofp.const.OFPAT_PUSH_MPLS):
+                    ofp.action_test.test_push_mpls(self,table_id,ports,ofp.const.OFPTFPT_WRITE_ACTIONS)
+                    break
+                if case(ofp.const.OFPAT_POP_MPLS):
+                    ofp.action_test.test_pop_mpls(self,table_id,ports,ofp.const.OFPTFPT_WRITE_ACTIONS)
+                    break
+                if case(ofp.const.OFPAT_SET_QUEUE):
+                    ofp.action_test.test_set_queue(self,table_id,ports,ofp.const.OFPTFPT_WRITE_ACTIONS)
+                    break
+                if case(ofp.const.OFPAT_GROUP):
+                    ofp.action_test.test_group(self,table_id,ports,ofp.const.OFPTFPT_WRITE_ACTIONS)
+                    break
+                if case(ofp.const.OFPAT_SET_NW_TTL):
+                    ofp.action_test.test_set_nw_ttl(self,table_id,ports,ofp.const.OFPTFPT_WRITE_ACTIONS)
+                    break
+                if case(ofp.const.OFPAT_DEC_NW_TTL):
+                    ofp.action_test.test_dec_nw_ttl(self,table_id,ports,ofp.const.OFPTFPT_WRITE_ACTIONS)
+                    break
+                if case(ofp.const.OFPAT_SET_FIELD):
+                    ofp.action_test.test_set_field(self,table_id,ports,ofp.const.OFPTFPT_WRITE_ACTIONS)
+                    break
+                if case(ofp.const.OFPAT_PUSH_PBB):
+                    logging.warn("Skipping table_miss PUSH_PBB action check.")
+                    break
+                if case(ofp.const.OFPAT_POP_PBB):
+                    logging.warn("Skipping table_miss POP_PBB action check.")
+                    break
+                if case(ofp.const.OFPAT_EXPERIMENTER):
+                    logging.warn("Skipping table_miss EXPERIMENTER action check.")
+                    break
+                if case(): 
+                    logging.warn("Skipping unknown action check.")

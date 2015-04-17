@@ -642,18 +642,60 @@ class Testcase_430_300_BadActionBadArgument(BII_testgroup150.Testcase_150_180_ba
     """
 
 
-"""
+
 class Testcase_430_320_BadActionTooMany(base_tests.SimpleProtocol):
-    """ """
+    """ 
     430.320 - Bad action too many
     Verify that if too many actions are included in a request,  the device generates a bad 
     action error with a too many code.
-    """ """
+    """ 
     @wireshark_capture
     def runTest(self):
         logging.info("Running test case Bad Action Too Many")
-        logging.info("Please manually implement this testcase")
-"""
+
+        delete_all_flows(self.controller)
+        port_a, port_b, = openflow_ports(2)
+
+        #Create flow_mod message with lot of actions
+        table_id = test_param_get("table", 0)
+        priority = 1
+        match = ofp.match([
+                ofp.oxm.eth_type(0x0800)
+                ])
+                
+        # add a lot of actions
+        for action_factor in range(1, 10):
+            actions = [ofp.action.set_field(ofp.oxm.ipv4_src(167772361)) for i in range(2**action_factor)]
+            act_output = ofp.action.output(port=port_b,max_len=128)
+            actions.append(act_output)
+            instructions = [ofp.instruction.apply_actions(actions=actions)]
+            flow_mod_msg = ofp.message.flow_add(table_id=table_id,
+                                           match=match,
+                                           buffer_id=ofp.OFP_NO_BUFFER,
+                                           instructions=instructions,
+                                           priority=priority) 
+            logging.info("Sending flow_mod message...")
+            rv = self.controller.message_send(flow_mod_msg)
+            self.assertTrue(rv != -1, "Error installing flow mod")
+            self.assertEqual(do_barrier(self.controller), 0, "Barrier failed")
+
+            logging.info("Waiting for OFPT_ERROR message...")
+            (response, pkt) = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=5)
+            
+            if response is not None:
+                break
+            
+            logging.info("DUT did not return an error. Increase number of actions and try again")
+            delete_all_flows(self.controller)
+            
+        self.assertTrue(response is not None,
+                               'Switch did not replay with error messge')
+        self.assertTrue(response.type==ofp.OFPET_BAD_ACTION,
+                               'Error type is not OFPET_BAD_ACTION')
+        self.assertTrue(response.code==ofp.OFPBAC_TOO_MANY,
+                               'Error code is not OFPBAC_TOO_MANY')
+
+
                                
 
 
