@@ -350,8 +350,8 @@ class Testcase_440_280_PortModFailedBadConfig(base_tests.SimpleDataPlane):
         for item in stats:
             if item.port_no in openflow_ports(1):
                 hw_addr.append(item.hw_addr)
-        invalidConfig = 2
-        mask = 2
+        invalidConfig = 256
+        mask = 256
         req = ofp.message.port_mod(port_no=port1, 
                                 hw_addr=hw_addr[0],
                                 config=invalidConfig, 
@@ -603,7 +603,7 @@ class Testcase_440_400_SwitchConfigFailedBadFlags(base_tests.SimpleDataPlane):
         self.assertIsNotNone(reply, "Did not receive Echo Reply")
         self.assertEqual(reply.type, ofp.OFPT_ECHO_REPLY, "Response is not echo reply")
         
-        invalidFlags = 128
+        invalidFlags = 16
         req = ofp.message.set_config(flags=invalidFlags)
         self.controller.message_send(req)
         reply, _ = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
