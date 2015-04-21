@@ -155,8 +155,8 @@ class Testcase_90_60_All_supported(base_tests.SimpleDataPlane):
         self.assertIsNone(reply,"The switch generated an OFPT_ERROR")
         matching_pkt = str(simple_tcpv6_packet(eth_dst ='ff:01:02:f3:04:05',
                                              eth_src ='ff:01:02:f3:04:05',
-                                             ip_src ='2001:0db8:85a3::8a2e:0370:7331',
-                                             ip_dst='2001:0db8:85a3::8a2e:0370:7331',
+                                             ipv6_src ='2001:0db8:85a3::8a2e:0370:7331',
+                                             ipv6_dst='2001:0db8:85a3::8a2e:0370:7331',
                                              tcp_sport=53,
                                              tcp_dport=54))
         self.dataplane.send(in_port,matching_pkt)
@@ -164,8 +164,8 @@ class Testcase_90_60_All_supported(base_tests.SimpleDataPlane):
         logging.info("Packet in received for a matching packet")
         nonmatching_pkt = str(simple_tcpv6_packet(eth_dst ='ff:01:02:f3:04:05',
                                              eth_src ='ff:01:02:f3:04:05',
-                                             ip_src ='2001:0db8:85a2::0001',
-                                             ip_dst='2001:0db8:85a2::0001',
+                                             ipv6_src ='2001:0db8:85a2::0001',
+                                             ipv6_dst='2001:0db8:85a2::0001',
                                              tcp_sport=53,
                                              tcp_dport=53))
         self.dataplane.send(in_port,nonmatching_pkt)
