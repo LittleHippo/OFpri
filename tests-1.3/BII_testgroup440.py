@@ -832,6 +832,40 @@ class Testcase_440_610_TableFeaturesFailedBadTable(base_tests.SimpleDataPlane):
         
         
         
+class Testcase_440_620_TableFeaturesFailedBadMetadata(base_tests.SimpleDataPlane):
+    """
+    440.620 - Table features failed bad metadata
+    Verify the correct error message is generated when a table features request specifies a bad property type.
+    """
+    @wireshark_capture
+    def runTest(self):
+        logging.info("Running test case 440.620 - Table Features Failed Bad Metadata")       
+        req = ofp.message.table_features_stats_request()
+        reply, _ = self.controller.transact(req)
+        self.assertIsNotNone(reply, "Did not receive table_features_stats_reply")
+        self.assertFalse(reply.type == ofp.OFPT_ERROR,"The switch generated an error.")
+        self.assertTrue(reply.type == ofp.OFPT_STATS_REPLY,"The switch responded an reply with wrong type.")
+        self.assertTrue(len(reply.entries) > 0,"No entry included in table features reply")
+        reply.entries[0].metadata_match = 0xffffffffffffffff ^ reply.entries[0].metadata_match
+        reply.entries[0].metadata_write = 0xffffffffffffffff ^ reply.entries[0].metadata_write
+        entry = [reply.entries[0]]
+        req = ofp.message.table_features_stats_request(entries=entry) 
+        self.controller.message_send(req)
+        reply, _ = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
+        self.assertIsNotNone(reply, "The switch failed to generate an error.")
+        logging.info("Error Message Received")
+        self.assertEqual(reply.err_type,ofp.const.OFPET_TABLE_FEATURES_FAILED, " Error type is not OFPET_TABLE_FEATURES_FAILED")
+        logging.info("Received OFPET_TABLE_FEATURES_FAILED")
+        if err.code == ofp.const.OFPTFFC_BAD_METADATA:
+            logging.info("Received correct error code OFPTFFC_BAD_METADATA.")
+        elif err.code == ofp.const.OFPTFFC_EPERM:
+            logging.info("Received correct error code OFPTFFC_EPERM. Multipart ofp_table_features requests were disabled")
+        else:
+            self.assertEqual(0, 1, "Error code was not correct")
+          
+        
+        
+        
 class Testcase_440_630_TableFeaturesFailedBadType(base_tests.SimpleDataPlane):
     """
     440.630 - Table features failed bad type
@@ -927,8 +961,12 @@ class Testcase_440_650_TableFeaturesFailedBadAgument(base_tests.SimpleDataPlane)
         logging.info("Error Message Received")
         self.assertEqual(reply.err_type,ofp.const.OFPET_TABLE_FEATURES_FAILED, " Error type is not OFPET_TABLE_FEATURES_FAILED")
         logging.info("Received OFPET_TABLE_FEATURES_FAILED")
-        self.assertEqual(reply.code, ofp.const.OFPTFFC_BAD_ARGUMENT, "Error Code is not OFPTFFC_BAD_ARGUMENT")
-        logging.info("Received Error code is OFPTFFC_BAD_ARGUMENT")
+        if err.code == ofp.const.OFPTFFC_BAD_ARGUMENT:
+            logging.info("Received correct error code OFPTFFC_BAD_ARGUMENT.")
+        elif err.code == ofp.const.OFPTFFC_EPERM:
+            logging.info("Received correct error code OFPTFFC_EPERM. Multipart ofp_table_features requests were disabled")
+        else:
+            self.assertEqual(0, 1, "Error code was not correct")
         
         
         
@@ -961,8 +999,14 @@ class Testcase_440_670_TableFeaturesFailedData(base_tests.SimpleDataPlane):
         logging.info("Error Message Received")
         self.assertEqual(reply.err_type,ofp.const.OFPET_TABLE_FEATURES_FAILED, " Error type is not OFPET_TABLE_FEATURES_FAILED")
         logging.info("Received OFPET_TABLE_FEATURES_FAILED")
-        self.assertEqual(reply.code, ofp.const.OFPTFFC_BAD_TABLE, "Error Code is not OFPTFFC_BAD_TABLE")
-        logging.info("Received Error code is OFPTFFC_BAD_TABLE")
+        if err.code == ofp.const.ofp.const.OFPTFFC_BAD_TABLE:
+            logging.info("Received correct error code ofp.const.OFPTFFC_BAD_TABLE.")
+        elif err.code == ofp.const.OFPTFFC_EPERM:
+            logging.info("Received correct error code OFPTFFC_EPERM. Multipart ofp_table_features requests were disabled")
+        else:
+            self.assertEqual(0, 1, "Error code was not correct")
+        
+        err_len = len(err.data)
         if len(reply.data) < 64:
             self.assertEqual(req.pack(), reply.data, "Incorrect data field")
         else:
