@@ -753,16 +753,16 @@ class Testcase_320_430_MultipartTableFeaturesPropertyExperimenterMiss(Testcase_3
 
 
 
-class Testcase_320_440_MultipartTableFeaturesPropertyMissSuffix(base_tests.SimpleDataPlane):
-    """
-    320.440 - Table features property miss suffix
-    Verify that all table feature prop types are reported for each table.
-    Tested in testgroup 330
-    """
-    @wireshark_capture
-    def runTest(self):
-        logging.info("Running 320.440 - Table features property miss suffix test")
-        logging.info("Tested in group 330")
+# class Testcase_320_440_MultipartTableFeaturesPropertyMissSuffix(base_tests.SimpleDataPlane):
+    # """
+    # 320.440 - Table features property miss suffix
+    # Verify that all table feature prop types are reported for each table.
+    # Tested in testgroup 330
+    # """
+    # @wireshark_capture
+    # def runTest(self):
+        # logging.info("Running 320.440 - Table features property miss suffix test")
+        # logging.info("Tested in group 330")
 
 
 class Testcase_320_450_MultipartTableFeaturesProperyEmptyList(Testcase_320_150_MultipartTableFeaturesPropertyTypes):
@@ -777,16 +777,16 @@ class Testcase_320_450_MultipartTableFeaturesProperyEmptyList(Testcase_320_150_M
 
         
 
-class Testcase_320_460_MultipartTableFeaturesPropertyExperimenterMiss(base_tests.SimpleDataPlane):
-    """
-    320.460 - Table features property omoited property
-    Verify that all table feature prop types are reported for each table.
-    Tested in testgroup 330
-    """
-    @wireshark_capture
-    def runTest(self):
-        logging.info("Running 320.460 - Table features property omoited property test")
-        logging.info("Tested in group 330")
+# class Testcase_320_460_MultipartTableFeaturesPropertyExperimenterMiss(base_tests.SimpleDataPlane):
+    # """
+    # 320.460 - Table features property omoited property
+    # Verify that all table feature prop types are reported for each table.
+    # Tested in testgroup 330
+    # """
+    # @wireshark_capture
+    # def runTest(self):
+        # logging.info("Running 320.460 - Table features property omoited property test")
+        # logging.info("Tested in group 330")
 
 
 
