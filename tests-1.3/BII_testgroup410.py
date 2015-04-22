@@ -560,55 +560,54 @@ class Testcase_410_280_tunnel_id_match(base_tests.SimpleDataPlane):
 
 
                 
-class Testcase_410_290_standard_match(base_tests.SimpleDataPlane):
-    """
-    Purpose
-    Verify that all standard OXM types included in an ofp_packet_in message's match field are non zero.
+# class Testcase_410_290_standard_match(base_tests.SimpleDataPlane):
+    # """
+    # Purpose
+    # Verify that all standard OXM types included in an ofp_packet_in message's match field are non zero.
 
-    Methodology
-    Configure and connect DUT to controller. After control channel establishment, add a flow matching on the named field 
-    (under the given Pre-requisites for the match), with an action output to OFPP_CONTROLLER. Send a matching packet on 
-    the data plane. Verify a packet_in message that encapsulates the matching packet is triggered. Verify that any pipeline 
-    fields that are included is non-zero.
+    # Methodology
+    # Configure and connect DUT to controller. After control channel establishment, add a flow matching on the named field 
+    # (under the given Pre-requisites for the match), with an action output to OFPP_CONTROLLER. Send a matching packet on 
+    # the data plane. Verify a packet_in message that encapsulates the matching packet is triggered. Verify that any pipeline 
+    # fields that are included is non-zero.
 
 
-    """
-    @wireshark_capture
-    def runTest(self):
-        logging.info("Running testcase 410.290 - Standard match")
-        in_port, = openflow_ports(1)
-        table_id=test_param_get("table", 0)
+    # """
+    # @wireshark_capture
+    # def runTest(self):
+        # logging.info("Running testcase 410.290 - Standard match")
+        # in_port, = openflow_ports(1)
+        # table_id=test_param_get("table", 0)
 
-        match = ofp.match([ofp.oxm.in_port(in_port)])
-        actions = [ofp.action.output(ofp.OFPP_CONTROLLER, max_len = 128)]
-        pkt = simple_tcp_packet()
+        # match = ofp.match([ofp.oxm.in_port(in_port)])
+        # actions = [ofp.action.output(ofp.OFPP_CONTROLLER, max_len = 128)]
+        # pkt = simple_tcp_packet()
         
-        delete_all_flows(self.controller)
+        # delete_all_flows(self.controller)
 
-        logging.info("Inserting flow")
-        request = ofp.message.flow_add(
-                table_id=test_param_get("table", 0),
-                match = match,
-                instructions=[
-                    ofp.instruction.apply_actions(actions)],
-                buffer_id=ofp.OFP_NO_BUFFER, 
-                priority=1000)
-        self.controller.message_send(request)
-        logging.info("Inserting a table miss flow to forward packet to controller")
-        reply, _ = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
-        self.assertIsNone(reply, "Switch generated an error when inserting flow")
-        #logging.info("Switch generated an error")
+        # logging.info("Inserting flow")
+        # request = ofp.message.flow_add(
+                # table_id=test_param_get("table", 0),
+                # match = match,
+                # instructions=[
+                    # ofp.instruction.apply_actions(actions)],
+                # buffer_id=ofp.OFP_NO_BUFFER, 
+                # priority=1000)
+        # self.controller.message_send(request)
+        # logging.info("Inserting a table miss flow to forward packet to controller")
+        # reply, _ = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
+        # self.assertIsNone(reply, "Switch generated an error when inserting flow")
 
-        do_barrier(self.controller)
+        # do_barrier(self.controller)
 
-        self.dataplane.send(in_port, str(pkt))
-        reply, _ = self.controller.poll(exp_msg = ofp.const.OFPT_PACKET_IN, timeout = 3)
-        self.assertIsNotNone(reply, "Did not receive packet in message")
-        logging.info("Received packet_in message.")
-        self.assertIsNotNone(reply.match.oxm_list, "oxm list was empty")
+        # self.dataplane.send(in_port, str(pkt))
+        # reply, _ = self.controller.poll(exp_msg = ofp.const.OFPT_PACKET_IN, timeout = 3)
+        # self.assertIsNotNone(reply, "Did not receive packet in message")
+        # logging.info("Received packet_in message.")
+        # self.assertIsNotNone(reply.match.oxm_list, "oxm list was empty")
         
-        for oxm_id in reply.match.oxm_list:
-            self.assertIsNotNone(oxm_id.type_len, "OXM type was zero")
+        # for oxm_id in reply.match.oxm_list:
+            # self.assertIsNotNone(oxm_id.type_len, "OXM type was zero")
 
 
             
