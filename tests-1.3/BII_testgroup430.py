@@ -846,23 +846,23 @@ class Testcase_430_560_BadInstrctionBadTableID(BII_testgroup150.Testcase_150_60_
 
 
 
-class Testcase_430_570_BadInstrctionUnsupMetadata(BII_testgroup150.Testcase_150_70_unsupported_meta_data):
+# class Testcase_430_570_BadInstrctionUnsupMetadata(BII_testgroup150.Testcase_150_70_unsupported_meta_data):
 
-    """
-    Tested in 150.70
-    430.570 - Bad instruction unsupported metadata
-    Verify how unsupported metadata value is handled in Write-Metadata
-    """
+    # """
+    # Tested in 150.70
+    # 430.570 - Bad instruction unsupported metadata
+    # Verify how unsupported metadata value is handled in Write-Metadata
+    # """
 
 
 
-class Testcase_430_580_BadInstrctionUnsupMetadataMask(BII_testgroup150.Testcase_150_70_unsupported_meta_data):
+# class Testcase_430_580_BadInstrctionUnsupMetadataMask(BII_testgroup150.Testcase_150_70_unsupported_meta_data):
 
-    """
-    Tested in 150.70
-    430.580 - Bad instruction unsupported metadata mask
-    Verify how unsupported metadata mask values are handled in Write-Metadata
-    """
+    # """
+    # Tested in 150.70
+    # 430.580 - Bad instruction unsupported metadata mask
+    # Verify how unsupported metadata mask values are handled in Write-Metadata
+    # """
 
 
 
@@ -1097,13 +1097,13 @@ class Testcase_430_710_BadMatchBadValue(BII_testgroup150.Testcase_150_140_illega
 
 
 
-class Testcase_430_720_BadMatchBadMask(BII_testgroup150.Testcase_150_130_unsupported_mask):
+# class Testcase_430_720_BadMatchBadMask(BII_testgroup150.Testcase_150_130_unsupported_mask):
 
-    """
-    Tested in 150.130
-    430.720 - Bad match mask
-    Verify how OFP_FLOW_MOD handles an arbitrary mask for the fields that don't support it.
-    """
+    # """
+    # Tested in 150.130
+    # 430.720 - Bad match mask
+    # Verify how OFP_FLOW_MOD handles an arbitrary mask for the fields that don't support it.
+    # """
 
 
 
