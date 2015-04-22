@@ -30,71 +30,71 @@ import BII_testgroup200
 import BII_testgroup430
 import BII_testgroup450
 
-class Testcase_450_10_HelloMessage(base_tests.SimpleDataPlane):
+# class Testcase_450_10_HelloMessage(base_tests.SimpleDataPlane):
 
-    """
-    450.10 - Unknown hello elements
-    Verify device can deal with unknown hello elements and their data.
-    """
+    # """
+    # 450.10 - Unknown hello elements
+    # Verify device can deal with unknown hello elements and their data.
+    # """
 
-    def setUp(self):
+    # def setUp(self):
 
-        base_tests.BaseTest.setUp(self)
+        # base_tests.BaseTest.setUp(self)
 
-        self.controller = controller.Controller(
-            switch=config["switch_ip"],
-            host=config["controller_host"],
-            port=config["controller_port"])
-        self.controller.initial_hello = False
-        #self.controller.start()
+        # self.controller = controller.Controller(
+            # switch=config["switch_ip"],
+            # host=config["controller_host"],
+            # port=config["controller_port"])
+        # self.controller.initial_hello = False
+        # #self.controller.start()
 
-        """try:                                                                                                                    
-            self.controller.connect(timeout=20)                                                                                           
-            self.controller.keep_alive = True
-            if not self.controller.active:
-                raise Exception("Controller startup failed")
-            if self.controller.switch_addr is None:
-                raise Exception("Controller startup failed (no switch addr)")
-            logging.info("Connected " + str(self.controller.switch_addr))
-        except:
-            self.controller.kill()
-            del self.controller
-            raise"""
+        # """try:                                                                                                                    
+            # self.controller.connect(timeout=20)                                                                                           
+            # self.controller.keep_alive = True
+            # if not self.controller.active:
+                # raise Exception("Controller startup failed")
+            # if self.controller.switch_addr is None:
+                # raise Exception("Controller startup failed (no switch addr)")
+            # logging.info("Connected " + str(self.controller.switch_addr))
+        # except:
+            # self.controller.kill()
+            # del self.controller
+            # raise"""
 
-    @wireshark_capture
-    def runTest(self):  
-        logging.info("Running test case Hello Message")  
-        self.controller.start()
-        self.controller.keep_alive = True
-        ofp_field_version = 4
-        res, pkt = self.controller.poll(exp_msg=ofp.OFPT_HELLO, timeout=3)
+    # @wireshark_capture
+    # def runTest(self):  
+        # logging.info("Running test case Hello Message")  
+        # self.controller.start()
+        # self.controller.keep_alive = True
+        # ofp_field_version = 4
+        # res, pkt = self.controller.poll(exp_msg=ofp.OFPT_HELLO, timeout=3)
 
-        req = ofp.message.hello()
-        req.version = ofp_field_version
-        bitmap = ofp.common.uint32(0x10) 
-        hello_elem = ofp.common.hello_elem_versionbitmap(bitmaps=[bitmap])
-        hello_elem2 = ofp.common.hello_elem_versionbitmap(bitmaps=[bitmap])
-        hello_elem2.type = 5
-        req.elements.append(hello_elem)
-        req.elements.append(hello_elem2)
-        self.controller.message_send(req)
-        reply, _ = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
-        self.assertIsNone(reply, "The switch generated an OFPT_ERROR")
+        # req = ofp.message.hello()
+        # req.version = ofp_field_version
+        # bitmap = ofp.common.uint32(0x10) 
+        # hello_elem = ofp.common.hello_elem_versionbitmap(bitmaps=[bitmap])
+        # hello_elem2 = ofp.common.hello_elem_versionbitmap(bitmaps=[bitmap])
+        # hello_elem2.type = 5
+        # req.elements.append(hello_elem)
+        # req.elements.append(hello_elem2)
+        # self.controller.message_send(req)
+        # reply, _ = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
+        # self.assertIsNone(reply, "The switch generated an OFPT_ERROR")
 
-    def tearDown(self):
-        self.controller.shutdown()
-        self.controller.join()
-        del self.controller
-        base_tests.BaseTest.tearDown(self)
+    # def tearDown(self):
+        # self.controller.shutdown()
+        # self.controller.join()
+        # del self.controller
+        # base_tests.BaseTest.tearDown(self)
 
 
-class Testcase_450_20_HelloElements(BII_testgroup10.Testcase_10_90_VersionNegotiationBitmap):
+# class Testcase_450_20_HelloElements(BII_testgroup10.Testcase_10_90_VersionNegotiationBitmap):
 
-    """
-    Tested in 10.90
-    450.20 - Version negotiation based on bitmap
-    Verify that version negotiation based on bitmap is successful.
-    """
+    # """
+    # Tested in 10.90
+    # 450.20 - Version negotiation based on bitmap
+    # Verify that version negotiation based on bitmap is successful.
+    # """
 
 
 
@@ -193,21 +193,21 @@ class Testcase_450_50_EchoEmpty(BII_testgroup200.Testcase_200_30_basic_ECHO_REQU
 
 
 
-class Testcase_450_60_EchoReplyData(BII_testgroup450.Testcase_450_40_EchoData):
+# class Testcase_450_60_EchoReplyData(BII_testgroup450.Testcase_450_40_EchoData):
 
-    """
-    Tested in 450.40
-    450.60 - Basic OFPT_ECHO_REQUEST / OFPT_ECHO_REPLY
-    Verify response to ECHO request
-    """
+    # """
+    # Tested in 450.40
+    # 450.60 - Basic OFPT_ECHO_REQUEST / OFPT_ECHO_REPLY
+    # Verify response to ECHO request
+    # """
 
 
 
-class Testcase_450_90_Experimenter(BII_testgroup430.Testcase_430_120_BadRequestBadExperimenter):
+# class Testcase_450_90_Experimenter(BII_testgroup430.Testcase_430_120_BadRequestBadExperimenter):
 
-    """
-    Tested in 430.120
-    450.90 - Bad request bad experimenter
-    If an unsupported experimenter request is sent to a device, check that 
-    the device generates a bad request error with a bad experimenter error.
-    """
+    # """
+    # Tested in 430.120
+    # 450.90 - Bad request bad experimenter
+    # If an unsupported experimenter request is sent to a device, check that 
+    # the device generates a bad request error with a bad experimenter error.
+    # """
