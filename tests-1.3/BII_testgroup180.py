@@ -53,9 +53,9 @@ class Testcase_180_10_reference_count(base_tests.SimpleDataPlane):
         
         table_stats = get_stats(self, ofp.message.table_stats_request())
         self.assertIsNotNone(table_stats,"Did not receive flow stats reply messsage")
-        orig_active_count=table_stats[0].active_count
-        orig_lookup_count=table_stats[0].lookup_count
-        orig_matched_count=table_stats[0].matched_count
+        orig_active_count=table_stats[test_param_get("table", 0)].active_count
+        orig_lookup_count=table_stats[test_param_get("table", 0)].lookup_count
+        orig_matched_count=table_stats[test_param_get("table", 0)].matched_count
 
         logging.info("Inserting flow")
         request = ofp.message.flow_add(
@@ -80,9 +80,9 @@ class Testcase_180_10_reference_count(base_tests.SimpleDataPlane):
         table_stats = get_stats(self, ofp.message.table_stats_request())
         self.assertIsNotNone(table_stats,"Did not receive flow stats reply messsage")
 
-        self.assertEqual(table_stats[0].active_count, orig_active_count+1, "The active_count counter is not increased by 1")
-        self.assertEqual(table_stats[0].lookup_count, orig_lookup_count+3, "The lookup_count counter is not increased by 3")
-        self.assertEqual(table_stats[0].matched_count, orig_matched_count+2, "The matched_count counter is not increased by 2")
+        self.assertEqual(table_stats[test_param_get("table", 0)].active_count, orig_active_count+1, "The active_count counter is not increased by 1")
+        self.assertEqual(table_stats[test_param_get("table", 0)].lookup_count, orig_lookup_count+3, "The lookup_count counter is not increased by 3")
+        self.assertEqual(table_stats[test_param_get("table", 0)].matched_count, orig_matched_count+2, "The matched_count counter is not increased by 2")
         
         
         
@@ -122,14 +122,14 @@ class Testcase_180_60_Per_Flow_Duration_Counter(base_tests.SimpleDataPlane):
         #logging.info("Switch generated an error")
 
         do_barrier(self.controller)
-        flow_stats = get_stats(self, ofp.message.flow_stats_request(table_id = 0, out_group = ofp.OFPG_ANY, out_port = ofp.OFPP_ANY))
+        flow_stats = get_stats(self, ofp.message.flow_stats_request(table_id = test_param_get("table", 0), out_group = ofp.OFPG_ANY, out_port = ofp.OFPP_ANY))
         self.assertIsNotNone(flow_stats,"Did not receive flow stats reply messsage")
-        init_duration_sec = flow_stats[0].duration_sec
+        init_duration_sec = flow_stats[test_param_get("table", 0)].duration_sec
         
         time.sleep(5)
-        flow_stats = get_stats(self, ofp.message.flow_stats_request(table_id = 0, out_group = ofp.OFPG_ANY, out_port = ofp.OFPP_ANY))
+        flow_stats = get_stats(self, ofp.message.flow_stats_request(table_id = test_param_get("table", 0), out_group = ofp.OFPG_ANY, out_port = ofp.OFPP_ANY))
         self.assertIsNotNone(flow_stats,"Did not receive flow stats reply messsage")
-        self.assertTrue(flow_stats[0].duration_sec==(init_duration_sec + 5),"Duration counter did not increase correctly")
+        self.assertTrue(flow_stats[test_param_get("table", 0)].duration_sec==(init_duration_sec + 5),"Duration counter did not increase correctly")
         
 
 
@@ -212,7 +212,7 @@ class Testcase_180_230_correct_packet_drop_counters(base_tests.SimpleDataPlane):
         
         table_stats = get_stats(self, ofp.message.table_stats_request())
         self.assertIsNotNone(table_stats,"Did not receive flow stats reply messsage")
-        initial_matched_count = table_stats[0].matched_count
+        initial_matched_count = table_stats[test_param_get("table", 0)].matched_count
 
         logging.info("Inserting flow")
         request = ofp.message.flow_add(
@@ -252,7 +252,7 @@ class Testcase_180_230_correct_packet_drop_counters(base_tests.SimpleDataPlane):
 
         #self.assertEqual(table_stats[0].active_count, 1, "The active_count counter is not 1")
         #self.assertEqual(table_stats[0].lookup_count, 3, "The lookup_count counter is not 3")
-        self.assertEqual(table_stats[0].matched_count, initial_matched_count+2, "The matched_count counter is not increased by 2")
+        self.assertEqual(table_stats[test_param_get("table", 0)].matched_count, initial_matched_count+2, "The matched_count counter is not increased by 2")
 
 
         
@@ -292,15 +292,15 @@ class Testcase_180_410_reference_count(base_tests.SimpleDataPlane):
         #logging.info("Switch generated an error")
 
         do_barrier(self.controller)
-        flow_stats = get_stats(self, ofp.message.flow_stats_request(table_id = 0, out_group = ofp.OFPG_ANY, out_port = ofp.OFPP_ANY))
+        flow_stats = get_stats(self, ofp.message.flow_stats_request(table_id = test_param_get("table", 0), out_group = ofp.OFPG_ANY, out_port = ofp.OFPP_ANY))
         self.assertIsNotNone(flow_stats,"Did not receive flow stats reply messsage")
-        init_duration_sec = flow_stats[0].duration_sec
+        init_duration_sec = flow_stats[test_param_get("table", 0)].duration_sec
         print init_duration_sec
 
         for i in range(0, 23):
-            flow_stats = get_stats(self, ofp.message.flow_stats_request(table_id = 0, out_group = ofp.OFPG_ANY, out_port = ofp.OFPP_ANY))
+            flow_stats = get_stats(self, ofp.message.flow_stats_request(table_id = test_param_get("table", 0), out_group = ofp.OFPG_ANY, out_port = ofp.OFPP_ANY))
             self.assertIsNotNone(flow_stats,"Did not receive flow stats reply messsage")
-            duration_sec = flow_stats[0].duration_sec
+            duration_sec = flow_stats[test_param_get("table", 0)].duration_sec
             if(duration_sec >= (init_duration_sec+i*5 - 0.5) and duration_sec <= (init_duration_sec+ i*5 + 0.5)):
                 pass
             else:
@@ -347,15 +347,15 @@ class Testcase_180_430_counter_wrap_around(base_tests.SimpleDataPlane):
         #logging.info("Switch generated an error")
 
         do_barrier(self.controller)
-        flow_stats = get_stats(self, ofp.message.flow_stats_request(table_id = 0, out_group = ofp.OFPG_ANY, out_port = ofp.OFPP_ANY))
+        flow_stats = get_stats(self, ofp.message.flow_stats_request(table_id = test_param_get("table", 0), out_group = ofp.OFPG_ANY, out_port = ofp.OFPP_ANY))
         self.assertIsNotNone(flow_stats,"Did not receive flow stats reply messsage")
-        init_duration_nsec = flow_stats[0].duration_nsec
+        init_duration_nsec = flow_stats[test_param_get("table", 0)].duration_nsec
         print init_duration_nsec
 
         for i in range(0, 11):
-            flow_stats = get_stats(self, ofp.message.flow_stats_request(table_id = 0, out_group = ofp.OFPG_ANY, out_port = ofp.OFPP_ANY))
+            flow_stats = get_stats(self, ofp.message.flow_stats_request(table_id = test_param_get("table", 0), out_group = ofp.OFPG_ANY, out_port = ofp.OFPP_ANY))
             self.assertIsNotNone(flow_stats,"Did not receive flow stats reply messsage")
-            duration_nsec = flow_stats[0].duration_nsec
+            duration_nsec = flow_stats[test_param_get("table", 0)].duration_nsec
             if duration_nsec <= init_duration_nsec:
                 break
             else:
