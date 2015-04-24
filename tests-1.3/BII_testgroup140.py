@@ -219,10 +219,10 @@ class Testcase_140_30_Add_Identical(base_tests.SimpleDataPlane):
         logging.info("Inserting a flow to forward packet to port %d with cookie 1001, flag not set", out_port)
         reply, _ = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
         self.assertIsNone(reply, "Switch generated an error when inserting flow")
-        stats = get_flow_stats(self, match = ofp.match(), table_id = 0)
+        stats = get_flow_stats(self, match = ofp.match(), table_id = test_param_get("table", 0))
         table_stats = get_stats(self, ofp.message.table_stats_request())
         self.assertIsNotNone(stats,"Did not receive flow stats reply messsage")
-        self.assertEqual(table_stats[0].active_count, 1, "active flow count is not 1")
+        self.assertEqual(table_stats[test_param_get("table", 0)].active_count, 1, "active flow count is not 1")
         self.assertEqual(stats[0].cookie, 1001, "Cookie did not change")
 
 
@@ -269,7 +269,7 @@ class Testcase_140_40_Add_Reset_Counters(base_tests.SimpleDataPlane):
         sleep(5)
         do_barrier(self.controller)
         self.dataplane.send(in_port, str(pkt))#send a packet
-        stats = get_flow_stats(self, match = ofp.match(), table_id = 0)
+        stats = get_flow_stats(self, match = ofp.match(), table_id = test_param_get("table", 0))
         self.assertTrue(stats[0].packet_count > 0, "The packet count is not incrmented")
         self.assertTrue(stats[0].byte_count > 0, "The byte count is not incrmented")
 
@@ -284,10 +284,10 @@ class Testcase_140_40_Add_Reset_Counters(base_tests.SimpleDataPlane):
         logging.info("Inserting a flow to forward packet to port %d with cookie 1001, flag not set", out_port)
         reply, _ = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
         self.assertIsNone(reply, "Switch generated an error when inserting flow")
-        stats = get_flow_stats(self, match = ofp.match(), table_id = 0)
+        stats = get_flow_stats(self, match = ofp.match(), table_id = test_param_get("table", 0))
         table_stats = get_stats(self, ofp.message.table_stats_request())
         self.assertIsNotNone(stats,"Did not receive flow stats reply messsage")
-        self.assertEqual(table_stats[0].active_count, 1, "active flow count is not 1")
+        self.assertEqual(table_stats[test_param_get("table", 0)].active_count, 1, "active flow count is not 1")
         self.assertEqual(stats[0].cookie, 1001, "Cookie did not change")
         self.assertEqual(stats[0].packet_count, 0, "The packet count is not reset")
         self.assertEqual(stats[0].byte_count,0, "The byte count is not reset")
@@ -334,7 +334,7 @@ class Testcase_140_50_Add_Reset_Counters_Flag_Not_Set(base_tests.SimpleDataPlane
         sleep(5)
         do_barrier(self.controller)
         self.dataplane.send(in_port, str(pkt))#send a packet
-        stats = get_flow_stats(self, match = ofp.match(), table_id = 0)
+        stats = get_flow_stats(self, match = ofp.match(), table_id = test_param_get("table", 0))
         self.assertTrue(stats[0].packet_count > 0, "The packet count is not incrmented")
         self.assertTrue(stats[0].byte_count > 0, "The byte count is not incrmented")
         replace_packet_count = stats[0].packet_count
@@ -351,10 +351,10 @@ class Testcase_140_50_Add_Reset_Counters_Flag_Not_Set(base_tests.SimpleDataPlane
         logging.info("Inserting a flow to forward packet to port %d with cookie 1001, flag not set", out_port)
         reply, _ = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
         self.assertIsNone(reply, "Switch generated an error when inserting flow")
-        stats = get_flow_stats(self, match = ofp.match(), table_id = 0)
+        stats = get_flow_stats(self, match = ofp.match(), table_id = test_param_get("table", 0))
         table_stats = get_stats(self, ofp.message.table_stats_request())
         self.assertIsNotNone(stats,"Did not receive flow stats reply messsage")
-        self.assertEqual(table_stats[0].active_count, 1, "active flow count is not 1")
+        self.assertEqual(table_stats[test_param_get("table", 0)].active_count, 1, "active flow count is not 1")
         self.assertEqual(stats[0].cookie, 1001, "Cookie did not change")
         self.assertEqual(stats[0].packet_count, replace_packet_count, "The packet count is not replaced")
         self.assertEqual(stats[0].byte_count,replace_byte_count, "The byte count is not replaced")
@@ -418,10 +418,10 @@ class Testcase_140_60_Add_no_flow_removed(base_tests.SimpleDataPlane):
         logging.info("Inserting a flow to forward packet to port %d with cookie 1001, flag not set", out_port)
         reply, _ = self.controller.poll(exp_msg=ofp.OFPT_FLOW_REMOVED, timeout=3)
         self.assertIsNone(reply, "Received flow removed message")
-        stats = get_flow_stats(self, match = ofp.match(), table_id = 0)
+        stats = get_flow_stats(self, match = ofp.match(), table_id = test_param_get("table", 0))
         table_stats = get_stats(self, ofp.message.table_stats_request())
         self.assertIsNotNone(stats,"Did not receive flow stats reply messsage")
-        self.assertEqual(table_stats[0].active_count, 1, "active flow count is not 1")
+        self.assertEqual(table_stats[test_param_get("table", 0)].active_count, 1, "active flow count is not 1")
         self.assertEqual(stats[0].cookie, 1001, "Cookie did not change")
         #self.assertEqual(stats[0].packet_count, 0, "The packet count is not reset")
         #self.assertEqual(stats[0].byte_count,0, "The byte count is not reset")
@@ -469,7 +469,7 @@ class Testcase_140_70_Modify_Preserved_fields(base_tests.SimpleDataPlane):
         sleep(5)
         do_barrier(self.controller)
         self.dataplane.send(in_port, str(pkt))#send a packet
-        stats = get_flow_stats(self, match = ofp.match(), table_id = 0)
+        stats = get_flow_stats(self, match = ofp.match(), table_id = test_param_get("table", 0))
         packet_count1 = stats[0].packet_count
         byte_count1 = stats[0].byte_count
         #self.assertTrue(stats[0].packet_count > 0, "The packet count is not incrmented")
@@ -486,7 +486,7 @@ class Testcase_140_70_Modify_Preserved_fields(base_tests.SimpleDataPlane):
         logging.info("Modifying the flow")
         reply, _ = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
         self.assertIsNone(reply, "Switch generated an error when modifying flow")
-        stats = get_flow_stats(self, match = ofp.match(), table_id = 0)
+        stats = get_flow_stats(self, match = ofp.match(), table_id = test_param_get("table", 0))
         #table_stats = get_stats(self, ofp.message.table_stats_request())
         self.assertIsNotNone(stats,"Did not receive flow stats reply messsage")
         #self.assertEqual(table_stats[0].active_count, 1, "active flow count is not 1")
@@ -539,7 +539,7 @@ class Testcase_140_80_Modify_Reset_Countersflag(base_tests.SimpleDataPlane):
         sleep(5)
         do_barrier(self.controller)
         self.dataplane.send(in_port, str(pkt))#send a packet
-        stats = get_flow_stats(self, match = ofp.match(), table_id = 0)
+        stats = get_flow_stats(self, match = ofp.match(), table_id =test_param_get("table", 0))
         packet_count1 = stats[0].packet_count
         byte_count1 = stats[0].byte_count
         self.assertTrue(stats[0].packet_count > 0, "The packet count is not incrmented")
@@ -556,7 +556,7 @@ class Testcase_140_80_Modify_Reset_Countersflag(base_tests.SimpleDataPlane):
         logging.info("Modifying the flow")
         reply, _ = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
         self.assertIsNone(reply, "Switch generated an error when modifying flow")
-        stats = get_flow_stats(self, match = ofp.match(), table_id = 0)
+        stats = get_flow_stats(self, match = ofp.match(), table_id = test_param_get("table", 0))
         #table_stats = get_stats(self, ofp.message.table_stats_request())
         self.assertIsNotNone(stats,"Did not receive flow stats reply messsage")
         #self.assertEqual(table_stats[0].active_count, 1, "active flow count is not 1")
@@ -737,7 +737,7 @@ class Testcase_140_120_Delete_nonexisting(base_tests.SimpleDataPlane):
 
         table_stats = get_stats(self, ofp.message.table_stats_request())
         self.assertIsNotNone(table_stats,"Did not receive flow stats reply messsage")
-        active_count = table_stats[0].active_count
+        active_count = table_stats[test_param_get("table", 0)].active_count
         logging.info("Active flow entry: %d",active_count)
 
         request = ofp.message.flow_delete(
@@ -756,7 +756,7 @@ class Testcase_140_120_Delete_nonexisting(base_tests.SimpleDataPlane):
         #verify_no_packet(self, str(pkt),out_port)
         table_stats = get_stats(self, ofp.message.table_stats_request())
         self.assertIsNotNone(table_stats,"Did not receive flow stats reply messsage")
-        self.assertEqual(table_stats[0].active_count, active_count, "The active counts are not equal")
+        self.assertEqual(table_stats[test_param_get("table", 0)].active_count, active_count, "The active counts are not equal")
         logging.info("The active counts are equal")
 
 class Testcase_140_130_Priority_strict(base_tests.SimpleDataPlane):
@@ -1115,7 +1115,7 @@ class Testcase_140_170_Delete_match_syntax(base_tests.SimpleDataPlane):
         self.dataplane.send(in_port, str(pkt))
         verify_packet(self, str(pkt),out_portZ)
 
-        request = ofp.message.aggregate_stats_request(table_id = 0, match = match1, out_port = ofp.OFPP_ANY, out_group = ofp.OFPG_ANY)
+        request = ofp.message.aggregate_stats_request(table_id = test_param_get("table", 0), match = match1, out_port = ofp.OFPP_ANY, out_group = ofp.OFPG_ANY)
         stats, _= self.controller.transact(request)
         self.assertEqual(stats.flow_count, 2, "Did not contains all the necessary flows")
 
@@ -1375,14 +1375,14 @@ class Testcase_140_220_Delete_all_tables(base_tests.SimpleDataPlane):
         pkt = simple_tcp_packet()
         
         #for table_id in range(tables_no):
-        req = ofp.message.flow_add(table_id=0,
+        req = ofp.message.flow_add(table_id=test_param_get("table", 0),
                                    match=packet_to_flow_match(self, pkt),
                                    buffer_id=ofp.OFP_NO_BUFFER,
                                    instructions=[ofp.instruction.apply_actions(actions)],
                                    priority = 100)
-        logging.info("Inserting a flow to table %d ", 0)
+        logging.info("Inserting a flow to table %d ", test_param_get("table", 0))
         rv = self.controller.message_send(req)
-        self.assertTrue(rv != -1, "Failed to insert flow to table %d "%0)
+        self.assertTrue(rv != -1, "Failed to insert flow to table %d "%test_param_get("table", 0))
         do_barrier(self.controller)
             
       
