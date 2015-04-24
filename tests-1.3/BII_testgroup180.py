@@ -124,12 +124,12 @@ class Testcase_180_60_Per_Flow_Duration_Counter(base_tests.SimpleDataPlane):
         do_barrier(self.controller)
         flow_stats = get_stats(self, ofp.message.flow_stats_request(table_id = test_param_get("table", 0), out_group = ofp.OFPG_ANY, out_port = ofp.OFPP_ANY))
         self.assertIsNotNone(flow_stats,"Did not receive flow stats reply messsage")
-        init_duration_sec = flow_stats[test_param_get("table", 0)].duration_sec
+        init_duration_sec = flow_stats[0].duration_sec
         
         time.sleep(5)
         flow_stats = get_stats(self, ofp.message.flow_stats_request(table_id = test_param_get("table", 0), out_group = ofp.OFPG_ANY, out_port = ofp.OFPP_ANY))
         self.assertIsNotNone(flow_stats,"Did not receive flow stats reply messsage")
-        self.assertTrue(flow_stats[test_param_get("table", 0)].duration_sec==(init_duration_sec + 5),"Duration counter did not increase correctly")
+        self.assertTrue(flow_stats[0].duration_sec==(init_duration_sec + 5),"Duration counter did not increase correctly")
         
 
 
@@ -294,13 +294,13 @@ class Testcase_180_410_reference_count(base_tests.SimpleDataPlane):
         do_barrier(self.controller)
         flow_stats = get_stats(self, ofp.message.flow_stats_request(table_id = test_param_get("table", 0), out_group = ofp.OFPG_ANY, out_port = ofp.OFPP_ANY))
         self.assertIsNotNone(flow_stats,"Did not receive flow stats reply messsage")
-        init_duration_sec = flow_stats[test_param_get("table", 0)].duration_sec
+        init_duration_sec = flow_stats[0].duration_sec
         print init_duration_sec
 
         for i in range(0, 23):
             flow_stats = get_stats(self, ofp.message.flow_stats_request(table_id = test_param_get("table", 0), out_group = ofp.OFPG_ANY, out_port = ofp.OFPP_ANY))
             self.assertIsNotNone(flow_stats,"Did not receive flow stats reply messsage")
-            duration_sec = flow_stats[test_param_get("table", 0)].duration_sec
+            duration_sec = flow_stats[0].duration_sec
             if(duration_sec >= (init_duration_sec+i*5 - 0.5) and duration_sec <= (init_duration_sec+ i*5 + 0.5)):
                 pass
             else:
@@ -355,7 +355,7 @@ class Testcase_180_430_counter_wrap_around(base_tests.SimpleDataPlane):
         for i in range(0, 11):
             flow_stats = get_stats(self, ofp.message.flow_stats_request(table_id = test_param_get("table", 0), out_group = ofp.OFPG_ANY, out_port = ofp.OFPP_ANY))
             self.assertIsNotNone(flow_stats,"Did not receive flow stats reply messsage")
-            duration_nsec = flow_stats[test_param_get("table", 0)].duration_nsec
+            duration_nsec = flow_stats[0].duration_nsec
             if duration_nsec <= init_duration_nsec:
                 break
             else:
