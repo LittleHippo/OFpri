@@ -719,10 +719,11 @@ class Testcase_340_260_MultipartPortDescSetPortState(base_tests.SimpleDataPlane)
             self.assertTrue(len(stats) >= 4, "Reported ports in port desc is not correct")
 
             for item in stats:
-                if item.port_no == default_port:
-                    self.assertEqual((item.state & 1),1, "Reported port state is not correct.")
-                else:
-                    self.assertEqual((item.state & 1),0, "Reported port state is not correct.")
+                if item.port_no in openflow_ports(4):
+                    if item.port_no == default_port:
+                        self.assertEqual((item.state & 1),1, "Reported port state is not correct.")
+                    else:
+                        self.assertEqual((item.state & 1),0, "Reported port state is not correct.")
                         
         #Bring up the port by starting the interface connected
         finally:
