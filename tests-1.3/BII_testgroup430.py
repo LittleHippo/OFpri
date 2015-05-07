@@ -422,14 +422,19 @@ class Testcase_430_200_ErrorMessageBadPort(base_tests.SimpleDataPlane):
         logging.info("Running test case Bad Port")
         invalid_port = 1111
         request = ofp.message.port_stats_request(port_no=invalid_port)
-        self.controller.message_send(request)
-        reply, _  = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
-        self.assertIsNotNone(reply, "The switch failed to generate an error.")
-        logging.info("Error Message Received")
-        self.assertEqual(reply.err_type,ofp.const.OFPET_BAD_REQUEST, " Error type is not OFPET_BAD_REQUEST")
-        logging.info("Received OFPET_BAD_REQUEST")
-        self.assertEqual(reply.code, ofp.const.OFPBRC_BAD_PORT, "Error Code is not OFPBRC_BAD_PORT")
-        logging.info("Received Error code is OFPBRC_BAD_PORT")
+        reply, _ = self.controller.transact(request)
+        self.assertIsNotNone(reply, "Did not receive Reply from DUT")
+        if reply.type == ofp.OFPT_ERROR:
+            logging.info("Error Message Received")
+            self.assertEqual(reply.err_type,ofp.const.OFPET_BAD_REQUEST, " Error type is not OFPET_BAD_REQUEST")
+            logging.info("Received OFPET_BAD_REQUEST")
+            self.assertEqual(reply.code, ofp.const.OFPBRC_BAD_PORT, "Error Code is not OFPBRC_BAD_PORT")
+            logging.info("Received Error code is OFPBRC_BAD_PORT")
+        elif reply.type == ofp.OFPT_STATS_REPLY:
+            self.assertTrue(reply.entries==[], "Port stats message was not empty")
+        else:
+            self.assertEqual(0,1, "Received unexpected message")
+
 
 
 
