@@ -134,9 +134,15 @@ class Testcase_450_30_HelloMessage2Bitmap(base_tests.SimpleDataPlane):
     def runTest(self):  
         logging.info("Running test case Hello Message")    
         self.controller.start()
-        self.controller.keep_alive = True        
-        ofp_field_version = 4
+        self.controller.keep_alive = True     
+            
         res, pkt = self.controller.poll(exp_msg=ofp.OFPT_HELLO, timeout=3)
+        
+        hello_element_support = test_param_get("hello_element_support",0)
+        if hello_element_support == 0:
+            ofp_field_version = 4 # OpenFlow v1.3
+        else:
+            ofp_field_version = 0
 
         req = ofp.message.hello()
         req.version = ofp_field_version
