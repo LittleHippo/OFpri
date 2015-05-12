@@ -643,6 +643,32 @@ class Testcase_440_400_SwitchConfigFailedBadFlags(base_tests.SimpleDataPlane):
         logging.info("Received Error code is OFPSCFC_BAD_FLAGS")
 
 
+class Testcase_440_410_SwitchConfigFailedBadLength(base_tests.SimpleDataPlane):
+    """
+    440.410 - Switch config failed bad length
+    Verify the correct error message is generated when a switch config specifies a bad length.
+    """
+    @wireshark_capture
+    def runTest(self):
+        logging.info("Running test case Switch Config Failed Bad Length")
+        #Send Echo request to check that the control channel is up.
+        request = ofp.message.echo_request()
+        logging.info("Sending a Echo Request")
+        reply, pkt = self.controller.transact(request)
+        self.assertIsNotNone(reply, "Did not receive Echo Reply")
+        self.assertEqual(reply.type, ofp.OFPT_ECHO_REPLY, "Response is not echo reply")
+        
+        #invalidFlags = 16
+        req = ofp.message.set_config(length=3)
+        self.controller.message_send(req)
+        reply, _ = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
+        self.assertIsNotNone(reply, "The switch failed to generate an error.")
+        logging.info("Error Message Received")
+        self.assertEqual(reply.err_type,ofp.const.OFPET_SWITCH_CONFIG_FAILED, " Error type is not OFPET_SWITCH_CONFIG_FAILED")
+        logging.info("Received OFPET_SWITCH_CONFIG_FAILED")
+        self.assertEqual(reply.code, ofp.const.OFPSCFC_BAD_LEN, "Error Code is not OFPSCFC_BAD_LEN")
+        logging.info("Received Error code is OFPSCFC_BAD_LEN")
+
 
 
 class Testcase_440_430_SwitchConfigFailedData(base_tests.SimpleDataPlane):
