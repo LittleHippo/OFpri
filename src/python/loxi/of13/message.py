@@ -14210,7 +14210,7 @@ class set_config(message):
     version = 4
     type = 9
 
-    def __init__(self, xid=None, flags=None, miss_send_len=None):
+    def __init__(self, xid=None, flags=None, miss_send_len=None, length=None):
         if xid != None:
             self.xid = xid
         else:
@@ -14223,6 +14223,10 @@ class set_config(message):
             self.miss_send_len = miss_send_len
         else:
             self.miss_send_len = 0
+        if length != None:
+            self.length = length
+        else:
+            self.length = 0
         return
 
     def pack(self):
@@ -14233,7 +14237,10 @@ class set_config(message):
         packed.append(struct.pack("!L", self.xid))
         packed.append(struct.pack("!H", self.flags))
         packed.append(struct.pack("!H", self.miss_send_len))
-        length = sum([len(x) for x in packed])
+        if self.length != 0:
+            length=self.length
+        else:
+            length = sum([len(x) for x in packed])
         packed[2] = struct.pack("!H", length)
         return ''.join(packed)
 
