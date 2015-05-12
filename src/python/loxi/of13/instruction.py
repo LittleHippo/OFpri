@@ -30,6 +30,7 @@ class instruction(loxi.OFObject):
             self.type = type
         else:
             self.type = 0
+
         return
 
     def pack(self):
@@ -71,11 +72,15 @@ class instruction(loxi.OFObject):
 class apply_actions(instruction):
     type = 4
 
-    def __init__(self, actions=None):
+    def __init__(self, actions=None, length=None):
         if actions != None:
             self.actions = actions
         else:
             self.actions = []
+        if length != None:
+            self.length = length
+        else:
+            self.length = None
         return
 
     def pack(self):
@@ -84,7 +89,10 @@ class apply_actions(instruction):
         packed.append(struct.pack("!H", 0)) # placeholder for len at index 1
         packed.append('\x00' * 4)
         packed.append(loxi.generic_util.pack_list(self.actions))
-        length = sum([len(x) for x in packed])
+        if self.length is not None:
+            length=self.length
+        else:
+            length = sum([len(x) for x in packed])
         packed[1] = struct.pack("!H", length)
         return ''.join(packed)
 
