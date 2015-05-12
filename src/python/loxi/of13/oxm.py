@@ -3009,15 +3009,23 @@ oxm.subtypes[2147484424] = in_phy_port_masked
 class in_port(oxm):
     type_len = 2147483652
 
-    def __init__(self, value=None):
+    def __init__(self, value=None,length=None):
         if value != None:
             self.value = value
         else:
             self.value = 0
+        if length != None:
+            self.length = length
+        else:
+            self.length = 0
         return
 
     def pack(self):
         packed = []
+        if self.length !=0:
+            self.type_len= self.type_len - 4 + self.length
+        else:
+            self.type_len= self.type_len
         packed.append(struct.pack("!L", self.type_len))
         packed.append(util.pack_port_no(self.value))
         return ''.join(packed)
