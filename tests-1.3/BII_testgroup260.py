@@ -725,7 +725,8 @@ class Testcase_260_230_FlowmodHard_IdleTimeout(base_tests.SimpleDataPlane):
         self.controller.message_send(req)
         rv = self.controller.message_send(req)
         self.assertTrue(rv != -1, "Failed to insert flow")
-
+        
+        sleep(2)
         pkt = str(simple_tcp_packet())
         logging.info("Sending dataplane packet")
         self.dataplane.send(in_port, pkt)
