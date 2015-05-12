@@ -786,6 +786,37 @@ class Testcase_430_500_BadActionBadSetType(base_tests.SimpleDataPlane):
         logging.info("Received Error code is OFPBAC_BAD_SET_TYPE")
 
         
+class Testcase_430_510_BadActionBadSetLength(base_tests.SimpleDataPlane):
+
+    """
+    430.510 - Bad action bad set Length
+    Verify that if an invalid set-field oxm length is specified, the device generates a bad action error
+    with a bad set length code. 
+    """
+    @wireshark_capture
+    def runTest(self):
+        logging.info("Running test case Bad Action Bad Set Length")
+        delete_all_flows(self.controller)
+        in_port,out_port = openflow_ports(2)
+        table_id=test_param_get("table", 0)
+        priority = 1
+        actions=[ofp.action.set_field(ofp.oxm.ipv4_src(0xc0a80005),length=15), ofp.action.output(port=out_port,max_len=128)]
+        instructions=[ofp.instruction.apply_actions(actions=actions)]
+        match = ofp.match([ofp.oxm.in_port(in_port), ofp.oxm.eth_type(0x0800)])
+        req = ofp.message.flow_add(table_id=table_id,
+                                   match=match,
+                                   buffer_id=ofp.OFP_NO_BUFFER,
+                                   instructions=instructions,
+                                   priority=priority )
+        self.controller.message_send(req)
+        reply, _  = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
+        self.assertIsNotNone(reply, "The switch failed to generate an error.")
+        logging.info("Error Message Received")
+        self.assertEqual(reply.err_type,ofp.const.OFPET_BAD_ACTION, " Error type is not OFPET_BAD_ACTION")
+        logging.info("Received OFPET_BAD_ACTION")
+        self.assertEqual(reply.code, ofp.const.OFPBAC_BAD_SET_LEN, "Error Code is not OFPBAC_BAD_SET_LEN")
+        logging.info("Received Error code is OFPBAC_BAD_SET_LEN")
+
 
 class Testcase_430_530_BadActionData(base_tests.SimpleDataPlane):
 
@@ -901,6 +932,43 @@ class Testcase_430_590_BadInstructionBadExperimenter(base_tests.SimpleDataPlane)
         self.assertEqual(reply.code, ofp.const.OFPBIC_BAD_EXPERIMENTER, "Error Code is not OFPBIC_BAD_EXPERIMENTER")
         logging.info("Received Error code is OFPBIC_BAD_EXPERIMENTER")
 
+class Testcase_430_610_BadInstructionBadLength(base_tests.SimpleDataPlane):
+
+    """
+    430.610 - Bad instruction bad length
+    Verify the correct error message is generated when an instructions length is incorrect.
+    """
+    @wireshark_capture
+    def runTest(self):
+        logging.info("Running test case Bad Instruction Bad Experimenter")
+        delete_all_flows(self.controller)
+        in_port,out_port = openflow_ports(2)
+        table_id=test_param_get("table", 0)
+        priority = 1
+        actions=[
+            ofp.action.output(
+                port=out_port,
+                max_len=ofp.OFPCML_NO_BUFFER)]
+        inst = ofp.instruction
+        #inst.instruction.length = 23
+        instructions=[inst.apply_actions(actions,length=23)]
+        #instructions.length=23
+        match = ofp.match([ofp.oxm.in_port(in_port)])
+        req = ofp.message.flow_add(table_id=table_id,
+                                   match=match,
+                                   buffer_id=ofp.OFP_NO_BUFFER,
+                                   instructions=instructions,
+                                   priority=priority )
+        self.controller.message_send(req)
+        reply, _  = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
+        self.assertIsNotNone(reply, "The switch failed to generate an error.")
+        logging.info("Error Message Received")
+        self.assertEqual(reply.err_type,ofp.const.OFPET_BAD_INSTRUCTION, " Error type is not OFPET_BAD_INSTRUCTION")
+        logging.info("Received OFPET_BAD_LEN")
+        self.assertEqual(reply.code, ofp.const.OFPBIC_BAD_EXPERIMENTER, "Error Code is not OFPBIC_BAD_LEN")
+        logging.info("Received Error code is OFPBIC_BAD_LEN")
+
+
 
 
 
@@ -978,14 +1046,14 @@ class Testcase_430_640_BadMatchBadType(base_tests.SimpleDataPlane):
         logging.info("Received correct error message type and code.")
 
 
-"""
-class BadMatchBadLength(base_tests.SimpleDataPlane):
 
-    """ """
+class Testcase_430_650_BadMatchLength(base_tests.SimpleDataPlane):
+
+    """ 
     430.650 - Bad match length
     Verify the correct error message is generated when a bad match length is specified.
-    """ """
-
+    """ 
+    @wireshark_capture
     def runTest(self):
         logging.info("Running test case Bad Match Bad Length")
         delete_all_flows(self.controller)
@@ -994,13 +1062,13 @@ class BadMatchBadLength(base_tests.SimpleDataPlane):
         priority = 1
         actions=[ofp.action.output(port=out_port,max_len=128)]
         instructions=[ofp.instruction.apply_actions(actions=actions)]
-        match = ofp.match([ofp.oxm.in_port(in_port)])
+        match = ofp.match([ofp.oxm.in_port(in_port,length=3)])
         req = ofp.message.flow_add(table_id=table_id,
                                    match=match,
                                    buffer_id=ofp.OFP_NO_BUFFER,
                                    instructions=instructions,
                                    priority=priority )
-        req.match.len = 2
+        #req.match.len = 3
         self.controller.message_send(req)
         err, _ = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
         self.assertIsNotNone(err, "The switch failed to generate an OFPT_ERROR.")
@@ -1011,7 +1079,7 @@ class BadMatchBadLength(base_tests.SimpleDataPlane):
                          ("Bad match code %d was received, but we "
                           "expected OFPBMC_BAD_LEN.") % err.code)
         logging.info("Received correct error message type and code.")
-"""
+
 
 
 
