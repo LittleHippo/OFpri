@@ -1104,11 +1104,15 @@ action.subtypes[17] = push_vlan
 class set_field(action):
     type = 25
 
-    def __init__(self, field=None):
+    def __init__(self, field=None,length=None):
         if field != None:
             self.field = field
         else:
             self.field = None
+        if length != None:
+            self.length = length
+        else:
+            self.length = None
         return
 
     def pack(self):
@@ -1118,7 +1122,10 @@ class set_field(action):
         packed.append(self.field.pack())
         length = sum([len(x) for x in packed])
         packed.append(loxi.generic_util.pad_to(8, length))
-        length += len(packed[-1])
+        if self.length is not None:
+            length = self.length
+        else:
+            length += len(packed[-1])
         packed[1] = struct.pack("!H", length)
         return ''.join(packed)
 
