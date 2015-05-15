@@ -1818,11 +1818,15 @@ class hello_elem(loxi.OFObject):
 class hello_elem_versionbitmap(hello_elem):
     type = 1
 
-    def __init__(self, bitmaps=None):
+    def __init__(self, bitmaps=None,type=None):
         if bitmaps != None:
             self.bitmaps = bitmaps
         else:
             self.bitmaps = []
+        if type != None:
+            self.type = type
+        else:
+            self.type = 1
         return
 
     def pack(self):
