@@ -377,10 +377,10 @@ class Testcase_200_150_basic_OFPT_TABLE_MOD(base_tests.SimpleDataPlane):
             logging.info("Received correct error code OFPTMFC_BAD_CONFIG.")
         elif reply.type == ofp.const.OFPET_BAD_REQUEST:
             logging.info("Received error type was OFPET_BAD_REQUEST.")
-            self.assertEqual(reply.code, ofp.OFPTFMFC_EPERM,
+            self.assertEqual(reply.code, ofp.OFPTMFC_EPERM,
                               ("Flow mod failed code %d was received, but we "
-                               "expected OFPTFMFC_EPERM.") % reply.code)
-            logging.info("Received correct error code OFPTFMFC_EPERM.")
+                               "expected OFPTMFC_EPERM.") % reply.code)
+            logging.info("Received correct error code OFPTMFC_EPERM.")
         else:
             self.assertEqual(0, 1, "Error type was not correct")
 
