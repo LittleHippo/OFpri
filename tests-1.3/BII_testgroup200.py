@@ -498,4 +498,112 @@ class Testcase_200_230_basic_OFPT_SET_ASYNC(base_tests.SimpleDataPlane):
 
 
 
+
+class Testcase_200_250__Reserved_Value_error(base_tests.SimpleDataPlane):
+    """
+    Purpose
+    Check that the switch rejects requests containing a reserved value.
+
+    Methodology
+    Send to the DUT a request containing a reserved value or an optional value it does not support, it must reject the request and return an appropriate error message. 
+
+    """
+    @wireshark_capture
+    def runTest(self):
+        logging.info("Running Testcase 200.250 - Reserved_Value_error")
+        delete_all_flows(self.controller)
+        table_id = test_param_get("table",0)
+        
+        logging.info("Inserting a flow")
+        request = ofp.message.flow_add(
+            table_id=table_id,
+            instructions=[
+                ofp.instruction.apply_actions(
+                    actions=[
+                        ofp.action.output(
+                            port=ofp.const.OFPP_ANY,
+                            max_len=ofp.OFPCML_NO_BUFFER)])],
+            buffer_id=ofp.OFP_NO_BUFFER,
+            priority=1000)
+        self.controller.message_send(request)
+        reply, _ = self.controller.poll(exp_msg = ofp.OFPT_ERROR, timeout = 3)
+        self.assertIsNotNone(reply, "Did not receive error message.")
+        logging.info("Received error message.")
+        self.assertEqual(reply.err_type, ofp.const.OFPET_BAD_ACTION,"Error type was not OFPET_BAD_ACTION.") 
+        logging.info("Error type was correct.")
+        self.assertEqual(reply.code, ofp.const.OFPBAC_BAD_OUT_PORT,"Error code was not OFPBAC_BAD_OUT_PORT.")
+        logging.info("Received correct error code.")
+
    
+
+class Testcase_200_270__Reserved_bit_position_error(base_tests.SimpleDataPlane):
+    """
+    Purpose
+    Check that the switch rejects requests containing a reserved bit position.
+
+    Methodology
+    Send to the DUT a request containing a reserved bit position or an optional bit position it does not support set to 1, it must reject the request and return an appropriate error message.
+
+    """
+    @wireshark_capture
+    def runTest(self):
+        logging.info("Running Testcase 200.270 - Reserved_bit_position_error")
+        delete_all_flows(self.controller)
+        
+        table_id = test_param_get("table", 0)
+        logging.info("Sending table_mod msg")
+        request = ofp.message.table_mod(table_id=table_id, config=ofp.const.OFPTC_DEPRECATED_MASK)
+        self.controller.message_send(request)
+        reply, _ = self.controller.poll(exp_msg = ofp.OFPT_ERROR, timeout = 3)
+        self.assertIsNotNone(reply, "Did not receive error message.")
+        logging.info("Received error message.")
+        self.assertEqual(reply.err_type, ofp.const.OFPET_BAD_REQUEST,"Error type was not OFPET_BAD_REQUEST.") 
+        logging.info("Error type was correct.")
+
+
+
+
+class Testcase_200_290__Reserved_TLV_error(base_tests.SimpleDataPlane):
+    """
+    Purpose
+    Check that the switch rejects requests containing a reserved TLV.
+
+    Methodology
+    Send to the DUT a request containing a reserved TLV type or an optional TLV type it does not support, it must reject the request and return an appropriate error message. 
+
+    """
+    @wireshark_capture
+    def runTest(self):
+        logging.info("Running Testcase 200.290 - Reserved_TLV_error")
+        delete_all_flows(self.controller)
+
+        table_id = test_param_get("table",0)
+        in_port, out_port, = openflow_ports(2)
+        
+        logging.info("Sending a flow - matching on icmpv6_code")
+        match = ofp.match([
+                    ofp.oxm.eth_type(0x86dd),
+                    ofp.oxm.ip_proto(58),
+                    ofp.oxm.icmpv6_code(4),
+                    ])  # Assume icmpv6 code is not supported by DUT
+        request = ofp.message.flow_add(
+                table_id=table_id,
+                match=match,
+                instructions=[
+                    ofp.instruction.apply_actions(
+                        actions=[
+                            ofp.action.output(
+                                port=out_port,
+                                max_len=ofp.OFPCML_NO_BUFFER)])],
+                buffer_id=ofp.OFP_NO_BUFFER,
+                priority=1000)
+        self.controller.message_send(request)
+        reply, _ = self.controller.poll(exp_msg = ofp.OFPT_ERROR, timeout = 3)
+        if reply is None:
+            logging.warn("ICMPv6 code may be supported by DUT. Cannot trigger the error")
+        else:
+            logging.info("Received error message.")
+            self.assertEqual(reply.err_type, ofp.const.OFPET_BAD_MATCH,"Error type was not OFPET_BAD_MATCH.") 
+            logging.info("Error type was correct.")
+            self.assertEqual(reply.code, ofp.const.OFPBMC_BAD_TYPE,"Error code was not OFPBMC_BAD_TYPE.") 
+            logging.info("Error code was correct.")
