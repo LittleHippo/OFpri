@@ -643,6 +643,44 @@ class Testcase_300_270_MultipartTypeExperimenter(base_tests.SimpleDataPlane):
 
 
 
+class Testcase_300_280_MultipartBufferOverflow(base_tests.SimpleDataPlane):
+    """
+    300.280 - Multipart request buffer overflow
+    Verify a valid response is received when requesting an experimenter extension.If a multipart request contains 
+    more data than a device can buffer, verify a bad request error with a multipart buffer overflow code is generated.
+    """
+
+    @wireshark_capture
+    def runTest(self):
+        logging.info("Running 300.280 - Multipart request buffer overflow test")
+        rv = delete_all_flows(self.controller)
+        self.assertEqual(rv, 0, "Failed to delete all flows")
+
+        request = ofp.message.port_stats_request(port_no=ofp.const.OFPP_ANY)
+        stats = get_stats(self, request)
+        self.assertIsNotNone(stats, "Did not receive port_stats_reply")
+        try:
+            print   stats.entries
+            entries = []
+            for i in range(10000000):
+                entry.append(reply.entries[0])
+
+            req = ofp.message.port_stats_request(entries=entries) 
+            self.controller.message_send(req)
+            reply, _ = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
+
+            self.assertIsNotNone(reply, "The switch failed to generate an error.")
+            self.assertEqual(reply.err_type, ofp.const.OFPET_BAD_REQUEST, "Error type is not OFPET_BAD_REQUEST")
+            self.assertEqual(reply.code, ofp.const.OFPBRC_MULTIPART_BUFFER_OVERFLOW, "Error code is not OFPBRC_MULTIPART_BUFFER_OVERFLOW")
+            logging.info("Received correct error message")
+        except   AttributeError:
+            print   'No entry included in port stats reply'
+            self.assertEqual(0,1, "No entry included in port stats reply")
+
+
+
+
+
 class Testcase_300_290_MultipartUnsupportedType(base_tests.SimpleDataPlane):
     """
     300.290 - Multipart message unsupported type
