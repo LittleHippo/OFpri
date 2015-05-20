@@ -21,6 +21,221 @@ from oftest.testutils import *
 from oftest.parse import parse_ipv6
 from oftest.oflog import *
 
+
+class MatchTest(base_tests.SimpleDataPlane):
+    """
+    Base class for match tests
+    """
+
+    def verify_match(self, match, matching, nonmatching):
+        """
+        Verify matching behavior
+
+        Checks that all the packets in 'matching' match 'match', and that
+        the packets in 'nonmatching' do not.
+
+        'match' is a LOXI match object. 'matching' and 'nonmatching' are
+        dicts mapping from string names (used in log messages) to string
+        packet data.
+        """
+        in_port, out_port = openflow_ports(2)
+        table_id = test_param_get("table", 0)
+
+        logging.info("Running match test for %s", match.show())
+
+        delete_all_flows(self.controller)
+
+        logging.info("Inserting flow sending matching packets to port %d", out_port)
+        request = ofp.message.flow_add(
+                table_id=table_id,
+                match=match,
+                instructions=[
+                    ofp.instruction.apply_actions(
+                        actions=[
+                            ofp.action.output(
+                                port=out_port,
+                                max_len=ofp.OFPCML_NO_BUFFER)])],
+                buffer_id=ofp.OFP_NO_BUFFER,
+                priority=1000)
+        self.controller.message_send(request)
+        reply, _ = self.controller.poll(exp_msg = ofp.OFPT_ERROR, timeout = 3)
+        self.assertIsNone(reply, "Received error message, could not install the flow")
+        logging.info("Installed the flow successfully")
+
+        logging.info("Inserting match-all flow sending packets to controller")
+        request = ofp.message.flow_add(
+            table_id=table_id,
+            instructions=[
+                ofp.instruction.apply_actions(
+                    actions=[
+                        ofp.action.output(
+                            port=ofp.OFPP_CONTROLLER,
+                            max_len=ofp.OFPCML_NO_BUFFER)])],
+            buffer_id=ofp.OFP_NO_BUFFER,
+            priority=1)
+        self.controller.message_send(request)
+        reply, _ = self.controller.poll(exp_msg = ofp.OFPT_ERROR, timeout = 3)
+        self.assertIsNone(reply, "Received error message, could not install the flow")
+        logging.info("Installed the flow successfully")
+
+        do_barrier(self.controller)
+
+        for name, pkt in matching.items():
+            logging.info("Sending matching packet %s, expecting output to port %d", repr(name), out_port)
+            pktstr = str(pkt)
+            self.dataplane.send(in_port, pktstr)
+            verify_packets(self, pktstr, [out_port])
+
+        for name, pkt in nonmatching.items():
+            logging.info("Sending non-matching packet %s, expecting packet-in", repr(name))
+            pktstr = str(pkt)
+            self.dataplane.send(in_port, pktstr)
+            verify_packet_in(self, pktstr, in_port, ofp.OFPR_ACTION)
+
+
+class Testcase_80_50_Mask_OXM_OF_IPV4_SRC(MatchTest):
+    """
+    Purpose
+    Verify correct matching on masked match fields.
+
+    Methodology
+    Configure and connect DUT to controller. After control channel establishment, add a flow matching on the named masked field (under the given Pre-requisites for the match), action is forwarding to an output port. Send a packet matching the masked flow range on the dataplane. Verify the packet is received only at the port specified in the flow action. Send a non matching packet, verify it does not get forwarded by the flow, but a table-miss is triggered.
+    """
+    @wireshark_capture
+    def runTest(self):
+        logging.info("Running Testcase for Mask: OXM_OF_IPV4_SRC")
+        match = ofp.match([
+            ofp.oxm.eth_type(0x0800),
+            # 192.168.0.0/20 (255.255.240.0)
+            ofp.oxm.ipv4_src_masked(0xc0a80000, 0xfffff000),
+        ])
+
+        matching = {
+            "192.168.0.1": simple_tcp_packet(ip_src='192.168.0.1'),
+            "192.168.0.5": simple_tcp_packet(ip_src='192.168.0.5'),
+            "192.168.4.2": simple_tcp_packet(ip_src='192.168.4.2'),
+            "192.168.0.0": simple_tcp_packet(ip_src='192.168.0.0'),
+            "192.168.15.255": simple_tcp_packet(ip_src='192.168.15.255'),
+        }
+
+        nonmatching = {
+            "192.168.16.0": simple_tcp_packet(ip_src='192.168.16.0'),
+            "192.167.255.255": simple_tcp_packet(ip_src='192.167.255.255'),
+            "192.168.31.1": simple_tcp_packet(ip_src='192.168.31.1'),
+        }
+
+        self.verify_match(match, matching, nonmatching)
+
+
+
+class Testcase_80_60_Mask_OXM_OF_IPV4_DST(MatchTest):
+    """
+    Purpose
+    Verify correct matching on masked match fields.
+
+    Methodology
+    Configure and connect DUT to controller. After control channel establishment, add a flow matching on the named masked field (under the given Pre-requisites for the match), action is forwarding to an output port. Send a packet matching the masked flow range on the dataplane. Verify the packet is received only at the port specified in the flow action. Send a non matching packet, verify it does not get forwarded by the flow, but a table-miss is triggered.
+    """
+    @wireshark_capture
+    def runTest(self):
+        logging.info("Running Testcase for Mask: OXM_OF_IPV4_DST")
+        match = ofp.match([
+            ofp.oxm.eth_type(0x0800),
+            # 192.168.0.0/20 (255.255.240.0)
+            ofp.oxm.ipv4_dst_masked(0xc0a80000, 0xfffff000),
+        ])
+
+        matching = {
+            "192.168.0.2": simple_tcp_packet(ip_dst='192.168.0.2'),
+            "192.168.0.5": simple_tcp_packet(ip_dst='192.168.0.5'),
+            "192.168.4.2": simple_tcp_packet(ip_dst='192.168.4.2'),
+            "192.168.0.0": simple_tcp_packet(ip_dst='192.168.0.0'),
+            "192.168.15.255": simple_tcp_packet(ip_dst='192.168.15.255'),
+        }
+
+        nonmatching = {
+            "192.168.16.0": simple_tcp_packet(ip_dst='192.168.16.0'),
+            "192.167.255.255": simple_tcp_packet(ip_dst='192.167.255.255'),
+            "192.168.31.1": simple_tcp_packet(ip_dst='192.168.31.1'),
+        }
+
+        self.verify_match(match, matching, nonmatching)
+
+
+class Testcase_80_70_Mask_OXM_OF_IPV6_SRC(MatchTest):
+    """
+    Purpose
+    Verify correct matching on masked match fields.
+
+    Methodology
+    Configure and connect DUT to controller. After control channel establishment, add a flow matching on the named masked field (under the given Pre-requisites for the match), action is forwarding to an output port. Send a packet matching the masked flow range on the dataplane. Verify the packet is received only at the port specified in the flow action. Send a non matching packet, verify it does not get forwarded by the flow, but a table-miss is triggered.
+
+    """
+    @wireshark_capture
+    def runTest(self):
+        logging.info("Running Testcase   for matching on IPv6 dst CIDR masking")
+        flow =       "2001:0db8:85a3::"
+        mask =       "ffff:ffff:fffe::"
+        correct1 =   "2001:0db8:85a3::8a2e:0370:7331"
+        correct2 =   "2001:0db8:85a2::ffff:ffff:ffff"
+        incorrect1 = "2001:0db8:85a1::"
+
+        match = ofp.match([
+            ofp.oxm.eth_type(0x86dd),
+            ofp.oxm.ipv6_dst_masked(parse_ipv6(flow), parse_ipv6(mask)),
+        ])
+
+        matching = {
+            "flow": simple_tcpv6_packet(ipv6_src=flow),
+            "correct1": simple_tcpv6_packet(ipv6_src=correct1),
+            "correct2": simple_tcpv6_packet(ipv6_src=correct2),
+        }
+
+        nonmatching = {
+            "incorrect1": simple_tcpv6_packet(ipv6_src=incorrect1),
+        }
+
+        self.verify_match(match, matching, nonmatching)
+
+
+
+class Testcase_80_80_Mask_OXM_OF_IPV6_DST(MatchTest):
+    """
+    Purpose
+    Verify correct matching on masked match fields.
+
+    Methodology
+    Configure and connect DUT to controller. After control channel establishment, add a flow matching on the named masked field (under the given Pre-requisites for the match), action is forwarding to an output port. Send a packet matching the masked flow range on the dataplane. Verify the packet is received only at the port specified in the flow action. Send a non matching packet, verify it does not get forwarded by the flow, but a table-miss is triggered.
+
+    """
+    @wireshark_capture
+    def runTest(self):
+        logging.info("Running Testcase   for matching on IPv6 dst CIDR masking")
+        flow =       "2001:0db8:85a3::"
+        mask =       "ffff:ffff:fffe::"
+        correct1 =   "2001:0db8:85a3::8a2e:0370:7331"
+        correct2 =   "2001:0db8:85a2::ffff:ffff:ffff"
+        incorrect1 = "2001:0db8:85a1::"
+
+        match = ofp.match([
+            ofp.oxm.eth_type(0x86dd),
+            ofp.oxm.ipv6_dst_masked(parse_ipv6(flow), parse_ipv6(mask)),
+        ])
+
+        matching = {
+            "flow": simple_tcpv6_packet(ipv6_dst=flow),
+            "correct1": simple_tcpv6_packet(ipv6_dst=correct1),
+            "correct2": simple_tcpv6_packet(ipv6_dst=correct2),
+        }
+
+        nonmatching = {
+            "incorrect1": simple_tcpv6_packet(ipv6_src=incorrect1),
+        }
+
+        self.verify_match(match, matching, nonmatching)
+
+
+
 class Testcase_80_180_Missing_Prerequisite(base_tests.SimpleDataPlane):
     """
     Purpose
