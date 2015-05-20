@@ -387,6 +387,177 @@ class Testcase_320_150_MultipartTableFeaturesPropertyTypes(base_tests.SimpleData
         self.assertTrue(missing_prop == [], "Table feature prop types not reported: %s" % (missing_prop))
         logging.info("All table feature prop types are reported for each table")
 
+class Testcase_320_160_MultipartTableFeaturesOmittingMiss(base_tests.SimpleDataPlane):
+    """
+    320.160 - Table features omitting miss
+    Verify that action miss types can be modified by including only the *_ACTIONS property, and omitting the *_ACTIONS_MISS property. 
+    """
+
+    @wireshark_capture
+    def runTest(self):
+        logging.info("Running 320.160 - Table features omitting miss test")
+        logging.info("Delete all flows on DUT")
+        rv = delete_all_flows(self.controller)
+        self.assertEqual(rv, 0, "Failed to delete all flows")
+
+        ModifyTableFeatures = test_param_get("modify", 2)   # 2 - not support
+        
+        request = ofp.message.table_features_stats_request()
+        stats = get_stats(self, request)
+        self.assertIsNotNone(stats, "Did not receive table features stats reply.")
+
+        for item in stats:
+            list_prop = []
+            for prop in item.properties:
+                if type(prop) != ofp.common.table_feature_prop_apply_actions_miss:
+                    list_prop.append(prop)
+            item.properties = list_prop
+        
+        req = ofp.message.table_features_stats_request(entries=stats)
+
+        if ModifyTableFeatures==2:  # not support modify table features
+            self.controller.message_send(req)
+            reply, _ = self.controller.poll(exp_msg=ofp.const.OFPT_ERROR)
+            self.assertIsNotNone(reply, "Didn't receive expected error message.")
+            self.assertEqual(reply.err_type, ofp.const.OFPET_BAD_REQUEST,
+                             "Error type was not OFPET_BAD_REQUEST.") 
+            self.assertEqual(reply.code, ofp.const.OFPBRC_BAD_LEN,
+                             "Error type was not OFPBRC_BAD_LEN.")
+            logging.info("Received correct error message.") 
+        elif ModifyTableFeatures==0: # support modify table features
+            stats = get_stats(self, req)
+            self.assertIsNotNone(stats, "Did not receive table features stats reply.")
+
+            for item in stats:
+                for prop in item.properties:
+                    self.assertNotEqual(type(prop), ofp.common.table_feature_prop_apply_actions_miss,
+                                        "Reported wrong apply action types")
+        elif ModifyTableFeatures==1:    # disabled modify table features
+            self.controller.message_send(req)
+            reply, _ = self.controller.poll(exp_msg=ofp.const.OFPT_ERROR)
+            self.assertIsNotNone(reply, "Didn't receive expected error message.")
+        
+            self.assertEqual(reply.err_type, ofp.const.OFPET_TABLE_FEATURES_FAILED,
+                             "Error type was not OFPET_TABLE_FEATURES_FAILED.") 
+            self.assertEqual(reply.code, ofp.const.OFPTFFC_EPERM,
+                             "Error type was not OFPTFFC_EPERM.")
+            logging.info("Received correct error message.")
+			
+class Testcase_320_170_MultipartTableFeaturesOmittingExperimenters(base_tests.SimpleDataPlane):
+    """
+    320.170 - Table features omitting experimenters
+    Verify that experimenter miss types can be disabled by omitting only the *_EXPERIMENTER, and *_EXPERIMENTER_MISS properties. 
+    """
+
+    @wireshark_capture
+    def runTest(self):
+        logging.info("Running 320.170 - Table features omitting experimenters test")
+        logging.info("Delete all flows on DUT")
+        rv = delete_all_flows(self.controller)
+        self.assertEqual(rv, 0, "Failed to delete all flows")
+
+        ModifyTableFeatures = test_param_get("modify", 2)   # 2 - not support
+        
+        request = ofp.message.table_features_stats_request()
+        stats = get_stats(self, request)
+        self.assertIsNotNone(stats, "Did not receive table features stats reply.")
+
+        for item in stats:
+            list_prop = []
+            for prop in item.properties:
+                if type(prop) != ofp.common.table_feature_prop_experimenter or type(prop) != ofp.common.table_feature_prop_experimenter_miss:
+                    list_prop.append(prop)
+            item.properties = list_prop
+        
+        req = ofp.message.table_features_stats_request(entries=stats)
+
+        if ModifyTableFeatures==2:  # not support modify table features
+            self.controller.message_send(req)
+            reply, _ = self.controller.poll(exp_msg=ofp.const.OFPT_ERROR)
+            self.assertIsNotNone(reply, "Didn't receive expected error message.")
+            self.assertEqual(reply.err_type, ofp.const.OFPET_BAD_REQUEST,
+                             "Error type was not OFPET_BAD_REQUEST.") 
+            self.assertEqual(reply.code, ofp.const.OFPBRC_BAD_LEN,
+                             "Error type was not OFPBRC_BAD_LEN.")
+            logging.info("Received correct error message.") 
+        elif ModifyTableFeatures==0: # support modify table features
+            stats = get_stats(self, req)
+            self.assertIsNotNone(stats, "Did not receive table features stats reply.")
+
+            for item in stats:
+                for prop in item.properties:
+                    self.assertNotEqual(type(prop), ofp.common.ofp.common.table_feature_prop_experimenter,
+                                        "Reported wrong experimenter")
+                    self.assertNotEqual(type(prop), ofp.common.ofp.common.table_feature_prop_experimenter_miss,
+                                        "Reported wrong experimenter miss")
+        elif ModifyTableFeatures==1:    # disabled modify table features
+            self.controller.message_send(req)
+            reply, _ = self.controller.poll(exp_msg=ofp.const.OFPT_ERROR)
+            self.assertIsNotNone(reply, "Didn't receive expected error message.")
+        
+            self.assertEqual(reply.err_type, ofp.const.OFPET_TABLE_FEATURES_FAILED,
+                             "Error type was not OFPET_TABLE_FEATURES_FAILED.") 
+            self.assertEqual(reply.code, ofp.const.OFPTFFC_EPERM,
+                             "Error type was not OFPTFFC_EPERM.")
+            logging.info("Received correct error message.")
+			
+class Testcase_320_180_MultipartTableFeaturesOmittingMatch(base_tests.SimpleDataPlane):
+    """
+    320.180 - Table features omitting match
+    Verify an attempt to set table feature properties without including the match property triggers an error message. 
+    """
+
+    @wireshark_capture
+    def runTest(self):
+        logging.info("Running 320.180 - Table features omitting match test")
+        logging.info("Delete all flows on DUT")
+        rv = delete_all_flows(self.controller)
+        self.assertEqual(rv, 0, "Failed to delete all flows")
+
+        ModifyTableFeatures = test_param_get("modify", 2)   # 2 - not support
+        
+        request = ofp.message.table_features_stats_request()
+        stats = get_stats(self, request)
+        self.assertIsNotNone(stats, "Did not receive table features stats reply.")
+
+        for item in stats:
+            list_prop = []
+            for prop in item.properties:
+                if type(prop) != ofp.common.table_feature_prop_match:
+                    list_prop.append(prop)
+            item.properties = list_prop
+        
+        req = ofp.message.table_features_stats_request(entries=stats)
+
+        if ModifyTableFeatures==2:  # not support modify table features
+            self.controller.message_send(req)
+            reply, _ = self.controller.poll(exp_msg=ofp.const.OFPT_ERROR)
+            self.assertIsNotNone(reply, "Didn't receive expected error message.")
+            self.assertEqual(reply.err_type, ofp.const.OFPET_BAD_REQUEST,
+                             "Error type was not OFPET_BAD_REQUEST.") 
+            self.assertEqual(reply.code, ofp.const.OFPTFFC_BAD_LEN,
+                             "Error type was not OFPTFFC_BAD_LEN.")
+            logging.info("Received correct error message.") 
+        elif ModifyTableFeatures==0: # support modify table features
+            self.controller.message_send(req)
+            reply, _ = self.controller.poll(exp_msg=ofp.const.OFPT_ERROR)
+            self.assertIsNotNone(reply, "Didn't receive expected error message.")
+            self.assertEqual(reply.err_type, ofp.const.OFPET_TABLE_FEATURES_FAILED,
+                             "Error type was not OFPET_TABLE_FEATURES_FAILED.") 
+            self.assertEqual(reply.code, ofp.const.OFPBRC_BAD_LEN,
+                             "Error type was not OFPBRC_BAD_LEN.")
+            logging.info("Received correct error message.") 
+        elif ModifyTableFeatures==1:    # disabled modify table features
+            self.controller.message_send(req)
+            reply, _ = self.controller.poll(exp_msg=ofp.const.OFPT_ERROR)
+            self.assertIsNotNone(reply, "Didn't receive expected error message.")
+        
+            self.assertEqual(reply.err_type, ofp.const.OFPET_TABLE_FEATURES_FAILED,
+                             "Error type was not OFPET_TABLE_FEATURES_FAILED.") 
+            self.assertEqual(reply.code, ofp.const.OFPTFFC_EPERM,
+                             "Error type was not OFPTFFC_EPERM.")
+            logging.info("Received correct error message.")
+			
 
 
 class Testcase_320_190_MultipartTableFeaturesOrder(base_tests.SimpleDataPlane):
@@ -415,6 +586,61 @@ class Testcase_320_190_MultipartTableFeaturesOrder(base_tests.SimpleDataPlane):
         self.assertEqual(len(stats), tables_no, "Table features stats is not correct")
         self.assertTrue(stats[0].table_id < stats[len(stats)-1].table_id, "Table ID is not in order")
         logging.info("Table features order is correct")
+
+class Testcase_320_200_MultipartTableFeaturesNameModification(base_tests.SimpleDataPlane):
+    """
+    320.200 - Table features name modification
+    Verify table names can be modified through a table freatures request. 
+    """
+
+    @wireshark_capture
+    def runTest(self):
+        logging.info("Running 320.200 - Table features name modification test")
+        logging.info("Delete all flows on DUT")
+        rv = delete_all_flows(self.controller)
+        self.assertEqual(rv, 0, "Failed to delete all flows")
+
+        table_id = test_param_get("table", 0)
+        ModifyTableFeatures = test_param_get("modify", 2)   # 2 - not support
+        
+        request = ofp.message.table_features_stats_request()
+        stats = get_stats(self, request)
+        self.assertIsNotNone(stats, "Did not receive table features stats reply.")
+
+        for item in stats:
+            if item.table_id == table_id:
+                item.name = "x" 
+        
+        req = ofp.message.table_features_stats_request(entries=stats)
+
+        if ModifyTableFeatures==2:  # not support modify table features
+            self.controller.message_send(req)
+            reply, _ = self.controller.poll(exp_msg=ofp.const.OFPT_ERROR)
+            self.assertIsNotNone(reply, "Didn't receive expected error message.")
+            self.assertEqual(reply.err_type, ofp.const.OFPET_BAD_REQUEST,
+                             "Error type was not OFPET_BAD_REQUEST.") 
+            self.assertEqual(reply.code, ofp.const.OFPBRC_BAD_LEN,
+                             "Error type was not OFPBRC_BAD_LEN.")
+            logging.info("Received correct error message.") 
+        elif ModifyTableFeatures==0: # support modify table features
+            stats = get_stats(self, req)
+            self.assertIsNotNone(stats, "Did not receive table features stats reply.")
+
+            for item in stats:
+                if item.table_id == table_id:
+                    self.assertEqual(item.name, "x",
+                                     "Table name was not correct.")
+        elif ModifyTableFeatures==1:    # disabled modify table features
+            self.controller.message_send(req)
+            reply, _ = self.controller.poll(exp_msg=ofp.const.OFPT_ERROR)
+            self.assertIsNotNone(reply, "Didn't receive expected error message.")
+        
+            self.assertEqual(reply.err_type, ofp.const.OFPET_TABLE_FEATURES_FAILED,
+                             "Error type was not OFPET_TABLE_FEATURES_FAILED.") 
+            self.assertEqual(reply.code, ofp.const.OFPTFFC_EPERM,
+                             "Error type was not OFPTFFC_EPERM.")
+            logging.info("Received correct error message.")
+			
 
 
 
@@ -607,6 +833,81 @@ class Testcase_320_250_MultipartTableFeaturesReportedOrder(Testcase_320_190_Mult
     Verify table features are reported from the lowest table number to the highest table number.
     """
 
+	
+class Testcase_320_260_MultipartTableFeaturesMaxNameField(base_tests.SimpleDataPlane):
+    """
+    320.260 - Table features max name length
+    Verify the table's name can be set to up to 32 characters in length.
+    """
+
+    @wireshark_capture
+    def runTest(self):
+        logging.info("Running 320.260 - Table features max name length test")
+        logging.info("Delete all flows on DUT")
+        rv = delete_all_flows(self.controller)
+        self.assertEqual(rv, 0, "Failed to delete all flows")
+
+        table_id = test_param_get("table", 0)
+        ModifyTableFeatures = test_param_get("modify", 2)   # 2 - not support
+        
+        request = ofp.message.table_features_stats_request()
+        stats = get_stats(self, request)
+        self.assertIsNotNone(stats, "Did not receive table features stats reply.")
+
+        for item in stats:
+            if item.table_id == table_id:
+                item.name = "something"
+        
+        req = ofp.message.table_features_stats_request(entries=stats)
+
+        if ModifyTableFeatures==2:  # not support modify table features
+            self.controller.message_send(req)
+            reply, _ = self.controller.poll(exp_msg=ofp.const.OFPT_ERROR)
+            self.assertIsNotNone(reply, "Didn't receive expected error message.")
+            self.assertEqual(reply.err_type, ofp.const.OFPET_BAD_REQUEST,
+                             "Error type was not OFPET_BAD_REQUEST.") 
+            self.assertEqual(reply.code, ofp.const.OFPBRC_BAD_LEN,
+                             "Error type was not OFPBRC_BAD_LEN.")
+            logging.info("Received correct error message.") 
+        elif ModifyTableFeatures==0: # support modify table features
+            stats = get_stats(self, req)
+            self.assertIsNotNone(stats, "Did not receive table features stats reply.")
+
+            for item in stats:
+                if item.table_id == table_id:
+                    self.assertEqual(item.name, "something",
+                                     "Table name was not correct.")
+        elif ModifyTableFeatures==1:    # disabled modify table features
+            self.controller.message_send(req)
+            reply, _ = self.controller.poll(exp_msg=ofp.const.OFPT_ERROR)
+            self.assertIsNotNone(reply, "Didn't receive expected error message.")
+        
+            self.assertEqual(reply.err_type, ofp.const.OFPET_TABLE_FEATURES_FAILED,
+                             "Error type was not OFPET_TABLE_FEATURES_FAILED.") 
+            self.assertEqual(reply.code, ofp.const.OFPTFFC_EPERM,
+                             "Error type was not OFPTFFC_EPERM.")
+            logging.info("Received correct error message.")
+
+        request = ofp.message.table_features_stats_request()
+        stats = get_stats(self, request)
+        self.assertIsNotNone(stats, "Did not receive table features stats reply.")
+
+        # Set the name field of the table under test.
+        for item in stats:
+            if item.table_id == table_id:
+                item.name = "x"*32
+        
+        request = ofp.message.table_features_stats_request(entries=stats)
+        stats = get_stats(self, request)
+        self.assertIsNotNone(stats, "Did not receive table features stats reply.")
+        for item in stats:
+            if item.table_id == table_id:
+                if item.name == ("x" * 31):
+                    logging.info("Table name was correct.")
+                elif item.name == "something":
+                    logging.info("Table name was correct.")
+                else:
+                    self.assertEqual(0, 1,"Table name was not correct.")
 
 
 class Testcase_320_270_MultipartTableFeaturesPropertyType(Testcase_320_150_MultipartTableFeaturesPropertyTypes):
