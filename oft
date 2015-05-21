@@ -519,8 +519,12 @@ if config["list_test_names"]:
 suite = unittest.TestSuite()
 
 for (modname, (mod, tests)) in test_modules.items():
-    for (testname, test) in tests.items():
-        suite.addTest(test())
+    list=sorted(tests.items(), key=lambda e: e[1])
+    for elem in list:
+        for (testname, test) in tests.items():
+            if not cmp(elem[1],test):
+                suite.addTest(test())
+                break;
 
 # Allow platforms to import each other
 sys.path.append(config["platform_dir"])
