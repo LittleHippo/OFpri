@@ -21,9 +21,9 @@ from oftest.testutils import *
 from oftest.parse import parse_ipv6
 from oftest.oflog import *
 from time import sleep
-
+"""
 class Testcase_390_10_packet_out(BII_testgroup200.Testcase_200_110_basic_OFPT_PACKET_OUT):
-    """
+    """"""
     Purpose
     Verify packets sent via packet_out are received.
 
@@ -31,12 +31,12 @@ class Testcase_390_10_packet_out(BII_testgroup200.Testcase_200_110_basic_OFPT_PA
     200.110
 
 
-    """
+    """"""
 
 
 
 class Testcase_390_20_packet_out_buffer_id(base_tests.SimpleDataPlane):
-    """
+    """"""
     Purpose
     Verify packets sent via packet_out are received.
 
@@ -44,7 +44,7 @@ class Testcase_390_20_packet_out_buffer_id(base_tests.SimpleDataPlane):
     200.110
 
 
-    """
+    """"""
     @wireshark_capture
     def runTest(self):
         logging.info("Running testcase 390.20 - packet out buffer")
@@ -82,8 +82,7 @@ class Testcase_390_20_packet_out_buffer_id(base_tests.SimpleDataPlane):
 
         self.controller.message_send(request)
         verify_packet(self, pkt, out_port)
-
-
+"""
 class Testcase_390_30_packet_out_in_port(base_tests.SimpleDataPlane):
     """
     Purpose
@@ -130,9 +129,9 @@ class Testcase_390_30_packet_out_in_port(base_tests.SimpleDataPlane):
 
 
 
-
+"""
 class Testcase_390_60_packet_out_data(BII_testgroup200.Testcase_200_110_basic_OFPT_PACKET_OUT):
-    """
+    
     Purpose
     Verify packets sent via packet_out are received.
 
@@ -351,9 +350,9 @@ class Testcase_390_100_packet_out_actions(base_tests.SimpleDataPlane):
         self.assertIsNone(reply, "Received an error")
         
 
-        
+"""     
 class Testcase_390_40_packet_out_action_field(Testcase_390_100_packet_out_actions):
-    """
+    
     Purpose
     Verify that packet_out message with action list is supported by the switch.
 

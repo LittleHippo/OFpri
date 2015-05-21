@@ -25,12 +25,12 @@ from oftest.oflog import *
 from oftest.testutils import *
 from time import sleep
 
-
+"""
 class Testcase_250_10_SwitchConfigConfigrationRequest(base_tests.SimpleProtocol):
-    """
+    """"""
     250.10 - Configuration request
     Verify that the controller can correctly get the switch information.
-    """
+    """"""
 
     @wireshark_capture
     def runTest(self):
@@ -46,10 +46,10 @@ class Testcase_250_10_SwitchConfigConfigrationRequest(base_tests.SimpleProtocol)
 
 
 class Testcase_250_20_SwitchConfigFlagsBitmap(base_tests.SimpleProtocol):
-    """
+    """"""
     250.20 - Bitmap of OFPC_* flags
     Verify OFP_SWITCH_CONFIG supports flags
-    """
+    """"""
 
     @wireshark_capture
     def runTest(self):
@@ -62,7 +62,7 @@ class Testcase_250_20_SwitchConfigFlagsBitmap(base_tests.SimpleProtocol):
         self.assertIsNotNone(reply,'Did not receive get config reply')
         logging.info("Frag is set to %s", reply.flags)
 
-
+"""
 
 class Testcase_250_70_SwitchConfigMaxBytes(base_tests.SimpleDataPlane):
     """
@@ -172,13 +172,13 @@ class Testcase_250_140_SwitchConfigMissSendLen(base_tests.SimpleDataPlane):
            
 
 
-
+"""
 
 class Testcase_250_150_SwitchConfigMissSendLenNoBuffer(base_tests.SimpleDataPlane):
-    """
+    """"""
     250.150 - MISS_SEND_LEN value set to OFPCML_NO_BUFFER
     Check the complete message is sent if OFPCML_NO_BUFFER set.
-    """
+    """"""
 
     @wireshark_capture
     def runTest(self):
@@ -209,3 +209,4 @@ class Testcase_250_150_SwitchConfigMissSendLenNoBuffer(base_tests.SimpleDataPlan
         self.assertIsNotNone(rv, "Did not receive packet in message")
         self.assertEqual(len(rv.data), len(pkt), "length of data in packet in is not correct")
         logging.info("Got packet in as expected")
+"""

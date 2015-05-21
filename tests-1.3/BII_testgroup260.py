@@ -32,14 +32,14 @@ import BII_testgroup230
 from oftest.oflog import *
 from oftest.testutils import *
 from time import sleep
-
+"""
 class Testcase_260_30_FlowmodMsg(BII_testgroup60.Testcase_60_20_OXM_OF_IN_PORT):
-    """
+    
     Tested in 60.20
     260.30 - OFPT_FLOW_MOD message modifies flow table
     Verify OFPT_FLOW_MOD message modifies flow table.
-    """
-
+    
+"""
 
 
 class Testcase_260_40_FlowmodCookies(base_tests.SimpleDataPlane):
@@ -524,64 +524,64 @@ class Testcase_260_120_FlowmodDelete_OFPTT_ALL(base_tests.SimpleDataPlane):
         self.assertEqual(err.code, ofp.const.OFPFMFC_BAD_TABLE_ID,"Error code is not OFPFMFC_BAD_TABLE_ID")
         logging.info("Received expected error message")
         
-
+"""
 
 class Testcase_260_130_FlowmodCommand(BII_testgroup60.Testcase_60_20_OXM_OF_IN_PORT):
-    """
+    """"""
     Tested in 60.20
     260.130 - OFP_FLOW_MOD_COMMAND
     Verify the switch is able to match on the previously named field as a single header field match (under the given Pre-requisites for the match).
-    """
+    """"""
 
 
 
 class Testcase_260_140_FlowmodNewFlow(BII_testgroup140.Testcase_140_70_Modify_Preserved_fields):
-    """
+    """"""
     Tested in 140.70
     260.140 - New flow.
     Test a new flow can be added OFPFCC_ADD
-    """
+    """"""
 
 
 
 class Testcase_260_150_FlowmodModifyAllMatchingFlows(BII_testgroup140.Testcase_140_70_Modify_Preserved_fields):
-    """ 
+    """ """
     Tested in 140.70
     260.150 - Modify all matching flows
     For ofp_flow_mod messages using a modify or modify_strict command, verify that the instruction field of all matching flows are updated. 
     In addition verify that cookies, timeouts, flags, counters, and durations are not modified. 
-    """
+    """ """
 
 
 
 class Testcase_260_160_FlowmodModifyStrict(BII_testgroup140.Testcase_140_70_Modify_Preserved_fields):
-    """ 
+    """ """
     Tested in 140.70
     260.160 - Modify entry strictly matching wildcards and priority.
     For ofp_flow_mod messages using a modify or modify_strict command, verify that the instruction field of all matching flows are updated. 
     In addition verify that cookies, timeouts, flags, counters, and durations are not modified.  
-    """
+    """ """
 
 
 
 class Testcase_260_170_FlowmodDeleteAllMatchingFlows(BII_testgroup140.Testcase_140_140_Strict_delete):
-    """ 
+    """ """
     Tested in 140.140
     260.170 - Delete all matching flows.
     For ofp_flow_mod messages using a delete or delete_strict command, verify that the DUT removes all matching flows according to the 
     behaviors defined for strict and nonstrict. 
-    """
+    """ """
 
 
 
 class Testcase_260_180_FlowmodDeleteStrict(BII_testgroup140.Testcase_140_140_Strict_delete):
-    """ 
+    
     Tested in 140.140
     260.180 - Delete entry strictly matching wildcards and priority.
     For ofp_flow_mod messages using a delete or delete_strict command, verify that the DUT removes all matching flows according to the 
     behaviors defined for strict and nonstrict. 
-    """
-
+    
+"""
 
 
 class Testcase_260_190_FlowmodIdleTimeout(base_tests.SimpleDataPlane):
@@ -675,18 +675,18 @@ class Testcase_260_200_FlowmodHardTimeout(base_tests.SimpleDataPlane):
         logging.info("Flow timeout as expected")
 
 
-
+"""
 class Testcase_260_210_FlowmodIdleTimeoutwithHardTimeout0(Testcase_260_190_FlowmodIdleTimeout):
-    """
+    
     Tested in 260.190
     260.210 - Flow modification with IDLE_TIMEOUT with HARD_TIMEOUT = 0
     Treating flow with IDLE_TIMEOUT set and HARD_TIMEOUT = 0.
     """
 
-
+"""
 
 class Testcase_260_220_FlowmodHardTimeoutwithIdleTimeout0(Testcase_260_200_FlowmodHardTimeout):
-    """
+    
     Tested in 260.200
     260.220 - Flow modification with IDLE_TIMEOUT = 0  with HARD_TIMEOUT set.
     Treating flow with IDLE_TIMOUTE = 0 and HARD_TIMEOUT SET.
@@ -859,13 +859,41 @@ class Testcase_260_250_FlowmodPriority(base_tests.SimpleDataPlane):
 
 
 
-class Testcase_260_260_FlowmodModifyDeleteBuffer(BII_testgroup230.Testcase_230_60_ActionHeaderMaxLenNoBuffer):
+class Testcase_260_260_FlowmodModifyDeleteBuffer(base_tests.SimpleDataPlane):
     """ 
     Tested in 230.60
     260.260 - Buffered packet to apply to, or OFP_NO_BUFFER. Not meaningful for OFPFC_DELETE*
     Verify packets "send to controller" action with MAX_LEN of OFPCML_NO_BUFFER set to 0xffff are sent in their entirety
     """
+    @wireshark_capture
+    def runTest(self):
+        logging.info("Running 230.60 - OFPCML_NO_BUFFER = 0xffff packets are sent entirely test")
+        logging.info("Delete all flows on DUT")
+        rv = delete_all_flows(self.controller)
+        self.assertEqual(rv, 0, "Failed to delete all flows")
+        
+        in_port, = openflow_ports(1)
+        table_id=0
+        priority=1
+        actions=[ofp.action.output(port=ofp.OFPP_CONTROLLER, max_len=ofp.const.OFPCML_NO_BUFFER)]
+        instructions=[ofp.instruction.apply_actions(actions=actions)]
+       	match = ofp.match([ofp.oxm.eth_type(0x0800)])
+        req = ofp.message.flow_add(table_id=table_id,
+                               match= match,
+                               buffer_id=ofp.OFP_NO_BUFFER,
+                               instructions=instructions,
+                                priority=priority)
+        logging.info("Sending flowmod")
+        rv = self.controller.message_send(req)
+        self.assertTrue(rv != -1, "Failed to insert flow")
 
+        pkt = simple_tcp_packet()
+        self.dataplane.send(in_port, str(pkt))
+        logging.info("Sending a dataplane packet")
+        rv, _ = self.controller.poll(exp_msg=ofp.const.OFPT_PACKET_IN)
+        self.assertIsNotNone(rv, "Did not receive packet in message")
+        self.assertEqual(len(rv.data), len(pkt), "length of data in packet in is not correct")
+        logging.info("Got packet in as expected")
 
 class Testcase_260_270_FlowmodBufferID(base_tests.SimpleDataPlane):
     """
@@ -978,9 +1006,9 @@ class Testcase_260_280_FlowmodBufferIDIgnored(base_tests.SimpleDataPlane):
         logging.info("Packet dropped as expected")
 
 
-
+"""
 class Testcase_260_290_FlowmodModifyDeleteOutport(BII_testgroup140.Testcase_140_180_Delete_filters):
-    """ 
+    
     Tested in 140.180
     260.290 - For OFPFC_DELETE* commands, require matching entries to include this as an output port. A value of OFPP_ANY indicates no restriction.
     OFPFC_DELETE command for OUT_PORT as a filter.
@@ -1124,40 +1152,40 @@ class Testcase_260_320_FlowmodModifyStrict(base_tests.SimpleDataPlane):
         logging.info("Packet forwarded as expected")
 
 
-
+"""
 class Testcase_260_340_FlowmodRemoveFlow(BII_testgroup140.Testcase_140_110_Delete_Flow_removed):
-    """ 
+    """ """
     Tested in 140.110
     260.340 - Send flow removed message when flow expires or is deleted.
     Verify correct switch behavior with OFPFF_SEND_FLOW_REM flag
-    """
+    """"""
 
 
 
 class Testcase_260_350_FlowmodOverlapping(BII_testgroup140.Testcase_140_10_Overlap_Check):
-    """ 
+    """ """
     Tested in 140.10
     260.350 - Check for overlapping entries first
     Switch behavior with OFPFF_CHECK_OVERLAP flag
-    """
+    """"""
 
 
 
 class Testcase_260_360_FlowmodOverlappingError(BII_testgroup140.Testcase_140_10_Overlap_Check):
-    """ 
+    """ """
     Tested in 140.10
     260.360 - Check for error generation for OVERLAPPING entries
     Switch behavior with OFPFF_CHECK_OVERLAP flag and flow entry with same priority
-    """
+    """ """
 
 
 
 class Testcase_260_370_FlowmodResetCounter(BII_testgroup140.Testcase_140_40_Add_Reset_Counters):
-    """ 
+    
     Tested in 140.40
     260.370 - Reset flow packet and byte counts
     Verify flow entry counters are cleared.
-    """
+    """ 
 
 
 
@@ -1332,10 +1360,10 @@ class Testcase_260_410_FlowmodFlagsIgnored(base_tests.SimpleDataPlane):
         self.assertEqual(stats[0].flags, ofp.OFPFF_NO_BYT_COUNTS, "The flags are incorrect")
         logging.info("The flags are correct")
 
-
+"""
 
 class Testcase_260_420_FlowmodInvalidInstructions(BII_testgroup150.Testcase_150_50_unsupported_instruction):
-    """ 
+    
     Tested in 150.50
     260.420 - Check how an invalid or unsupported instructions are handled.
     Check error generation for invalid or unsupported instruction.

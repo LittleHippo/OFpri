@@ -26,12 +26,12 @@ from oftest.testutils import *
 from time import sleep
 
 
-
+"""
 class Testcase_230_10_ActionHeaderOutput(base_tests.SimpleDataPlane):
-    """
+    
     230.10 - OFPAT_OUTPUT out to PORT
     Test OFPAT_OUTPUT action sends to out port 
-    """
+    
 
     @wireshark_capture
     def runTest(self):
@@ -67,10 +67,10 @@ class Testcase_230_10_ActionHeaderOutput(base_tests.SimpleDataPlane):
 
 
 class Testcase_230_20_ActionHeaderOutput2Port(base_tests.SimpleDataPlane):
-    """
+    
     230.20 - Flow with action output to port
     Verify packet is sent to a port with OUTPUT action.
-    """
+    
 
     @wireshark_capture
     def runTest(self):
@@ -107,10 +107,10 @@ class Testcase_230_20_ActionHeaderOutput2Port(base_tests.SimpleDataPlane):
 
 
 class Testcase_230_30_ActionHeaderMaxLen(base_tests.SimpleDataPlane):
-    """
+    
     230.30 - MAX_LEN size packets
     Verify packet "send to controller" action sends MAX_LEN bytes
-    """
+    
 
     @wireshark_capture
     def runTest(self):
@@ -141,7 +141,7 @@ class Testcase_230_30_ActionHeaderMaxLen(base_tests.SimpleDataPlane):
         self.assertIsNotNone(rv, "Did not receive packet in message")
         self.assertTrue(len(rv.data)<=100, "length of data in packet in is not correct")
         logging.info("Got packet in as expected")
-
+"""
 
 
 class Testcase_230_40_ActionHeaderMaxLenZero(base_tests.SimpleDataPlane):

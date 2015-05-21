@@ -21,9 +21,9 @@ from oftest.testutils import *
 from oftest.parse import parse_ipv6
 from oftest.oflog import *
 from time import sleep
-
+"""
 class Testcase_420_10_flow_removed_message(BII_testgroup140.Testcase_140_110_Delete_Flow_removed):
-    """
+    
     Purpose
     Check a flow is deleted while "OFPFF_SEND_FLOW_REM" flag is set, and verify a flow removed message is generated.
 

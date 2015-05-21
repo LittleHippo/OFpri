@@ -167,13 +167,13 @@ class Testcase_450_30_HelloMessage2Bitmap(base_tests.SimpleDataPlane):
         del self.controller
         base_tests.BaseTest.tearDown(self)
 
-
+"""
 class Testcase_450_40_EchoData(base_tests.SimpleDataPlane):
 
-    """
+    """"""
     450.40 - Basic OFPT_ECHO_REQUEST / OFPT_ECHO_REPLY
     Verify response to ECHO request
-    """
+    """"""
     @wireshark_capture
     def runTest(self): 
         logging = get_logger()
@@ -186,15 +186,23 @@ class Testcase_450_40_EchoData(base_tests.SimpleDataPlane):
         self.assertEqual(reply.data, request.data, "Data is not the same as sended Echo Request Message")
         logging.info("Received a Echo Request")
 
+"""
 
-
-class Testcase_450_50_EchoEmpty(BII_testgroup200.Testcase_200_30_basic_ECHO_REQUEST):
+class Testcase_450_50_EchoEmpty(base_tests.SimpleDataPlane):
 
     """
     Tested in 200.30
     450.50 - Echo request reply with no data
     Verify response to ECHO request
     """
+    @wireshark_capture
+    def runTest(self):
+        logging.info("Running testcase 200.30 basic ECHO REQUEST")
+        delete_all_flows(self.controller)
+        request = ofp.message.echo_request()
+        self.controller.message_send(request)
+        reply,_= self.controller.poll(exp_msg = ofp.OFPT_ECHO_REPLY, timeout = 3)
+        self.assertIsNotNone(reply, "Did not receive echo_reply messge")
 
 
 

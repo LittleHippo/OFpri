@@ -668,9 +668,9 @@ class Testcase_340_240_MultipartPortDescPortName(base_tests.SimpleDataPlane):
         logging.info("Reported port_name in port desc is correct")
 
 
-
+"""
 class Testcase_340_250_MultipartPortDescSetPortConfig(BII_testgroup100.Testcase_100_60_ALL_OFPPC_NO_FWD):
-    """
+    
     340.250 - Set port configuration
     Verify that a packet matching a flow with an associated  output:ALL action gets forwarded to all ports except the 
     ingress port and except ports configured for OFPPC_NO_FWD

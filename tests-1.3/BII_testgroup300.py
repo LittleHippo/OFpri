@@ -91,10 +91,9 @@ class Testcase_300_80_MultipartReplyMoreFlag(base_tests.SimpleDataPlane):
 
         logging.info("Switch behavior is as expected")
 
-
-
+"""
 class Testcase_300_90_MultipartReplyMoreFlagSet(BII_testgroup300.Testcase_300_80_MultipartReplyMoreFlag):
-    """
+    
     Tested in 300.80
     300.90 - Multipart reply more flag set
     Verify that replies composed of multiple ofp_multipart_reply messages have the OFPMPF_REPLY_MORE flag set on all but the last message.
@@ -129,31 +128,31 @@ class Testcase_300_100_MultipartXid(base_tests.SimpleDataPlane):
         logging.info("Switch behavior is as expected")
 
 
-
+"""
 class Testcase_300_110_MultipartXidType(BII_testgroup300.Testcase_300_100_MultipartXid):
-    """
+    """"""
     Tested in 300.100
     300.110 - Multipart message xid type
     Verify that replies composed of multiple ofp_multipart_reply messages have the same xid as the request.
-    """
+    """"""
 
 
 
 class Testcase_300_130_MultipartXidTypeDesc(BII_testgroup40.Testcase_40_170_ManufacturerDescription):
-    """
+    """"""
     Tested in 40.170
     300.130 - Multipart type description
     Verify the switch reports the Manufacturer description
-    """
+    """"""
 
         
 
 
 class Testcase_300_140_MultipartTypeFlowStats(base_tests.SimpleDataPlane):
-    """
+    """"""
     300.140 - Multipart type flow statistics
     Verify the switch can reply to the OFPMP_FLOW multipart request
-    """
+    """"""
 
     @wireshark_capture
     def runTest(self):
@@ -207,10 +206,10 @@ class Testcase_300_140_MultipartTypeFlowStats(base_tests.SimpleDataPlane):
 
 
 class Testcase_300_150_MultipartTypeAggFlowStats(base_tests.SimpleDataPlane):
-    """
+    """"""
     300.150 - Multipart type aggregate flow statistics
     verify the switch can reply to the OFPMP_AGGREGATE multipart request.
-    """
+    """"""
 
     @wireshark_capture
     def runTest(self):
@@ -227,10 +226,10 @@ class Testcase_300_150_MultipartTypeAggFlowStats(base_tests.SimpleDataPlane):
 
 
 class Testcase_300_160_MultipartTypeFlowTableStats(base_tests.SimpleDataPlane):
-    """
+    """"""
     300.160 - Multipart type flow table statistics
     Verify that the n_tables ofp_table_stats messages are returned in response to a multipart table request.
-    """
+    """"""
 
     @wireshark_capture
     def runTest(self):
@@ -250,11 +249,11 @@ class Testcase_300_160_MultipartTypeFlowTableStats(base_tests.SimpleDataPlane):
 
 
 class Testcase_300_170_MultipartTypePortStats(base_tests.SimpleDataPlane):
-    """
+    """"""
     300.170 - Multipart type port statistics
     The port_no field optionally filters the stats request to the given port. To request all port statistics, 
     port_no must be set to OFPP_ANY. The response is reported in ofp_port_stats structs.
-    """
+    """"""
 
     @wireshark_capture
     def runTest(self):
@@ -282,7 +281,7 @@ class Testcase_300_170_MultipartTypePortStats(base_tests.SimpleDataPlane):
 
 
 class Testcase_300_180_MultipartTypeQueueStats(BII_testgroup380.Testcase_380_40_MultipartQueueStats):
-    """
+    """"""
     300.180 - Multipart type queue statistics
     Verify that the n_tables ofp_table_stats messages are returned in response to a multipart table request.Check that a queue stats 
     request with a port field set to OFPP_ANY results in a queue stats reply which includes each test ports' configured queues.
@@ -580,12 +579,12 @@ class Testcase_300_240_MultipartTypeMeterFeatures(base_tests.SimpleDataPlane):
             self.assertEqual(reply.stats_type,ofp.const.OFPST_METER_FEATURES,"Received msg is not meter features")
 
 
-
+"""
 class Testcase_300_250_MultipartTypeTableFeatures(base_tests.SimpleDataPlane):
-    """
+    
     300.250 - Multipart type table features
     Verify that the oft_multipart_reply contains correct information without error.
-    """
+    
 
     @wireshark_capture
     def runTest(self):
@@ -597,7 +596,7 @@ class Testcase_300_250_MultipartTypeTableFeatures(base_tests.SimpleDataPlane):
         reply = get_stats(self, request)
         self.assertIsNotNone(reply, "Did not receive table stats reply.")
         logging.info("Received table stats reply as expected")
-
+"""
 
 
 class Testcase_300_260_MultipartTypePortDesc(base_tests.SimpleDataPlane):

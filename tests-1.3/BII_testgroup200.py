@@ -26,8 +26,9 @@ import BII_testgroup40
 import BII_testgroup50
 import BII_testgroup60
 
+"""
 class Testcase_200_10_basic_OFPT_HELLO(BII_testgroup10.Testcase_10_70_VersionNegotiationSuccess):
-    """
+    
     Purpose
     Check the switch negotiates the correct version with the controller, based on the version field.
 
@@ -35,19 +36,19 @@ class Testcase_200_10_basic_OFPT_HELLO(BII_testgroup10.Testcase_10_70_VersionNeg
     10.70
 
 
-    """
+    
         
         
 
 class Testcase_200_20_basic_OFPT_ERROR(base_tests.SimpleDataPlane):
-    """
+    
     Purpose
     Verify correct behavior in case of version negotiation failure.
 
     Methodology
     10.80
 
-    """
+    
     @wireshark_capture
     def runTest(self):
         logging.info("Running 10.80 - Version negotiation failure test")
@@ -64,7 +65,7 @@ class Testcase_200_20_basic_OFPT_ERROR(base_tests.SimpleDataPlane):
         logging.info("Received OFPET_HELLO_FAILED")
         self.assertEqual(rv.code, ofp.const.OFPHFC_INCOMPATIBLE, "Error Code is not correct. Expect error code: OFPHFC_INCOMPATIBLE")
         logging.info("Received Error code is OFPHFC_INCOMPATIBLE")
-
+"""
         
 class Testcase_200_30_basic_ECHO_REQUEST(base_tests.SimpleDataPlane):
     """
@@ -127,9 +128,9 @@ class Testcase_200_30_basic_ECHO_REQUEST(base_tests.SimpleDataPlane):
         self.assertEqual(str(rv.data), pkt, ("Received pkt did not match sending pkt."))
         logging.info("Packet In received as expected")
         """
-
+"""
 class Testcase_200_60_basic_OFPT_FLOW_REMOVED(BII_testgroup140.Testcase_140_110_Delete_Flow_removed):
-    """
+    
     Purpose
     Check a flow is deleted while "OFPFF_SEND_FLOW_REM" flag is set
 
@@ -178,9 +179,9 @@ class Testcase_200_70_basic_OFPT_PORT_STATUS(base_tests.SimpleDataPlane):
             (response, raw) = self.controller.poll(ofp.OFPT_PORT_STATUS, timeout=180)
             self.assertTrue(response is not None,
                         'Port Status Message not generated')
-
+"""
 class Testcase_200_80_basic_OFPT_FEATURES_REQUEST(BII_testgroup40.Testcase_40_10_FeaturesReplyDatapathID):
-    """
+    
     Purpose
     Verify that an OFPT_FEATURES_REQUEST message generates an OFPT_FEATURES_REPLY from the switch containing a valid datapath ID.
 
@@ -190,9 +191,9 @@ class Testcase_200_80_basic_OFPT_FEATURES_REQUEST(BII_testgroup40.Testcase_40_10
     """
 
 
-
+"""
 class Testcase_200_90_basic_OFPT_GET_CONFIG_REQUEST(BII_testgroup40.Testcase_40_120_GetConfigMissSendLen):
-    """
+    
 
     Purpose
     Check the miss_send_len value returned by the switch.
@@ -257,9 +258,9 @@ class Testcase_200_110_basic_OFPT_PACKET_OUT(base_tests.SimpleDataPlane):
         verify_packet(self, pkt, out_port)
 
 
-
+"""
 class Testcase_200_120_basic_OFPT_FLOW_MOD(BII_testgroup60.Testcase_60_20_OXM_OF_IN_PORT):
-    """
+    
 
     Purpose
     Verify the switch is able to match on the previously named field as a single header field match (under the given Pre-requisites for the match).
@@ -385,9 +386,9 @@ class Testcase_200_150_basic_OFPT_TABLE_MOD(base_tests.SimpleDataPlane):
             self.assertEqual(0, 1, "Error type was not correct")
 
 
-
+"""
 class Testcase_200_160_basic_OFPT_MULTIPART_REQUEST(BII_testgroup40.Testcase_40_60_FeaturesReplyTableStats):
-    """
+    
 
     Purpose
     Check whether the switch supports table statistics 

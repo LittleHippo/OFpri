@@ -66,6 +66,43 @@ class Testcase_10_20_Certificate_configuration_TLS(base_tests.EncryptedProtocol)
 		self.assertEqual(rv.type, ofp.OFPT_ECHO_REPLY, "Did not receive echo reply message")
 		logging.info("Received Echo Reply from the switch")
 		
+		
+		
+class Testcase_10_30_TCPdefaultPort(base_tests.SimpleProtocol):
+    """
+    10.30 - TCP default Port
+    Test unencrypted control channel establishment on default port
+    """
+
+    @wireshark_capture
+    def runTest(self):
+        logging.info("Running 10.30 - TCP default Port test")
+        timeout = 5
+        request=ofp.message.echo_request()
+        self.controller.message_send(request)
+        (rv, pkt) = self.controller.poll(exp_msg=ofp.OFPT_ECHO_REPLY,timeout=timeout)
+        self.assertIsNotNone(rv, 'Did not receive Echo reply')
+        logging.info("Received echo reply with port "+str(config["controller_port"]))
+
+
+        
+class Testcase_10_40_TCPNondefaultPort(base_tests.SimpleProtocol):
+    """
+    10.40 - TCP non default Port
+    Test unencrypted control channel establishment on non default port
+    """
+
+    @wireshark_capture
+    def runTest(self):
+        logging.info("Running 10.40 - TCP non default Port test")
+        timeout = 5
+        request=ofp.message.echo_request()
+        self.controller.message_send(request)
+        (rv, pkt) = self.controller.poll(exp_msg=ofp.OFPT_ECHO_REPLY,timeout=timeout)
+        self.assertIsNotNone(rv, 'Did not receive Echo reply')
+        logging.info("Received echo reply with port "+str(config["controller_port"]))
+		
+		
 class Testcase_10_50_TLS_with_default_TCP_port(base_tests.EncryptedProtocol):
 	"""
     Purpose
@@ -164,39 +201,7 @@ class Testcase_10_70_VersionNegotiationSuccess(base_tests.SimpleProtocol):
 
         
 
-class Testcase_10_30_TCPdefaultPort(base_tests.SimpleProtocol):
-    """
-    10.30 - TCP default Port
-    Test unencrypted control channel establishment on default port
-    """
 
-    @wireshark_capture
-    def runTest(self):
-        logging.info("Running 10.30 - TCP default Port test")
-        timeout = 5
-        request=ofp.message.echo_request()
-        self.controller.message_send(request)
-        (rv, pkt) = self.controller.poll(exp_msg=ofp.OFPT_ECHO_REPLY,timeout=timeout)
-        self.assertIsNotNone(rv, 'Did not receive Echo reply')
-        logging.info("Received echo reply with port "+str(config["controller_port"]))
-
-
-        
-class Testcase_10_40_TCPNondefaultPort(base_tests.SimpleProtocol):
-    """
-    10.40 - TCP non default Port
-    Test unencrypted control channel establishment on non default port
-    """
-
-    @wireshark_capture
-    def runTest(self):
-        logging.info("Running 10.40 - TCP non default Port test")
-        timeout = 5
-        request=ofp.message.echo_request()
-        self.controller.message_send(request)
-        (rv, pkt) = self.controller.poll(exp_msg=ofp.OFPT_ECHO_REPLY,timeout=timeout)
-        self.assertIsNotNone(rv, 'Did not receive Echo reply')
-        logging.info("Received echo reply with port "+str(config["controller_port"]))
         
 
 

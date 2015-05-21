@@ -25,12 +25,12 @@ from oftest.oflog import *
 from oftest.testutils import *
 from time import sleep
 
-
+"""
 class Testcase_240_10_SwitchFeatures(base_tests.SimpleProtocol):
-    """
+    """"""
     240.10 - Features
     Verify for OFPT_FEATURES_REQUEST we get an OFPT_FEATURES_REQUEST back.
-    """
+    """"""
 
     @wireshark_capture
     def runTest(self):
@@ -45,10 +45,10 @@ class Testcase_240_10_SwitchFeatures(base_tests.SimpleProtocol):
 
 
 class Testcase_240_20_SwitchFeaturesDPID(base_tests.SimpleProtocol):
-    """
+    """"""
     240.20 - Features DPID
     Verify lower 48 bits in DATAPAH_ID are for MAC and top 16 are for implementer use.
-    """
+    """"""
 
     @wireshark_capture
     def runTest(self):
@@ -63,10 +63,10 @@ class Testcase_240_20_SwitchFeaturesDPID(base_tests.SimpleProtocol):
 
 
 class Testcase_240_30_SwitchFeaturesMaxBuffers(base_tests.SimpleProtocol):
-    """
+    """"""
     240.30 - Features reply - max buffers
     Verify number of packets switch can buffer is N_BUFFER when sending PACKET-IN.
-    """
+    """"""
 
     @wireshark_capture
     def runTest(self):
@@ -81,10 +81,10 @@ class Testcase_240_30_SwitchFeaturesMaxBuffers(base_tests.SimpleProtocol):
 
 
 class Testcase_240_40_SwitchFeaturesTables(base_tests.SimpleProtocol):
-    """
+    """"""
     240.40 - Number of tables supported by datapath
     Verify number of tables switch supports is what was contained in Features Reply N_TABLES.
-    """
+    """"""
 
     @wireshark_capture
     def runTest(self):
@@ -99,10 +99,10 @@ class Testcase_240_40_SwitchFeaturesTables(base_tests.SimpleProtocol):
 
 
 class Testcase_240_50_SwitchFeaturesAuxiliaryID(base_tests.SimpleProtocol):
-    """
+    """"""
     240.50 - Features auxiliary ID
     Verify type of connection by AUXILIARY_ID. 0 for main and other for auxiliary.
-    """
+    """"""
 
     @wireshark_capture
     def runTest(self):
@@ -117,10 +117,10 @@ class Testcase_240_50_SwitchFeaturesAuxiliaryID(base_tests.SimpleProtocol):
 
 
 class Testcase_240_60_SwitchFeaturesCapabilities(base_tests.SimpleProtocol):
-    """
+    """"""
     240.60 - Features capabilities
     Verify "ofp_capabilities".
-    """
+    """"""
 
     @wireshark_capture
     def runTest(self):
@@ -134,10 +134,10 @@ class Testcase_240_60_SwitchFeaturesCapabilities(base_tests.SimpleProtocol):
 
 
 class Testcase_240_70_SwitchFeaturesFlowStats(base_tests.SimpleProtocol):
-    """
+    """"""
     240.70 - Features flow capabilities
     Verify "ofp_capabilities" supports OFPC_FLOW_STATS 
-    """
+    """"""
 
     @wireshark_capture
     def runTest(self):
@@ -154,10 +154,10 @@ class Testcase_240_70_SwitchFeaturesFlowStats(base_tests.SimpleProtocol):
 
 
 class Testcase_240_80_SwitchFeaturesTableStats(base_tests.SimpleProtocol):
-    """
+    """"""
     240.80 - Features table capabilities
     Verify "ofp_capabilities" supports OFPC_TABLE_STATS
-    """
+    """"""
 
     @wireshark_capture
     def runTest(self):
@@ -174,10 +174,10 @@ class Testcase_240_80_SwitchFeaturesTableStats(base_tests.SimpleProtocol):
 
 
 class Testcase_240_90_SwitchFeaturesPortStats(base_tests.SimpleProtocol):
-    """
+    """"""
     240.90 - Features port capabilities
     Verify "ofp_capabilities" supportsOFPC_PORT_STATS
-    """
+    """"""
 
     @wireshark_capture
     def runTest(self):
@@ -194,10 +194,10 @@ class Testcase_240_90_SwitchFeaturesPortStats(base_tests.SimpleProtocol):
 
 
 class Testcase_240_100_SwitchFeaturesGroupStats(base_tests.SimpleProtocol):
-    """
+    """"""
     240.100 - Features reply - Group statistics
     Verify "ofp_capabilities" OFPC_GROUP_STATS
-    """
+    """"""
 
     @wireshark_capture
     def runTest(self):
@@ -214,10 +214,10 @@ class Testcase_240_100_SwitchFeaturesGroupStats(base_tests.SimpleProtocol):
 
 
 class Testcase_240_110_SwitchFeaturesIPFragment(base_tests.SimpleProtocol):
-    """
+    """"""
     240.110 - Supports IP fragments
     Verify "ofp_capabilities" supports OFPC_IP_REASM
-    """
+    """"""
 
     @wireshark_capture
     def runTest(self):
@@ -234,10 +234,10 @@ class Testcase_240_110_SwitchFeaturesIPFragment(base_tests.SimpleProtocol):
 
 
 class Testcase_240_120_SwitchFeaturesQueueStats(base_tests.SimpleProtocol):
-    """
+    """"""
     240.120 - Features queue capabilities
     Verify "ofp_capabilities" supports OFPC_QUEUE_STATS
-    """
+    """"""
 
     @wireshark_capture
     def runTest(self):
@@ -254,10 +254,10 @@ class Testcase_240_120_SwitchFeaturesQueueStats(base_tests.SimpleProtocol):
 
 
 class Testcase_240_130_SwitchFeaturesBlockLooping(base_tests.SimpleProtocol):
-    """
+    """"""
     240.130 - Supports block looping ports
     Verify "ofp_capabilities" supports OFPC_PORT_BLOCKED
-    """
+    """"""
 
     @wireshark_capture
     def runTest(self):
@@ -270,3 +270,4 @@ class Testcase_240_130_SwitchFeaturesBlockLooping(base_tests.SimpleProtocol):
         cap = mask & int(reply.capabilities)
         self.assertTrue(cap != 0, "Block looping ports not supported by switch")
         logging.info("Block looping ports supported by switch")
+"""

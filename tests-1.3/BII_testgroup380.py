@@ -84,22 +84,22 @@ class Testcase_380_50_MultipartQueueStatsContent(base_tests.SimpleDataPlane):
         logging.info("Correct Reply Message Received")
 
 
-
+"""
 class Testcase_380_60_MultipartQueueStatsReply(BII_testgroup380.Testcase_380_40_MultipartQueueStats):
 
-    """
+    """"""
     Tested in 380.40
     380.60 - Queue stats reply reserved
     Check that a queue stats request with a port field set to OFPP_ANY results in a queue stats reply 
     which includes each test ports' configured queues.
-    """
+    """"""
 
 
 
 
 class Testcase_380_70_MultipartQueueStatsReplyContent(BII_testgroup380.Testcase_380_50_MultipartQueueStatsContent):
 
-    """
+    """"""
     Tested in 380.50
     380.70 - Queue stats reply standard
     Check that a queue stats request for a configured test port results in a queue stats reply 
@@ -185,22 +185,22 @@ class Testcase_380_100_QueueGetConfigPort(base_tests.SimpleDataPlane):
         self.assertEqual(reply.port, port1, "Port is not matched")
 
 
-
+"""
 class Testcase_380_110_QueueGetConfigReplyEmpty(BII_testgroup380.Testcase_380_90_QueueGetConfigEmpty):
 
-    """
+    """"""
     Tested in 380.90
     380.110 - Queue config reply reserved
     Check that an ofp_queue_get_config_request with a port field set to OFPP_ANY results in an ofp_queue_get_config_reply 
     which includes each test ports' configured queues.
-    """
+    """"""
 
 
 
 
 class Testcase_380_120_QueueGetConfigReplyPort(BII_testgroup380.Testcase_380_100_QueueGetConfigPort):
 
-    """
+    """"""
     Tested in 380.100
     380.120 - Queue config reply standard
     Check that an ofp_queue_get_config_request for a configured test port results in an ofp_queue_get_config_reply 

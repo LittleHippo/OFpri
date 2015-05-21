@@ -558,8 +558,8 @@ class Testcase_150_85_Bad_match_class(base_tests.SimpleDataPlane):
                          ("Bad instruction code %d was received, but we "
                           "expected OFPFBMC_BAD_FIELD.") % reply.code)
 
-class Testcase_150_90_Duplicate_field(BII_testgroup80.Testcase_80_200_Multiple_instances_same_OXM_TYPE):
-    """
+"""class Testcase_150_90_Duplicate_field(BII_testgroup80.Testcase_80_200_Multiple_instances_same_OXM_TYPE):
+    
     Purpose
     Verify how OFP_FLOW_MOD handles multiple OXM_FIELD.
 
@@ -569,8 +569,7 @@ class Testcase_150_90_Duplicate_field(BII_testgroup80.Testcase_80_200_Multiple_i
     """
 
 
-class Testcase_150_100_Bad_Prerequisite(BII_testgroup80.Testcase_80_180_Missing_Prerequisite):
-    """
+"""class Testcase_150_100_Bad_Prerequisite(BII_testgroup80.Testcase_80_180_Missing_Prerequisite):
    Purpose
     Verify how OFP_FLOW_MOD handles a field without its prerequisites specified. 
 
@@ -1098,15 +1097,15 @@ class Testcase_150_190_bad_argument(base_tests.SimpleDataPlane):
                          ("Bad instruction code %d was received, but we "
                           "expected OFPBAC_BAD_SET_ARGUMENT.") % reply.code)
 
-class Testcase_150_220_bad_action(base_tests.SimpleDataPlane):
-    """
+"""class Testcase_150_220_bad_action(base_tests.SimpleDataPlane):
+    
     Purpose
     Verify how OFP_FLOW_MOD handles a field not supported in the table
 
     Methodology
     430.50
 
-    """
+    
     @wireshark_capture
     def runTest(self):
         logging.info("Running 10.80 - Version negotiation failure test")
@@ -1126,14 +1125,14 @@ class Testcase_150_220_bad_action(base_tests.SimpleDataPlane):
 
 
 class Testcase_150_230_bad_action(base_tests.SimpleDataPlane):
-    """
+    
     Purpose
     Verify how OFP_FLOW_MOD handles duplicate actions 
 
     Methodology
     430.320
 
-    """
+    
     def runTest(self):
         logging.info("Running test case Bad Action Too Many")
         delete_all_flows(self.controller)
@@ -1177,7 +1176,7 @@ class Testcase_150_230_bad_action(base_tests.SimpleDataPlane):
 
 
 class Testcase_150_250_unsupported_action_order(base_tests.SimpleDataPlane):
-    """
+    
     TODO: Verify the correctness of this testcase by using another DUT
     Purpose
     Verify how OFP_FLOW_MOD handles action list that can't be supported in the specified sequence.
@@ -1185,7 +1184,7 @@ class Testcase_150_250_unsupported_action_order(base_tests.SimpleDataPlane):
     Methodology
     Configure and connect DUT to controller. After control channel establishment, add a flow matching on a named field (under the given Pre-requisites for the match) with two actions. The first action should be an output action to a data plane test port. The second action should be a set_field IPv4 source action. After installation verify an error is returned with error type OFPET_BAD_ACTION and error code OFPBAC_UNSUPPORTED_ORDER.
 
-    """
+    
     @wireshark_capture
     def runTest(self):
         logging.info("Running testcase 150.250 unsupported action order")
@@ -1217,7 +1216,7 @@ class Testcase_150_250_unsupported_action_order(base_tests.SimpleDataPlane):
         self.assertEqual(reply.code, ofp.OFPBAC_UNSUPPORTED_ORDER,
                          ("Bad instruction code %d was received, but we "
                           "expected OFPBAC_UNSUPPORTED_ORDER.") % reply.code)
-
+"""
 
 class Testcase_150_260_bad_instruction(base_tests.SimpleDataPlane):
     """

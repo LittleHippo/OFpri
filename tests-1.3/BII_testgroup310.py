@@ -30,45 +30,45 @@ import BII_testgroup40
 from oftest.oflog import *
 from oftest.testutils import *
 from time import sleep
-
+"""
 class Testcase_310_10_MultipartManufacturerDescription(BII_testgroup40.Testcase_40_170_ManufacturerDescription):
-    """
+    """"""
     Tested in 40.170
     310.10 - Manufacturer description
     Verify the information about the switch manufacturer is available from the OFPMP_DESC multipart reply message
-    """
+    """"""
 
 
 
 class Testcase_310_20_MultipartHWDescription(BII_testgroup40.Testcase_40_180_HWDescription):
-    """
+    """"""
     Tested in 40.180
     310.20 - Hardware description
     Verify the information about the switch hardware revision is available from the OFPMP_DESC multipart reply message
-    """
+    """"""
 
 
 
 class Testcase_310_30_MultipartSoftwareDescription(BII_testgroup40.Testcase_40_190_SoftwareDescription):
-    """
+    """"""
     Tested in 40.190
     310.30 - Software description
     Verify the information about the switch software revision is available from the OFPMP_DESC multipart reply message
-    """
+    """"""
 
 
 
 class Testcase_310_40_MultipartSNDescription(BII_testgroup40.Testcase_40_200_SNDescription):
-    """
+    """"""
     Tested in 40.200
     310.40 - Serial number
     Verify the information about the switch serial number is available from the OFPMP_DESC multipart reply message
-    """
+    """"""
 
 
 
 class Testcase_310_50_MultipartDPDescription(BII_testgroup40.Testcase_40_210_DPDescription):
-    """
+    """"""
     Tested in 40.210
     310.50 - Datapath description
     Verify the information about the switch description of datapath is available from the OFPMP_DESC multipart reply message
@@ -76,12 +76,60 @@ class Testcase_310_50_MultipartDPDescription(BII_testgroup40.Testcase_40_210_DPD
 
 
 
-class Testcase_310_60_MultipartFlowStats(BII_testgroup300.Testcase_300_140_MultipartTypeFlowStats):
+class Testcase_310_60_MultipartFlowStats(base_tests.SimpleDataPlane):
     """
     Tested in 300.140
     310.60 - Flow statistics
     Verify the switch can reply to the OFPMP_FLOW multipart request.
     """
+    @wireshark_capture
+    def runTest(self):
+        logging.info("Running 300.140 - Multipart type flow statistics test")
+        rv = delete_all_flows(self.controller)
+        self.assertEqual(rv, 0, "Failed to delete all flows")
+
+        in_port1, in_port2, in_port3, out_port, = openflow_ports(4)
+        table_id=0
+        priority=100
+        actions=[ofp.action.output(port=out_port, max_len=128)]
+        instructions=[ofp.instruction.apply_actions(actions=actions)]
+       	match = ofp.match([ofp.oxm.in_port(in_port1)])
+        req = ofp.message.flow_add(table_id=table_id,
+                               match= match,
+                               buffer_id=ofp.OFP_NO_BUFFER,
+                               instructions=instructions,
+                               priority=priority)
+        logging.info("Insert flow 1")
+        rv = self.controller.message_send(req)
+        self.assertTrue(rv != -1, "Failed to insert flow 1")
+        
+        actions=[ofp.action.output(port=out_port, max_len=128)]
+        instructions=[ofp.instruction.apply_actions(actions=actions)]
+       	match = ofp.match([ofp.oxm.in_port(in_port2)])
+        req = ofp.message.flow_add(table_id=table_id,
+                               match= match,
+                               buffer_id=ofp.OFP_NO_BUFFER,
+                               instructions=instructions,
+                               priority=priority)
+        logging.info("Insert flow 2")
+        rv = self.controller.message_send(req)
+        self.assertTrue(rv != -1, "Failed to insert flow 2")
+
+        actions=[ofp.action.output(port=out_port, max_len=128)]
+        instructions=[ofp.instruction.apply_actions(actions=actions)]
+       	match = ofp.match([ofp.oxm.in_port(in_port3)])
+        req = ofp.message.flow_add(table_id=table_id,
+                               match= match,
+                               buffer_id=ofp.OFP_NO_BUFFER,
+                               instructions=instructions,
+                               priority=priority) 
+        logging.info("Insert flow 3")
+        rv = self.controller.message_send(req)
+        self.assertTrue(rv != -1, "Failed to insert flow 3") 
+
+        stats = get_flow_stats(self,match=ofp.match())
+        self.assertEqual(len(stats), 3, "Incorrect flow stats.")
+        logging.info("Received multipart reply as expected")
 
 
 
@@ -324,21 +372,21 @@ class Testcase_310_110_MultipartFlowStatsCookieMask(base_tests.SimpleDataPlane):
         logging.info("Received multipart reply as expected")
 
 
-
+"""
 class Testcase_310_130_MultipartFlowStatsTableIDField(BII_testgroup310.Testcase_310_70_MultipartFlowStatsTableID):
-    """
+    """"""
     Tested in 310.70
     310.130 - Flow statistics table id field
     Verify the switch can send the OFPMP_FLOW multipart reply with the right table_id field.
-    """
+    """"""
 
 
 
 class Testcase_310_140_MultipartFlowStatsDuration(base_tests.SimpleDataPlane):
-    """
+    """"""
     310.140 - Flow statistics duration
     Verify the switch can send the OFPMP_FLOW multipart reply with the right duration_sec field.
-    """
+    
 
     @wireshark_capture
     def runTest(self):
@@ -366,7 +414,7 @@ class Testcase_310_140_MultipartFlowStatsDuration(base_tests.SimpleDataPlane):
         self.assertEqual(len(stats), 1, "Incorrect flow stats.")
         self.assertNotEqual(stats[0].duration_sec,0, "Invalid duration")
         logging.info("Received multipart reply as expected")
-
+"""
 
 
 class Testcase_310_150_MultipartFlowStatsNanoDuration(base_tests.SimpleDataPlane):
@@ -564,13 +612,13 @@ class Testcase_310_190_MultipartFlowStatsFlags(base_tests.SimpleDataPlane):
         logging.info("Received multipart reply as expected")   
 
 
-
+"""
 class Testcase_310_200_MultipartFlowStatsOpaqueCookie(BII_testgroup310.Testcase_310_110_MultipartFlowStatsCookieMask):
-    """
+    
     Tested in 310.110
     310.200 - Flow statistics opaque cookie
     Verify the switch can send the OFPMP_FLOW multipart reply with the right cookie field.
-    """   
+    """  
 
 
 
@@ -887,9 +935,9 @@ class Testcase_310_290_MultipartAggStatsCookieMask(base_tests.SimpleDataPlane):
         logging.info("Received multipart reply as expected")
 
 
-
+"""
 class Testcase_310_300_MultipartAggStatsReply(BII_testgroup310.Testcase_310_240_MultipartAggStats):
-    """
+    
     Tested in 310.240
     310.300 - Aggregate statistics reply
     Verify the switch can send the OFPMP_AGGREGATE multipart reply.

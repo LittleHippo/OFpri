@@ -133,21 +133,21 @@ class Testcase_180_60_Per_Flow_Duration_Counter(base_tests.SimpleDataPlane):
         
 
 
-
+"""
 class Testcase_180_80_per_port_received_packets_counter(BII_testgroup340.Testcase_340_50_MultipartPortStatsRxPackets):
-    """
+    
     Purpose
     Test Received Packet counter
 
     Methodology
     340,50
 
-    """
+    
 
 
 
 class Testcase_180_90_per_port_transmitted_packets_counter(BII_testgroup340.Testcase_340_60_MultipartPortStatsTxPackets):
-    """
+    
     Purpose
     Test Transmitted Packet counter
 

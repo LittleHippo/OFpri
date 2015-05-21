@@ -15,43 +15,43 @@ from oftest.oflog import *
 from time import sleep
 
 import BII_testgroup340
-
+"""
 class Testcase_210_10_port_structures_port_no(BII_testgroup340.Testcase_340_200_MultipartPortDescUniquePort):
-    """
+    
     Purpose
     Verify that all ports reported in response to an OFPMP_PORT_DESC have a unique non-negative port number.
 
     Methodology
     340.200
 
-    """
+    
 
 
 
 class Testcase_210_20_port_structures_hw_addr(BII_testgroup340.Testcase_340_220_MultipartPortDescUniqueHWAddress):
-    """
+    
     Purpose
     Check the HW_ADDR is unique. 
 
     Methodology
     340.220
 
-    """
+    
 
 
 class Testcase_210_30_port_structures_name(BII_testgroup340.Testcase_340_240_MultipartPortDescPortName):
-    """
+    
     Purpose
     Verify the length of OFP_MAX_PORT_NAME is less than 16
 
     Methodology
     340.240
 
-    """
+    
 
 
 class Testcase_210_40_correct_bitmap_OFPPC_flags(BII_testgroup100.Testcase_100_60_ALL_OFPPC_NO_FWD):
-    """
+    
     Purpose
     Verify the current config  (default config) is correctly returned
 
@@ -144,16 +144,16 @@ class Testcase_210_50_port_administratively_down(base_tests.SimpleDataPlane):
         self.controller.message_send(request)
 
 
-
+"""
 class Testcase_210_60_Drop_all_packets_received(base_tests.SimpleDataPlane):
-    """
+    
     Purpose
     Verify a port status change message is received, and the bitmap reflects the change in the port config.
 
     Methodology
     Configure and connect DUT to controller. After control channel establishment, install a table_miss flow entry to generate ofp_packet_in messages. Send an ofp_port_mod message that sets the all configuration bits to zero except OFPPC_NO_RECV, for a data plane port X. Verify that the port config bits are correctly set. Send traffic on data plane port X. Verify no ofp_packet_in message is received. Send an ofp_packet_out message with an output action to port X. Verify traffic is forwarded out data plane port X.
 
-    """
+    
     def tearDown(self):
         in_port, out_port = openflow_ports(2)
         request = ofp.message.port_desc_stats_request()
@@ -225,18 +225,18 @@ class Testcase_210_60_Drop_all_packets_received(base_tests.SimpleDataPlane):
         self.controller.message_send(request)
 
         verify_packet(self, str(pkt), out_port)
+"""
 
-
-
+"""
 class Testcase_210_70_drop_packets_forwarded(base_tests.SimpleDataPlane):
-    """
+    
     Purpose
     Verify a port status change message is received, and the bitmap reflects the change in the port config.
 
     Methodology
     Configure and connect DUT to controller. After control channel establishment, install a table_miss flow entry to generate ofp_packet_in messages. Send an ofp_port_mod message that sets the all configuration bits to zero except OFPPC_NO_FWD, for a data plane port X. Verify that the port config bits are correctly set. Send traffic on data plane port X. Verify that ofp_packet_in messages are received. Send an ofp_packet_out message with an output action to port X. Verify no traffic is forwarded
 
-    """
+    
     def tearDown(self):
         in_port, out_port = openflow_ports(2)
         request = ofp.message.port_desc_stats_request()
@@ -311,14 +311,14 @@ class Testcase_210_70_drop_packets_forwarded(base_tests.SimpleDataPlane):
 
 
 class Testcase_210_80_do_not_send_packet_in(base_tests.SimpleDataPlane):
-    """
+    
     Purpose
     Verify a port status change message is received, and the bitmap reflects the change in the port config.
 
     Methodology
     Configure and connect DUT to controller. After control channel establishment, install a table_miss flow entry to generate ofp_packet_in messages. Send an ofp_port_mod message that sets the all configuration bits to zero except OFPPC_NO_PACKET_IN, for a data plane port X. Verify that the port config bits are correctly set. Send traffic on data plane port X. Verify no ofp_packet_in message is received. Install a second fully wildcarded flow with priority 100 with an output action to OFPP_CONTROLLER. Send traffic on data plane port X. Verify that ofp_packet_in messages are not received.
 
-    """
+    
     def tearDown(self):
         in_port, out_port = openflow_ports(2)
         request = ofp.message.port_desc_stats_request()
@@ -408,7 +408,7 @@ class Testcase_210_80_do_not_send_packet_in(base_tests.SimpleDataPlane):
         #verify_no_packet(self, str(pkt), out_port)
 
 class Testcase_210_90_correct_bitmap_OFPPS_flags(BII_testgroup340.Testcase_340_260_MultipartPortDescSetPortState):
-    """
+    
     Purpose
     Verify the current state  (default state) is correctly returned
 
@@ -416,34 +416,34 @@ class Testcase_210_90_correct_bitmap_OFPPS_flags(BII_testgroup340.Testcase_340_2
     340.260
 
 
-    """
+    
 
 
 class Testcase_210_130_correct_features(BII_testgroup340.Testcase_340_270_MultipartPortDescCurrFeatures):
-    """
+    
     Purpose
     Verify current port features are correctly reported.
 
     Methodology
     340.270
 
-    """
+    
 
 
 class Testcase_210_140_features_being_advertised_by_port(BII_testgroup340.Testcase_340_280_MultipartPortDescAdvertisedFeatures):
-    """
+    
     Purpose
     Verify the  features advertised by the port are correctly returned
 
     Methodology
     340.280
 
-    """
+    
 
 
 
 class Testcase_210_150_features_supported_by_port(BII_testgroup340.Testcase_340_290_MultipartPortDescSupportedFeatures):
-    """
+    
     Purpose
     Verify the features supported  by the port are correctly returned
 
@@ -451,22 +451,22 @@ class Testcase_210_150_features_supported_by_port(BII_testgroup340.Testcase_340_
     340.290
 
 
-    """
+    
 
 
 class Testcase_210_160_features_advertised_by_port(BII_testgroup340.Testcase_340_300_MultipartPortDescPeerFeatures):
-    """
+    
     Purpose
     Verify the features supported  by the peer port are correctly returned
 
     Methodology
     340.300
 
-    """
+    
 
 
 class Testcase_210_170_current_port_bitrate_kbps(BII_testgroup340.Testcase_340_310_MultipartPortDescCurrSpeed):
-    """
+    
     Purpose
     Verify the current bit rate is correctly returned
 
@@ -474,11 +474,11 @@ class Testcase_210_170_current_port_bitrate_kbps(BII_testgroup340.Testcase_340_3
     340.310
 
 
-    """
+    
 
 
 class Testcase_210_180_max_port_bitrate(BII_testgroup340.Testcase_340_320_MultipartPortDescMaxSpeed):
-    """
+    
     Purpose
     Verify the maximum bitrate for the port is correctly returned
 
