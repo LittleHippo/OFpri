@@ -604,7 +604,7 @@ class Testcase_440_390_QueueOPFailedData(base_tests.SimpleDataPlane):
         self.assertEqual(reply.type, ofp.OFPT_ECHO_REPLY, "Response is not echo reply")
         invalidPort = ofp.const.OFPP_MAX
         request = ofp.message.queue_stats_request(port_no=invalidPort)
-        reply, _ = self.controller.transact(request)
+        reply, _ = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
         self.assertIsNotNone(reply, "The switch failed to generate an error.")
         logging.info("Error Message Received")
         self.assertEqual(reply.err_type,ofp.const.OFPET_QUEUE_OP_FAILED, " Error type is not OFPET_QUEUE_OP_FAILED")
