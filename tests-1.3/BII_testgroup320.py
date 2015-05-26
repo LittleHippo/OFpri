@@ -1226,7 +1226,7 @@ class Testcase_320_500_MultipartTableFeaturesPropertyWriteActionsMiss(base_tests
                 if case(ofp.const.OFPAT_DEC_MPLS_TTL):
                     ofp.action_test.test_dec_mpls_ttl(self,table_id,ports,ofp.const.OFPTFPT_WRITE_ACTIONS_MISS)
                     break
-                if case(a_type == ofp.const.OFPAT_PUSH_VLAN):
+                if case(ofp.const.OFPAT_PUSH_VLAN):
                     ofp.action_test.test_push_vlan(self,table_id,ports,ofp.const.OFPTFPT_WRITE_ACTIONS_MISS)
                     break
                 if case(ofp.const.OFPAT_POP_VLAN):
@@ -1318,7 +1318,7 @@ class Testcase_320_510_MultipartTableFeaturesPropertyApplyActions(base_tests.Sim
                 if case(ofp.const.OFPAT_DEC_MPLS_TTL):
                     ofp.action_test.test_dec_mpls_ttl(self,table_id,ports,ofp.const.OFPTFPT_APPLY_ACTIONS)
                     break
-                if case(a_type == ofp.const.OFPAT_PUSH_VLAN):
+                if case(ofp.const.OFPAT_PUSH_VLAN):
                     ofp.action_test.test_push_vlan(self,table_id,ports,ofp.const.OFPTFPT_APPLY_ACTIONS)
                     break
                 if case(ofp.const.OFPAT_POP_VLAN):
@@ -1411,7 +1411,7 @@ class Testcase_320_520_MultipartTableFeaturesPropertyApplyActionsMiss(base_tests
                 if case(ofp.const.OFPAT_DEC_MPLS_TTL):
                     ofp.action_test.test_dec_mpls_ttl(self,table_id,ports,ofp.const.OFPTFPT_APPLY_ACTIONS_MISS)
                     break
-                if case(a_type == ofp.const.OFPAT_PUSH_VLAN):
+                if case(ofp.const.OFPAT_PUSH_VLAN):
                     ofp.action_test.test_push_vlan(self,table_id,ports,ofp.const.OFPTFPT_APPLY_ACTIONS_MISS)
                     break
                 if case(ofp.const.OFPAT_POP_VLAN):
@@ -1502,7 +1502,7 @@ class Testcase_320_540_MultipartTableFeaturesPropertyWriteActions(base_tests.Sim
                 if case(ofp.const.OFPAT_DEC_MPLS_TTL):
                     ofp.action_test.test_dec_mpls_ttl(self,table_id,ports,ofp.const.OFPTFPT_WRITE_ACTIONS)
                     break
-                if case(a_type == ofp.const.OFPAT_PUSH_VLAN):
+                if case(ofp.const.OFPAT_PUSH_VLAN):
                     ofp.action_test.test_push_vlan(self,table_id,ports,ofp.const.OFPTFPT_WRITE_ACTIONS)
                     break
                 if case(ofp.const.OFPAT_POP_VLAN):
