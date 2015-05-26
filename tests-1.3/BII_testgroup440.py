@@ -953,9 +953,9 @@ class Testcase_440_620_TableFeaturesFailedBadMetadata(base_tests.SimpleDataPlane
         logging.info("Error Message Received")
         self.assertEqual(reply.err_type,ofp.const.OFPET_TABLE_FEATURES_FAILED, " Error type is not OFPET_TABLE_FEATURES_FAILED")
         logging.info("Received OFPET_TABLE_FEATURES_FAILED")
-        if err.code == ofp.const.OFPTFFC_BAD_METADATA:
+        if reply.code == ofp.const.OFPTFFC_BAD_METADATA:
             logging.info("Received correct error code OFPTFFC_BAD_METADATA.")
-        elif err.code == ofp.const.OFPTFFC_EPERM:
+        elif reply.code == ofp.const.OFPTFFC_EPERM:
             logging.info("Received correct error code OFPTFFC_EPERM. Multipart ofp_table_features requests were disabled")
         else:
             self.assertEqual(0, 1, "Error code was not correct")
@@ -1058,9 +1058,9 @@ class Testcase_440_650_TableFeaturesFailedBadAgument(base_tests.SimpleDataPlane)
         logging.info("Error Message Received")
         self.assertEqual(reply.err_type,ofp.const.OFPET_TABLE_FEATURES_FAILED, " Error type is not OFPET_TABLE_FEATURES_FAILED")
         logging.info("Received OFPET_TABLE_FEATURES_FAILED")
-        if err.code == ofp.const.OFPTFFC_BAD_ARGUMENT:
+        if reply.code == ofp.const.OFPTFFC_BAD_ARGUMENT:
             logging.info("Received correct error code OFPTFFC_BAD_ARGUMENT.")
-        elif err.code == ofp.const.OFPTFFC_EPERM:
+        elif reply.code == ofp.const.OFPTFFC_EPERM:
             logging.info("Received correct error code OFPTFFC_EPERM. Multipart ofp_table_features requests were disabled")
         else:
             self.assertEqual(0, 1, "Error code was not correct")
@@ -1096,14 +1096,14 @@ class Testcase_440_670_TableFeaturesFailedData(base_tests.SimpleDataPlane):
         logging.info("Error Message Received")
         self.assertEqual(reply.err_type,ofp.const.OFPET_TABLE_FEATURES_FAILED, " Error type is not OFPET_TABLE_FEATURES_FAILED")
         logging.info("Received OFPET_TABLE_FEATURES_FAILED")
-        if err.code == ofp.const.ofp.const.OFPTFFC_BAD_TABLE:
+        if reply.code == ofp.const.OFPTFFC_BAD_TABLE:
             logging.info("Received correct error code ofp.const.OFPTFFC_BAD_TABLE.")
-        elif err.code == ofp.const.OFPTFFC_EPERM:
+        elif reply.code == ofp.const.OFPTFFC_EPERM:
             logging.info("Received correct error code OFPTFFC_EPERM. Multipart ofp_table_features requests were disabled")
         else:
             self.assertEqual(0, 1, "Error code was not correct")
         
-        err_len = len(err.data)
+        err_len = len(reply.data)
         if len(reply.data) < 64:
             self.assertEqual(req.pack(), reply.data, "Incorrect data field")
         else:
