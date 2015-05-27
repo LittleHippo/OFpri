@@ -767,6 +767,45 @@ def test_dec_nw_ttl(testcase, table_id, ports, property_type):
     verify_packet(testcase, str(expected_packet), ports[1])
     return True
 
+    
+    
+def get_oxm_ids(test,table_id,prop_type):
+    
+    """
+    Returns the list of all oxm_ids returned by the DUT
+    of the particular prop_type
+    @param test instance of base_testa
+    @param table_id table_id to get the oxm_ids from
+    @prop_type One of the valid prop_types of OFPTFPT_*
+    """
+    oids = []
+    valid_prop = [ofp.const.OFPTFPT_WILDCARDS,
+                  ofp.const.OFPTFPT_MATCH,
+                  ofp.const.OFPTFPT_WRITE_SETFIELD,
+                  ofp.const.OFPTFPT_WRITE_SETFIELD_MISS,
+                  ofp.const.OFPTFPT_APPLY_SETFIELD,
+                  ofp.const.OFPTFPT_APPLY_SETFIELD_MISS]
+    test.assertIn(prop_type,valid_prop, "%s is not valid prop_type for oxm_ids"%prop_type)
+    req = ofp.message.table_features_stats_request()
+    res = get_stats(test, req)
+    test.assertIsNotNone(res, "Could not retreive table statistics.")
+    logging.info("Table features were successfully received.")
+    for features in res:
+        if features.table_id == table_id:
+           for prop in features.properties:
+               if prop.type == prop_type:
+                   for ids in prop.oxm_ids:
+                       try:
+                           oids.append(oxm.subtypes[ids.value].__name__)
+                       except KeyError:
+                           logging.warn("Invalid oxm_id reported %d"%ids.value)
+                           continue
+                   return oids
+               else:
+                   continue
+
+    return oids
+    
 
 def test_set_field(testcase, table_id, ports, property_type):
     msg = "Checking if table {0} supports OFPAT_SET_FIELD."
