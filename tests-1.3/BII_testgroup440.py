@@ -604,14 +604,15 @@ class Testcase_440_390_QueueOPFailedData(base_tests.SimpleDataPlane):
         self.assertEqual(reply.type, ofp.OFPT_ECHO_REPLY, "Response is not echo reply")
         invalidPort = ofp.const.OFPP_MAX
         request = ofp.message.queue_stats_request(port_no=invalidPort)
-        reply, _ = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
-        self.assertIsNotNone(reply, "The switch failed to generate an error.")
+        self.controller.message_send(request)
+        err, _ = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
+        self.assertIsNotNone(err, "The switch failed to generate an error.")
         logging.info("Error Message Received")
-        self.assertEqual(reply.err_type,ofp.const.OFPET_QUEUE_OP_FAILED, " Error type is not OFPET_QUEUE_OP_FAILED")
+        self.assertEqual(err.err_type,ofp.const.OFPET_QUEUE_OP_FAILED, " Error type is not OFPET_QUEUE_OP_FAILED")
         logging.info("Received OFPET_QUEUE_OP_FAILED")
-        self.assertEqual(reply.code, ofp.const.OFPQOFC_BAD_PORT, "Error Code is not OFPQOFC_BAD_PORT")
+        self.assertEqual(err.code, ofp.const.OFPQOFC_BAD_PORT, "Error Code is not OFPQOFC_BAD_PORT")
         logging.info("Received Error code is OFPQOFC_BAD_PORT")
-        self.assertTrue(len(reply.data) != 0, "Data field of error message should include at least 64 bytes")
+        self.assertTrue(len(err.data) != 0, "Data field of error message should include at least 64 bytes")
         logging.info("Received correct error message contains data.")
 
 

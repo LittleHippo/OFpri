@@ -183,7 +183,7 @@ class Testcase_180_230_correct_packet_drop_counters(base_tests.SimpleDataPlane):
         #self.controller.message_send(request)
         #reply, _ = self.controller.poll(exp_msg=ofp.OFPMP_PORT_DESCRIPTION, timeout=3)
         port_stats = get_stats(self, req = request)
-        hard_addr = port_stats[out_port - 1].hw_addr
+        hard_addr = port_stats[1].hw_addr
         request = ofp.message.port_mod(port_no = out_port, hw_addr = hard_addr, config = 0)
         self.controller.message_send(request)
         logging.info("Set up port %d ", out_port)
@@ -234,7 +234,7 @@ class Testcase_180_230_correct_packet_drop_counters(base_tests.SimpleDataPlane):
         #self.controller.message_send(request)
         #reply, _ = self.controller.poll(exp_msg=ofp.OFPMP_PORT_DESCRIPTION, timeout=3)
         port_stats = get_stats(self, req = request)
-        hard_addr = port_stats[out_port - 1].hw_addr
+        hard_addr = port_stats[1].hw_addr
         print hard_addr
         
         request = ofp.message.port_mod(port_no = out_port, hw_addr = hard_addr, config = ofp.OFPPC_PORT_DOWN)
