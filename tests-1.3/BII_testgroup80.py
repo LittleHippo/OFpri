@@ -182,7 +182,7 @@ class Testcase_80_70_Mask_OXM_OF_IPV6_SRC(MatchTest):
 
         match = ofp.match([
             ofp.oxm.eth_type(0x86dd),
-            ofp.oxm.ipv6_dst_masked(parse_ipv6(flow), parse_ipv6(mask)),
+            ofp.oxm.ipv6_src_masked(parse_ipv6(flow), parse_ipv6(mask)),
         ])
 
         matching = {
@@ -229,7 +229,7 @@ class Testcase_80_80_Mask_OXM_OF_IPV6_DST(MatchTest):
         }
 
         nonmatching = {
-            "incorrect1": simple_tcpv6_packet(ipv6_src=incorrect1),
+            "incorrect1": simple_tcpv6_packet(ipv6_dst=incorrect1),
         }
 
         self.verify_match(match, matching, nonmatching)
