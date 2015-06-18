@@ -124,7 +124,7 @@ class Testcase_90_60_All_supported(base_tests.SimpleDataPlane):
                                              ip_src ='192.168.4.2',
                                              ip_dst='192.167.255.255',
                                              udp_sport=53,
-                                             udp_dport=53))
+                                             udp_dport=55))
         self.dataplane.send(in_port,nonmatching_pkt)
         verify_no_packet(self,nonmatching_pkt,out_port)
         logging.info("Packet in not received for a non matching packet")
@@ -167,7 +167,7 @@ class Testcase_90_60_All_supported(base_tests.SimpleDataPlane):
                                              ipv6_src ='2001:0db8:85a2::0001',
                                              ipv6_dst='2001:0db8:85a2::0001',
                                              tcp_sport=53,
-                                             tcp_dport=53))
+                                             tcp_dport=55))
         self.dataplane.send(in_port,nonmatching_pkt)
         verify_no_packet(self,nonmatching_pkt,out_port)
         logging.info("Packet in not received for a non matching packet")
@@ -194,7 +194,7 @@ class Testcase_90_60_All_supported(base_tests.SimpleDataPlane):
         self.controller.message_send(req)
         reply, _ = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
         self.assertIsNone(reply,"The switch generated an OFPT_ERROR")
-        matching_pkt = str(simple_tcpv6_packet(eth_dst ='ff:01:02:f3:04:05',
+        matching_pkt = str(simple_udpv6_packet(eth_dst ='ff:01:02:f3:04:05',
                                              eth_src ='ff:01:02:f3:04:05',
                                              ipv6_src ='2001:0db8:85a3::8a2e:0370:7331',
                                              ipv6_dst='2001:0db8:85a3::8a2e:0370:7331',
@@ -203,12 +203,12 @@ class Testcase_90_60_All_supported(base_tests.SimpleDataPlane):
         self.dataplane.send(in_port,matching_pkt)
         verify_packet(self,matching_pkt,out_port)
         logging.info("Packet in received for a matching packet")
-        nonmatching_pkt = str(simple_tcpv6_packet(eth_dst ='ff:01:02:f3:04:05',
+        nonmatching_pkt = str(simple_udpv6_packet(eth_dst ='ff:01:02:f3:04:05',
                                              eth_src ='ff:01:02:f3:04:05',
                                              ipv6_src ='2001:0db8:85a2::0001',
                                              ipv6_dst='2001:0db8:85a2::0001',
                                              udp_sport=53,
-                                             udp_dport=53))
+                                             udp_dport=55))
         self.dataplane.send(in_port,nonmatching_pkt)
         verify_no_packet(self,nonmatching_pkt,out_port)
         logging.info("Packet in not received for a non matching packet")
