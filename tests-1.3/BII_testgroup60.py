@@ -191,7 +191,7 @@ class MatchTest(base_tests.SimpleDataPlane):
                             port=ofp.OFPP_CONTROLLER,
                             max_len=ofp.OFPCML_NO_BUFFER)])],
             buffer_id=ofp.OFP_NO_BUFFER,
-            priority=1)
+            priority=0)
         self.controller.message_send(request)
         reply, _ = self.controller.poll(exp_msg = ofp.OFPT_ERROR, timeout = 3)
         self.assertIsNone(reply, "Received error message, could not install the flow")
