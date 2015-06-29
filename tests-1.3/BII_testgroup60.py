@@ -464,7 +464,7 @@ class Testcase_60_70_OXM_OF_IPv4_SRCSubnetMasked(MatchTest):
         match = ofp.match([
             ofp.oxm.eth_type(0x0800),
             # 192.168.0.0/20 (255.255.240.0)
-            ofp.oxm.ipv4_src_masked(0xc0a80000, 0xfffff000),
+            ofp.oxm.ipv4_src(0xc0a80000),
         ])
 
         matching = {
@@ -500,7 +500,7 @@ class Testcases_60_80_OXM_OF_IPV4_DSTSubnetMasked(MatchTest):
         match = ofp.match([
             ofp.oxm.eth_type(0x0800),
             # 192.168.0.0/20 (255.255.240.0)
-            ofp.oxm.ipv4_dst_masked(0xc0a80000, 0xfffff000),
+            ofp.oxm.ipv4_dst(0xc0a80000),
         ])
 
         matching = {
@@ -541,7 +541,7 @@ class Testcase_60_90_OXM_OF_IPV6_SRCSubnetMasked(MatchTest):
 
         match = ofp.match([
             ofp.oxm.eth_type(0x86dd),
-            ofp.oxm.ipv6_src_masked(parse_ipv6(flow), parse_ipv6(mask)),
+            ofp.oxm.ipv6_src(parse_ipv6(flow)),
         ])
 
         matching = {
@@ -579,7 +579,7 @@ class Testcase_60_100_OXM_OF_IPv6_DSTSubnetMasked(MatchTest):
 
         match = ofp.match([
             ofp.oxm.eth_type(0x86dd),
-            ofp.oxm.ipv6_dst_masked(parse_ipv6(flow), parse_ipv6(mask)),
+            ofp.oxm.ipv6_dst(parse_ipv6(flow)),
         ])
 
         matching = {
