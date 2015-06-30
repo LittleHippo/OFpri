@@ -425,7 +425,6 @@ def test_pop_vlan(testcase, table_id, ports, property_type):
         priority = 1
     if property_type == ofp.const.OFPTFPT_APPLY_ACTIONS:
         priority = 1
-
     actions = [
         ofp.action.pop_vlan(),
         ofp.action.output(port=ports[1], max_len=128)
@@ -446,8 +445,7 @@ def test_pop_vlan(testcase, table_id, ports, property_type):
     logging.info("Installed ofp_flow_mod table entry.")
 
     packet = simple_tcp_packet(dl_vlan_enable=True, vlan_vid=2)
-    expected_packet = simple_tcp_packet()
-
+    expected_packet = simple_tcp_packet(pktlen=96)
     testcase.dataplane.send(ports[0], str(packet))
     verify_packet(testcase, str(expected_packet), ports[1])
     return True

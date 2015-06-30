@@ -658,13 +658,14 @@ class Testcase_300_280_MultipartBufferOverflow(base_tests.SimpleDataPlane):
         request = ofp.message.port_stats_request(port_no=ofp.const.OFPP_ANY)
         stats = get_stats(self, request)
         self.assertIsNotNone(stats, "Did not receive port_stats_reply")
-        try:
-            print   stats.entries
-            entries = []
-            for i in range(10000000):
-                entry.append(reply.entries[0])
 
-            req = ofp.message.port_stats_request(entries=entries) 
+        try:
+            # print stats.entries
+            entry = []
+            for i in range(500):
+                entry.append(stats[0])
+
+            req = ofp.message.port_stats_request(entries=entry) 
             self.controller.message_send(req)
             reply, _ = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
 
