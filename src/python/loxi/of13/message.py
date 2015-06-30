@@ -13433,7 +13433,7 @@ class port_stats_request(stats_request):
     type = 18
     stats_type = 4
 
-    def __init__(self, xid=None, flags=None, port_no=None, entries=None):
+    def __init__(self, xid=None, flags=None, port_no=None):
         if xid != None:
             self.xid = xid
         else:
@@ -13446,10 +13446,6 @@ class port_stats_request(stats_request):
             self.port_no = port_no
         else:
             self.port_no = 0
-        if entries != None:
-            self.entries = entries
-        else:
-            self.entries = None
         return
 
     def pack(self):
@@ -13461,11 +13457,8 @@ class port_stats_request(stats_request):
         packed.append(struct.pack("!H", self.stats_type))
         packed.append(struct.pack("!H", self.flags))
         packed.append('\x00' * 4)
-        if self.entries != None:
-            packed.append(loxi.generic_util.pack_list(self.entries))
-        else:
-            packed.append(util.pack_port_no(self.port_no))
-            packed.append('\x00' * 4)
+        packed.append(util.pack_port_no(self.port_no))
+        packed.append('\x00' * 4)
         length = sum([len(x) for x in packed])
         packed[2] = struct.pack("!H", length)
         return ''.join(packed)
