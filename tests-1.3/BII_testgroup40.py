@@ -41,6 +41,8 @@ class Testcase_40_10_FeaturesReplyDatapathID(base_tests.SimpleProtocol):
         self.assertEqual(reply.type, ofp.OFPT_FEATURES_REPLY, "Received message is not features reply")
         self.assertTrue(reply.datapath_id is not None, "Invalid DatapathID!")
         logging.info("Received datapath id: " + str(reply.datapath_id))
+        strmsg = 'Please manually verify the datapath id recorded in the log file'
+        print strmsg
 
 
 
@@ -76,7 +78,9 @@ class Testcase_40_30_FeaturesReplyTables(base_tests.SimpleProtocol):
         self.assertIsNotNone(reply, "Did not receive Features Reply Message")
         self.assertEqual(reply.type, ofp.OFPT_FEATURES_REPLY, "Received message is not features reply")
         self.assertTrue(reply.n_tables >= 1, "Invalid number of tables!")
-        logging.info("Supported number of buffers: " + str(reply.n_tables))
+        logging.info("Supported number of tables: " + str(reply.n_tables))
+        strmsg = 'Please manually verify the number of tables recorded in the log file'
+        print strmsg
 
 
 
