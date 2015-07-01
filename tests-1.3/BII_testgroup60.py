@@ -214,7 +214,7 @@ class MatchTest(base_tests.SimpleDataPlane):
 
 
 
-class Testcase_60_30_OXM_OF_ETH_DSTMasked(MatchTest):
+class Testcase_60_30_OXM_OF_ETH_DST(MatchTest):
     """
     Purpose
     Verify the switch is able to match on the previously named field as a single header field match (under the given Pre-requisites for the match).
@@ -225,27 +225,24 @@ class Testcase_60_30_OXM_OF_ETH_DSTMasked(MatchTest):
     """
     @wireshark_capture
     def runTest(self):
-        logging.info("Running Testcase 60.30 matching on ethernet destination(Masked)")
+        logging.info("Running Testcase 60.30 matching on ethernet destination")
         match = ofp.match([
-            ofp.oxm.eth_dst_masked([0x00, 0x01, 0x02, 0x03, 0x04, 0x05],
-                                   [0x00, 0xff, 0xff, 0x0f, 0xff, 0xff])
+            ofp.oxm.eth_dst([0x00, 0x01, 0x02, 0x03, 0x04, 0x05])
         ])
 
         matching = {
-            "00:01:02:03:04:05": simple_tcp_packet(eth_dst='00:01:02:03:04:05'),
-            "ff:01:02:f3:04:05": simple_tcp_packet(eth_dst='ff:01:02:f3:04:05'),
+            "00:01:02:03:04:05": simple_tcp_packet(eth_dst='00:01:02:03:04:05')
         }
 
         nonmatching = {
-            "00:02:02:03:04:05": simple_tcp_packet(eth_dst='00:02:02:03:04:05'),
-            "00:01:02:07:04:05": simple_tcp_packet(eth_dst='00:01:02:07:04:05'),
+            "00:02:02:03:04:05": simple_tcp_packet(eth_dst='00:02:02:03:04:05')
         }
 
         self.verify_match(match, matching, nonmatching)
 
 
 
-class Testcase_60_40_OXM_OF_ETH_SRCMasked(MatchTest):
+class Testcase_60_40_OXM_OF_ETH_SRC(MatchTest):
     """
     Purpose
     Verify the switch is able to match on the previously named field as a single header field match (under the given Pre-requisites for the match).
@@ -256,20 +253,17 @@ class Testcase_60_40_OXM_OF_ETH_SRCMasked(MatchTest):
     """
     @wireshark_capture
     def runTest(self):
-        logging.info("Running Testcase 60.40 matching on ethernet source(Masked)")
+        logging.info("Running Testcase 60.40 matching on ethernet source")
         match = ofp.match([
-            ofp.oxm.eth_src_masked([0x00, 0x01, 0x02, 0x03, 0x04, 0x05],
-                                   [0x00, 0xff, 0xff, 0x0f, 0xff, 0xff])
+            ofp.oxm.eth_src([0x00, 0x01, 0x02, 0x03, 0x04, 0x05])
         ])
 
         matching = {
-            "00:01:02:03:04:05": simple_tcp_packet(eth_src='00:01:02:03:04:05'),
-            "ff:01:02:f3:04:05": simple_tcp_packet(eth_src='ff:01:02:f3:04:05'),
+            "00:01:02:03:04:05": simple_tcp_packet(eth_src='00:01:02:03:04:05')
         }
 
         nonmatching = {
-            "00:02:02:03:04:05": simple_tcp_packet(eth_src='00:02:02:03:04:05'),
-            "00:01:02:07:04:05": simple_tcp_packet(eth_src='00:01:02:07:04:05'),
+            "00:02:02:03:04:05": simple_tcp_packet(eth_src='00:02:02:03:04:05')
         }
 
         self.verify_match(match, matching, nonmatching)
