@@ -308,7 +308,9 @@ class Testcase_300_190_MultipartTypeGroupStats(base_tests.SimpleDataPlane):
             group_id=1,
             buckets=[
                 ofp.bucket(actions=[ofp.action.output(port_a)])])
-        self.controller.message_send(msg)
+        #self.controller.message_send(msg)
+        rv = self.controller.message_send(msg)
+        self.assertTrue(rv != -1, "Failed to add group")
 
         table_id = 0
         priority = 100
@@ -355,7 +357,8 @@ class Testcase_300_200_MultipartTypeGroupDescs(base_tests.SimpleDataPlane):
             group_id=1,
             buckets=[
                 ofp.bucket(actions=[ofp.action.output(port_a)])])
-        self.controller.message_send(msg)
+        rv = self.controller.message_send(msg)
+        self.assertTrue(rv != -1, "Failed to Modify flow")
 
         table_id = 0
         priority = 100
@@ -369,7 +372,7 @@ class Testcase_300_200_MultipartTypeGroupDescs(base_tests.SimpleDataPlane):
                                    priority=priority)
         logging.info("Insert flow")
         rv = self.controller.message_send(request)
-        self.assertTrue(rv != -1, "Failed to insert flow") 
+        self.assertTrue(rv != -1, "Failed to add group") 
 
         request = ofp.message.group_desc_stats_request()
         reply, _= self.controller.transact(request)
@@ -402,7 +405,8 @@ class Testcase_300_210_MultipartTypeGroupFeatures(base_tests.SimpleDataPlane):
             group_id=1,
             buckets=[
                 ofp.bucket(actions=[ofp.action.output(port_a)])])
-        self.controller.message_send(msg)
+        rv = self.controller.message_send(request)
+        self.assertTrue(rv != -1, "Failed to add group") 
 
         table_id = 0
         priority = 100

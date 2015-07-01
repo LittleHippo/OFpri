@@ -177,10 +177,17 @@ class Testcase_230_40_ActionHeaderMaxLenZero(base_tests.SimpleDataPlane):
         logging.info("Sending a dataplane packet")
         rv, _ = self.controller.poll(exp_msg=ofp.const.OFPT_PACKET_IN)
         self.assertIsNotNone(rv, "Did not receive packet in message")
+        
+        if (len(rv.data)) > 0:
+            self.assertEqual(rv.data,str(pkt),"Packet does not include in the pakcet in msg")
+            logging.info("DUT does not has buffer")
+        else:
+            self.assertEqual(len(rv.data), 0, "length of data in packet in is not correct")
+            logging.info("Got packet in as expected")
+        """
         self.assertEqual(len(rv.data), 0, "length of data in packet in is not correct")
         logging.info("Got packet in as expected")
-
-
+        """
 
 class Testcase_230_50_ActionHeaderMaxLenMax(base_tests.SimpleDataPlane):
     """

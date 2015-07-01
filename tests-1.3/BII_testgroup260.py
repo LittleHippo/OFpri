@@ -523,6 +523,30 @@ class Testcase_260_120_FlowmodDelete_OFPTT_ALL(base_tests.SimpleDataPlane):
         self.assertEqual(err.err_type, ofp.const.OFPET_FLOW_MOD_FAILED,"Erroe type is not OFPET_FLOW_MOD_FAILED")
         self.assertEqual(err.code, ofp.const.OFPFMFC_BAD_TABLE_ID,"Error code is not OFPFMFC_BAD_TABLE_ID")
         logging.info("Received expected error message")
+
+        req = ofp.message.flow_add(table_id=0,
+                               cookie=cookie1,
+                               match= match,
+                               buffer_id=ofp.OFP_NO_BUFFER,
+                               instructions=instructions,
+                               priority=priority)
+        logging.info("Sending flowmod")
+        self.controller.message_send(req)
+        err, _ = self.controller.poll(exp_msg=ofp.const.OFPT_ERROR)
+        self.assertIsNone(err, "Received err msg when inserting the flow")
+
+        req = ofp.message.flow_delete(buffer_id=ofp.OFP_NO_BUFFER,
+                                      match= match,
+                                      priority=priority,
+                                      out_port=ofp.const.OFPP_ANY,
+                                      out_group=ofp.const.OFPG_ANY,
+                                      table_id=ofp.const.OFPTT_ALL)
+        logging.info("Deleting flows from Table")
+        rv = self.controller.message_send(req)
+        self.assertTrue(rv != -1, "Failed to delete flows")
+
+        stats = get_flow_stats(self, table_id=table_id,match=ofp.match())
+        self.assertEqual(len(stats), 0, "Received unexpected stats length.")
         
 """
 

@@ -219,7 +219,7 @@ class Testcase_310_80_MultipartFlowStatsOutport(base_tests.SimpleDataPlane):
         rv = self.controller.message_send(req)
         self.assertTrue(rv != -1, "Failed to insert flow 2")
 
-        actions=[ofp.action.output(port=port4, max_len=128)]
+        actions=[ofp.action.output(port=port3, max_len=128),ofp.action.output(port=port4, max_len=128)]
         instructions=[ofp.instruction.apply_actions(actions=actions)]
        	match = ofp.match([ofp.oxm.in_port(port3)])
         req = ofp.message.flow_add(table_id=table_id,
@@ -755,7 +755,7 @@ class Testcase_310_260_MultipartAggStatsOutport(base_tests.SimpleDataPlane):
         port1, port2, port3, port4, = openflow_ports(4)
         table_id=test_param_get("table", 0)
         priority=100
-        actions=[ofp.action.output(port=port3, max_len=128)]
+        actions=[ofp.action.output(port=port2, max_len=128)]
         instructions=[ofp.instruction.apply_actions(actions=actions)]
         match = ofp.match([ofp.oxm.in_port(port1)])
         req = ofp.message.flow_add(table_id=table_id,
@@ -767,7 +767,7 @@ class Testcase_310_260_MultipartAggStatsOutport(base_tests.SimpleDataPlane):
         rv = self.controller.message_send(req)
         self.assertTrue(rv != -1, "Failed to insert flow 1")
 
-        actions=[ofp.action.output(port=port3, max_len=128)]
+        actions=[ofp.action.output(port=port4, max_len=128)]
         instructions=[ofp.instruction.apply_actions(actions=actions)]
         match = ofp.match([ofp.oxm.in_port(port2)])
         req = ofp.message.flow_add(table_id=table_id,
@@ -779,9 +779,9 @@ class Testcase_310_260_MultipartAggStatsOutport(base_tests.SimpleDataPlane):
         rv = self.controller.message_send(req)
         self.assertTrue(rv != -1, "Failed to insert flow 2") 
         
-        actions=[ofp.action.output(port=port1, max_len=128),ofp.action.output(port=port2, max_len=128)]
+        actions=[ofp.action.output(port=port2, max_len=128),ofp.action.output(port=port4, max_len=128)]
         instructions=[ofp.instruction.apply_actions(actions=actions)]
-        match = ofp.match([ofp.oxm.in_port(port4)])
+        match = ofp.match([ofp.oxm.in_port(port3)])
         req = ofp.message.flow_add(table_id=table_id,
                                match= match,
                                buffer_id=ofp.OFP_NO_BUFFER,
@@ -794,17 +794,17 @@ class Testcase_310_260_MultipartAggStatsOutport(base_tests.SimpleDataPlane):
         pkt = simple_tcp_packet()
         strpkt=str(pkt)
         self.dataplane.send(port1, strpkt)
-        verify_packets(self, strpkt,[port3])
+        verify_packets(self, strpkt,[port2])
         logging.info("Received packet on outport %d", port3)
         self.dataplane.send(port2, strpkt)
-        verify_packets(self, strpkt,[port3])
+        verify_packets(self, strpkt,[port4])
         logging.info("Received packet on outport %d", port3)
-        self.dataplane.send(port4, strpkt)
-        verify_packets(self, strpkt,[port1,port2])
+        self.dataplane.send(port3, strpkt)
+        verify_packets(self, strpkt,[port2,port4])
         logging.info("Received packet on outport")
         
         time.sleep(2)
-        request = ofp.message.aggregate_stats_request(table_id=table_id,match=ofp.match(),out_port=port3,out_group=ofp.OFPG_ANY)
+        request = ofp.message.aggregate_stats_request(table_id=table_id,match=ofp.match(),out_port=port2,out_group=ofp.OFPG_ANY)
         reply, _=self.controller.transact(request)
         self.assertEqual(reply.flow_count,2, "Incorrect flow_stats entry")
         logging.info("Received multipart reply as expected") 
