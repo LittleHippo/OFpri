@@ -41,7 +41,9 @@ class Testcase_150_10_Invalid_table(base_tests.SimpleDataPlane):
         in_port, out_port = openflow_ports(2)
 
         actions = [ofp.action.output(out_port)]
-
+        match = ofp.match([
+            ofp.oxm.eth_type(0x0800)
+        ])
         #logging.info("Running actions test for %s", pp(actions))
         request = ofp.message.features_request()
         (reply, pkt)= self.controller.transact(request)
@@ -54,7 +56,8 @@ class Testcase_150_10_Invalid_table(base_tests.SimpleDataPlane):
         logging.info("Inserting flow")
         request = ofp.message.flow_add(
                 table_id=test_param_get("table", 0),
-                match=packet_to_flow_match(self, pkt),
+                #match=packet_to_flow_match(self, pkt),
+                match = match,
                 instructions=[
                     ofp.instruction.apply_actions(actions)],
                 buffer_id=ofp.OFP_NO_BUFFER,
@@ -69,7 +72,8 @@ class Testcase_150_10_Invalid_table(base_tests.SimpleDataPlane):
 
         request = ofp.message.flow_delete(
                 table_id=tables_no+1, #invalid table id
-                match=packet_to_flow_match(self, pkt),
+                #match=packet_to_flow_match(self, pkt),
+                match = match,
                 out_port = ofp.OFPP_ANY,
                 out_group = ofp.OFPG_ANY,
                 instructions=[
@@ -102,7 +106,9 @@ class Testcase_150_20_TableID_OFPTT_ALL(base_tests.SimpleDataPlane):
         in_port, out_port, out_portY = openflow_ports(3)
 
         actions = [ofp.action.output(out_port)]
-
+        match = ofp.match([
+            ofp.oxm.eth_type(0x0800)
+        ])
         pkt = simple_tcp_packet()
 
         #logging.info("Running actions test for %s", pp(actions))
@@ -112,7 +118,8 @@ class Testcase_150_20_TableID_OFPTT_ALL(base_tests.SimpleDataPlane):
         logging.info("Inserting flow")
         request = ofp.message.flow_add(
                 table_id=ofp.OFPTT_ALL,
-                match=packet_to_flow_match(self, pkt),
+                #match=packet_to_flow_match(self, pkt),
+                match = match,
                 instructions=[
                     ofp.instruction.apply_actions(actions)],
                 buffer_id=ofp.OFP_NO_BUFFER,
@@ -134,7 +141,8 @@ class Testcase_150_20_TableID_OFPTT_ALL(base_tests.SimpleDataPlane):
         logging.info("Inserting flow")
         request = ofp.message.flow_add(
                 table_id=test_param_get("table", 0),
-                match=packet_to_flow_match(self, pkt),
+                #match=packet_to_flow_match(self, pkt),
+                match = match,
                 instructions=[
                     ofp.instruction.apply_actions(actions)],
                 buffer_id=ofp.OFP_NO_BUFFER,
@@ -149,7 +157,8 @@ class Testcase_150_20_TableID_OFPTT_ALL(base_tests.SimpleDataPlane):
 
         request = ofp.message.flow_mod(
                 table_id=ofp.OFPTT_ALL, #invalid table id
-                match=packet_to_flow_match(self, pkt),
+                #match=packet_to_flow_match(self, pkt),
+                match = match,
                 out_port = ofp.OFPP_ANY,
                 out_group = ofp.OFPG_ANY,
                 instructions=[
@@ -251,7 +260,9 @@ class Testcase_150_40_unknown_instruction(base_tests.SimpleDataPlane):
         in_port, out_port = openflow_ports(2)
 
         actions = [ofp.action.output(out_port)]
-
+        match = ofp.match([
+            ofp.oxm.eth_type(0x0800)
+        ])
         pkt = simple_tcp_packet()
 
         #logging.info("Running actions test for %s", pp(actions))
@@ -262,7 +273,8 @@ class Testcase_150_40_unknown_instruction(base_tests.SimpleDataPlane):
         logging.info("Inserting flow")
         request = ofp.message.flow_add(
                 table_id=test_param_get("table", 0),
-                match=packet_to_flow_match(self, pkt),
+                #match=packet_to_flow_match(self, pkt),
+                match = match,
                 instructions=[
                     invalid_instruction],
                 buffer_id=ofp.OFP_NO_BUFFER,

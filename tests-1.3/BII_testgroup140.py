@@ -186,7 +186,7 @@ class Testcase_140_30_Add_Identical(base_tests.SimpleDataPlane):
         flags = ofp.OFPFF_CHECK_OVERLAP
 
         actions = [ofp.action.output(out_port)]
-
+        match = ofp.match([ofp.oxm.eth_type(0x0800)])
         pkt = simple_tcp_packet()
 
         #logging.info("Running actions test for %s", pp(actions))
@@ -196,7 +196,8 @@ class Testcase_140_30_Add_Identical(base_tests.SimpleDataPlane):
         logging.info("Inserting flow")
         request = ofp.message.flow_add(
                 table_id=test_param_get("table", 0),
-                match=packet_to_flow_match(self, pkt),
+                #match=packet_to_flow_match(self, pkt),
+                match = match,
                 instructions=[
                     ofp.instruction.apply_actions(actions)],
                 buffer_id=ofp.OFP_NO_BUFFER,
@@ -210,7 +211,8 @@ class Testcase_140_30_Add_Identical(base_tests.SimpleDataPlane):
         do_barrier(self.controller)
         request = ofp.message.flow_add(
                 table_id=test_param_get("table", 0),
-                match=packet_to_flow_match(self, pkt),
+                #match=packet_to_flow_match(self, pkt),
+                match = match,
                 instructions=[
                     ofp.instruction.apply_actions(actions)],
                 buffer_id=ofp.OFP_NO_BUFFER,
@@ -246,7 +248,7 @@ class Testcase_140_40_Add_Reset_Counters(base_tests.SimpleDataPlane):
 
 
         actions = [ofp.action.output(out_port)]
-
+        match = ofp.match([ofp.oxm.eth_type(0x0800)])
         pkt = simple_tcp_packet()
 
         #logging.info("Running actions test for %s", pp(actions))
@@ -256,7 +258,8 @@ class Testcase_140_40_Add_Reset_Counters(base_tests.SimpleDataPlane):
         logging.info("Inserting flow")
         request = ofp.message.flow_add(
                 table_id=test_param_get("table", 0),
-                match=packet_to_flow_match(self, pkt),
+                #match=packet_to_flow_match(self, pkt),
+                match = match,
                 instructions=[
                     ofp.instruction.apply_actions(actions)],
                 buffer_id=ofp.OFP_NO_BUFFER,
@@ -275,7 +278,8 @@ class Testcase_140_40_Add_Reset_Counters(base_tests.SimpleDataPlane):
 
         request = ofp.message.flow_add(
                 table_id=test_param_get("table", 0),
-                match=packet_to_flow_match(self, pkt),
+                #match=packet_to_flow_match(self, pkt),
+                match = match,
                 instructions=[
                     ofp.instruction.apply_actions(actions)],
                 buffer_id=ofp.OFP_NO_BUFFER,flags = flags,
@@ -292,9 +296,9 @@ class Testcase_140_40_Add_Reset_Counters(base_tests.SimpleDataPlane):
         self.assertEqual(stats[0].packet_count, 0, "The packet count is not reset")
         self.assertEqual(stats[0].byte_count,0, "The byte count is not reset")
         
-
+"""
 class Testcase_140_50_Add_Reset_Counters_Flag_Not_Set(base_tests.SimpleDataPlane):
-    """
+    
     Purpose
     Verify counters are replaced when "OFPFC_ADD" is processed and "OFPFF_CHECK_OVERLAP" flag is set and "OFPFF_RESET_COUNTS" flag is not set.
 
@@ -302,7 +306,7 @@ class Testcase_140_50_Add_Reset_Counters_Flag_Not_Set(base_tests.SimpleDataPlane
     Configure and connect DUT to controller. After control channel establishment, add a flow matching on a named field (under the given Pre-requisites for the match). Wait a set period of time. Add a second flow with an identical match, the OFPFF_CHECK_OVERLAP flag not set, the same priority as flow one, but a different cookie value from flow one. Verify that flow one has been removed, that flow two is installed, the second flow's cookie field is set correctly, and the flow's duration counter has reset.
 
 
-    """
+    
     @wireshark_capture
     def runTest(self):
         logging.info("Running testcase 140.50 Add with Reset Counters Flag not Set")
@@ -359,7 +363,7 @@ class Testcase_140_50_Add_Reset_Counters_Flag_Not_Set(base_tests.SimpleDataPlane
         self.assertEqual(stats[0].packet_count, replace_packet_count, "The packet count is not replaced")
         self.assertEqual(stats[0].byte_count,replace_byte_count, "The byte count is not replaced")
         
-
+"""
 class Testcase_140_60_Add_no_flow_removed(base_tests.SimpleDataPlane):
     """
     TODO: Verify the correctness of the testcase by using another DUT
@@ -378,7 +382,7 @@ class Testcase_140_60_Add_no_flow_removed(base_tests.SimpleDataPlane):
         in_port, out_port = openflow_ports(2)
         flags = ofp.OFPFF_SEND_FLOW_REM
 
-
+        match = ofp.match([ofp.oxm.eth_type(0x0800)])
         actions = [ofp.action.output(out_port)]
 
         pkt = simple_tcp_packet()
@@ -390,7 +394,8 @@ class Testcase_140_60_Add_no_flow_removed(base_tests.SimpleDataPlane):
         logging.info("Inserting flow")
         request = ofp.message.flow_add(
                 table_id=test_param_get("table", 0),
-                match=packet_to_flow_match(self, pkt),
+                #match=packet_to_flow_match(self, pkt),
+                match = match,
                 instructions=[
                     ofp.instruction.apply_actions(actions)],
                 buffer_id=ofp.OFP_NO_BUFFER,
@@ -409,7 +414,8 @@ class Testcase_140_60_Add_no_flow_removed(base_tests.SimpleDataPlane):
 
         request = ofp.message.flow_add(
                 table_id=test_param_get("table", 0),
-                match=packet_to_flow_match(self, pkt),
+                #match=packet_to_flow_match(self, pkt),
+                match = match,
                 instructions=[
                     ofp.instruction.apply_actions(actions)],
                 buffer_id=ofp.OFP_NO_BUFFER,
@@ -446,7 +452,7 @@ class Testcase_140_70_Modify_Preserved_fields(base_tests.SimpleDataPlane):
 
 
         actions = [ofp.action.output(out_port)]
-
+        match = ofp.match([ofp.oxm.eth_type(0x0800)])
         pkt = simple_tcp_packet()
 
         #logging.info("Running actions test for %s", pp(actions))
@@ -456,7 +462,8 @@ class Testcase_140_70_Modify_Preserved_fields(base_tests.SimpleDataPlane):
         logging.info("Inserting flow")
         request = ofp.message.flow_add(
                 table_id=test_param_get("table", 0),
-                match=packet_to_flow_match(self, pkt),
+                #match=packet_to_flow_match(self, pkt),
+                match = match,
                 instructions=[
                     ofp.instruction.apply_actions(actions)],
                 buffer_id=ofp.OFP_NO_BUFFER,
@@ -477,7 +484,8 @@ class Testcase_140_70_Modify_Preserved_fields(base_tests.SimpleDataPlane):
 
         request = ofp.message.flow_mod(
                 table_id=test_param_get("table", 0),
-                match=packet_to_flow_match(self, pkt),
+                #match=packet_to_flow_match(self, pkt),
+                match = match,
                 instructions=[
                     ofp.instruction.apply_actions([ofp.action.output(ofp.OFPP_CONTROLLER)])],
                 buffer_id=ofp.OFP_NO_BUFFER,
@@ -516,7 +524,7 @@ class Testcase_140_80_Modify_Reset_Countersflag(base_tests.SimpleDataPlane):
 
 
         actions = [ofp.action.output(out_port)]
-
+        match = ofp.match([ofp.oxm.eth_type(0x0800)])
         pkt = simple_tcp_packet()
 
         #logging.info("Running actions test for %s", pp(actions))
@@ -526,7 +534,8 @@ class Testcase_140_80_Modify_Reset_Countersflag(base_tests.SimpleDataPlane):
         logging.info("Inserting flow")
         request = ofp.message.flow_add(
                 table_id=test_param_get("table", 0),
-                match=packet_to_flow_match(self, pkt),
+                #match=packet_to_flow_match(self, pkt),
+                match = match,
                 instructions=[
                     ofp.instruction.apply_actions(actions)],
                 buffer_id=ofp.OFP_NO_BUFFER,
@@ -547,7 +556,8 @@ class Testcase_140_80_Modify_Reset_Countersflag(base_tests.SimpleDataPlane):
 
         request = ofp.message.flow_mod(
                 table_id=test_param_get("table", 0),
-                match=packet_to_flow_match(self, pkt),
+                #match=packet_to_flow_match(self, pkt),
+                match = match,
                 instructions=[
                     ofp.instruction.apply_actions([ofp.action.output(ofp.OFPP_CONTROLLER)])],
                 buffer_id=ofp.OFP_NO_BUFFER, flags = flags,
@@ -561,8 +571,8 @@ class Testcase_140_80_Modify_Reset_Countersflag(base_tests.SimpleDataPlane):
         self.assertIsNotNone(stats,"Did not receive flow stats reply messsage")
         #self.assertEqual(table_stats[0].active_count, 1, "active flow count is not 1")
         self.assertEqual(stats[0].cookie, 1000, "Cookie is not unchanged")
-        self.assertEqual(stats[0].packet_count, 0, "The packet count is not unchanged")
-        self.assertEqual(stats[0].byte_count,0, "The byte count is not unchanged")
+        self.assertEqual(stats[0].packet_count, 0, "The packet count is not cleared")
+        self.assertEqual(stats[0].byte_count,0, "The byte count is not cleared")
         self.assertEqual(stats[0].hard_timeout,100, "The hard_timeout is not unchanged")
         self.assertEqual(stats[0].idle_timeout,100, "The idle_timeout is not unchanged")
         self.assertEqual(stats[0].flags,ofp.OFPFF_RESET_COUNTS, "The idle_timeout is not unchanged")
@@ -583,7 +593,7 @@ class Testcase_140_90_Modify_non_existent(base_tests.SimpleDataPlane):
         #flags = ofp.OFPFF_RESET_COUNTS
 
         actions = [ofp.action.output(out_port)]
-
+        match = ofp.match([ofp.oxm.eth_type(0x0800)])
         pkt = simple_tcp_packet()
 
         #logging.info("Running actions test for %s", pp(actions))
@@ -593,7 +603,8 @@ class Testcase_140_90_Modify_non_existent(base_tests.SimpleDataPlane):
         logging.info("Inserting flow")
         request = ofp.message.flow_modify(
                 table_id=test_param_get("table", 0),
-                match=packet_to_flow_match(self, pkt),
+                #match=packet_to_flow_match(self, pkt),
+                match = match,
                 instructions=[
                     ofp.instruction.apply_actions(actions)],
                 buffer_id=ofp.OFP_NO_BUFFER,priority = 1000)
@@ -622,7 +633,7 @@ class Testcase_140_100_Default_delete(base_tests.SimpleDataPlane):
         #flags = ofp.OFPFF_RESET_COUNTS
 
         actions = [ofp.action.output(out_port)]
-
+        match = ofp.match([ofp.oxm.eth_type(0x0800)])
         pkt = simple_tcp_packet()
 
         #logging.info("Running actions test for %s", pp(actions))
@@ -632,7 +643,8 @@ class Testcase_140_100_Default_delete(base_tests.SimpleDataPlane):
         logging.info("Inserting flow")
         request = ofp.message.flow_add(
                 table_id=test_param_get("table", 0),
-                match=packet_to_flow_match(self, pkt),
+                #match=packet_to_flow_match(self, pkt),
+                match = match,
                 instructions=[
                     ofp.instruction.apply_actions(actions)],
                 buffer_id=ofp.OFP_NO_BUFFER, priority = 1000)
@@ -645,7 +657,8 @@ class Testcase_140_100_Default_delete(base_tests.SimpleDataPlane):
         verify_packet(self, str(pkt),out_port)
         request = ofp.message.flow_delete(
                 table_id=test_param_get("table", 0),
-                match=packet_to_flow_match(self, pkt),
+                #match=packet_to_flow_match(self, pkt),
+                match = match,
                 out_port = ofp.OFPP_ANY,
                 out_group = ofp.OFPG_ANY,
                 instructions=[
@@ -675,7 +688,7 @@ class Testcase_140_110_Delete_Flow_removed(base_tests.SimpleDataPlane):
         flags = ofp.OFPFF_SEND_FLOW_REM
 
         actions = [ofp.action.output(out_port)]
-
+        match = ofp.match([ofp.oxm.eth_type(0x0800)])
         pkt = simple_tcp_packet()
 
         #logging.info("Running actions test for %s", pp(actions))
@@ -685,7 +698,8 @@ class Testcase_140_110_Delete_Flow_removed(base_tests.SimpleDataPlane):
         logging.info("Inserting flow")
         request = ofp.message.flow_add(
                 table_id=test_param_get("table", 0),
-                match=packet_to_flow_match(self, pkt),
+                #match=packet_to_flow_match(self, pkt),
+                match = match,
                 instructions=[
                     ofp.instruction.apply_actions(actions)],
                 buffer_id=ofp.OFP_NO_BUFFER, priority = 1000, flags = flags)
@@ -698,7 +712,8 @@ class Testcase_140_110_Delete_Flow_removed(base_tests.SimpleDataPlane):
         verify_packet(self, str(pkt),out_port)
         request = ofp.message.flow_delete(
                 table_id=test_param_get("table", 0),
-                match=packet_to_flow_match(self, pkt),
+                #match=packet_to_flow_match(self, pkt),
+                match = match,
                 out_port = ofp.OFPP_ANY,
                 out_group = ofp.OFPG_ANY,
                 instructions=[
@@ -776,7 +791,7 @@ class Testcase_140_130_Priority_strict(base_tests.SimpleDataPlane):
         #flags = ofp.OFPFF_SEND_FLOW_REM
 
         actions = [ofp.action.output(out_port)]
-
+        match = ofp.match([ofp.oxm.eth_type(0x0800)])
         pkt = simple_tcp_packet()
 
         #logging.info("Running actions test for %s", pp(actions))
@@ -786,7 +801,8 @@ class Testcase_140_130_Priority_strict(base_tests.SimpleDataPlane):
         logging.info("Inserting flow")
         request = ofp.message.flow_add(
                 table_id=test_param_get("table", 0),
-                match=packet_to_flow_match(self, pkt),
+                #match=packet_to_flow_match(self, pkt),
+                match = match,
                 instructions=[
                     ofp.instruction.apply_actions(actions)],
                 buffer_id=ofp.OFP_NO_BUFFER, priority = 1000)
@@ -802,7 +818,8 @@ class Testcase_140_130_Priority_strict(base_tests.SimpleDataPlane):
 
         request = ofp.message.flow_add(
                 table_id=test_param_get("table", 0),
-                match=packet_to_flow_match(self, pkt),
+                #match=packet_to_flow_match(self, pkt),
+                match = match,
                 instructions=[
                     ofp.instruction.apply_actions([ofp.action.output(out_portY)])],
                 buffer_id=ofp.OFP_NO_BUFFER, priority = 1001)
@@ -818,7 +835,8 @@ class Testcase_140_130_Priority_strict(base_tests.SimpleDataPlane):
 
         request = ofp.message.flow_delete_strict(
                 table_id=test_param_get("table", 0),
-                match=packet_to_flow_match(self, pkt),
+                #match=packet_to_flow_match(self, pkt),
+                match = match,
                 out_port = ofp.OFPP_ANY,
                 out_group = ofp.OFPG_ANY,
                 instructions=[
@@ -849,7 +867,7 @@ class Testcase_140_140_Strict_delete(base_tests.SimpleDataPlane):
         #flags = ofp.OFPFF_SEND_FLOW_REM
 
         actions = [ofp.action.output(out_port)]
-
+        match = ofp.match([ofp.oxm.eth_type(0x0800)])
         pkt = simple_tcp_packet()
 
         #logging.info("Running actions test for %s", pp(actions))
@@ -859,7 +877,8 @@ class Testcase_140_140_Strict_delete(base_tests.SimpleDataPlane):
         logging.info("Inserting flow")
         request = ofp.message.flow_add(
                 table_id=test_param_get("table", 0),
-                match=packet_to_flow_match(self, pkt),
+                #match=packet_to_flow_match(self, pkt),
+                match = match,
                 instructions=[
                     ofp.instruction.apply_actions(actions)],
                 buffer_id=ofp.OFP_NO_BUFFER, priority = 100)
@@ -875,7 +894,8 @@ class Testcase_140_140_Strict_delete(base_tests.SimpleDataPlane):
 
         request = ofp.message.flow_add(
                 table_id=test_param_get("table", 0),
-                match=packet_to_flow_match(self, pkt),
+                #match=packet_to_flow_match(self, pkt),
+                match = match,
                 instructions=[
                     ofp.instruction.apply_actions([ofp.action.output(out_portY)])],
                 buffer_id=ofp.OFP_NO_BUFFER, priority = 200)
@@ -891,7 +911,8 @@ class Testcase_140_140_Strict_delete(base_tests.SimpleDataPlane):
 
         request = ofp.message.flow_add(
                 table_id=test_param_get("table", 0),
-                match=packet_to_flow_match(self, pkt),
+                #match=packet_to_flow_match(self, pkt),
+                match = match,
                 instructions=[
                     ofp.instruction.apply_actions([ofp.action.output(out_portZ)])],
                 buffer_id=ofp.OFP_NO_BUFFER, priority = 300)
@@ -906,7 +927,8 @@ class Testcase_140_140_Strict_delete(base_tests.SimpleDataPlane):
 
         request = ofp.message.flow_delete_strict(
                 table_id=test_param_get("table", 0),
-                match=packet_to_flow_match(self, pkt),
+                #match=packet_to_flow_match(self, pkt),
+                match = match,
                 out_port = ofp.OFPP_ANY,
                 out_group = ofp.OFPG_ANY,
                 instructions=[
@@ -1119,6 +1141,7 @@ class Testcase_140_170_Delete_match_syntax(base_tests.SimpleDataPlane):
         stats, _= self.controller.transact(request)
         self.assertEqual(stats.flow_count, 2, "Did not contains all the necessary flows")
 
+
 class Testcase_140_180_Delete_filters(base_tests.SimpleDataPlane):
     """
     Purpose
@@ -1136,7 +1159,7 @@ class Testcase_140_180_Delete_filters(base_tests.SimpleDataPlane):
         #flags = ofp.OFPFF_SEND_FLOW_REM
 
         actions = [ofp.action.output(out_port)]
-
+        match = ofp.match([ofp.oxm.eth_type(0x0800)])
         pkt = simple_tcp_packet()
 
         #logging.info("Running actions test for %s", pp(actions))
@@ -1146,7 +1169,8 @@ class Testcase_140_180_Delete_filters(base_tests.SimpleDataPlane):
         logging.info("Inserting flow")
         request = ofp.message.flow_add(
                 table_id=test_param_get("table", 0),
-                match=packet_to_flow_match(self, pkt),
+                #match=packet_to_flow_match(self, pkt),
+                match = match,
                 instructions=[
                     ofp.instruction.apply_actions(actions)],
                 buffer_id=ofp.OFP_NO_BUFFER, priority = 100)
@@ -1162,7 +1186,8 @@ class Testcase_140_180_Delete_filters(base_tests.SimpleDataPlane):
 
         request = ofp.message.flow_add(
                 table_id=test_param_get("table", 0),
-                match=packet_to_flow_match(self, pkt),
+                #match=packet_to_flow_match(self, pkt),
+                match = match,
                 instructions=[
                     ofp.instruction.apply_actions([ofp.action.output(out_portY)])],
                 buffer_id=ofp.OFP_NO_BUFFER, priority = 200)
@@ -1177,7 +1202,8 @@ class Testcase_140_180_Delete_filters(base_tests.SimpleDataPlane):
 
         request = ofp.message.flow_delete(
                 table_id=test_param_get("table", 0),
-                match=packet_to_flow_match(self, pkt),
+                #match=packet_to_flow_match(self, pkt),
+                match = match,
                 out_port = out_portY,
                 out_group = ofp.OFPG_ANY,
                 instructions=[
@@ -1206,7 +1232,7 @@ class Testcase_140_200_Add_modify_ignore(base_tests.SimpleDataPlane):
         ports = openflow_ports(4)
         in_port, out_port, out_portY, out_portZ = openflow_ports(4)
         #flags = ofp.OFPFF_SEND_FLOW_REM
-
+        match = ofp.match([ofp.oxm.eth_type(0x0800)])
         actions = [ofp.action.output(out_port)]
 
         pkt = simple_tcp_packet()
@@ -1218,7 +1244,8 @@ class Testcase_140_200_Add_modify_ignore(base_tests.SimpleDataPlane):
         logging.info("Inserting flow")
         request = ofp.message.flow_add(
                 table_id=test_param_get("table", 0),
-                match=packet_to_flow_match(self, pkt),
+                #match=packet_to_flow_match(self, pkt),
+                match = match,
                 instructions=[
                     ofp.instruction.apply_actions(actions)],
                 buffer_id=ofp.OFP_NO_BUFFER, priority = 100)
@@ -1232,7 +1259,8 @@ class Testcase_140_200_Add_modify_ignore(base_tests.SimpleDataPlane):
 
         request = ofp.message.flow_modify(
                 table_id=test_param_get("table", 0),
-                match=packet_to_flow_match(self, pkt),
+                #match=packet_to_flow_match(self, pkt),
+                match = match,
                 out_port = out_portY,
                 instructions=[
                     ofp.instruction.apply_actions([ofp.action.output(out_portZ)])],
@@ -1263,7 +1291,7 @@ class Testcase_140_210_Delete_cookie(base_tests.SimpleDataPlane):
         #flags = ofp.OFPFF_SEND_FLOW_REM
 
         actions = [ofp.action.output(out_port)]
-
+        match = ofp.match([ofp.oxm.eth_type(0x0800)])
         pkt = simple_tcp_packet()
 
         #logging.info("Running actions test for %s", pp(actions))
@@ -1273,7 +1301,8 @@ class Testcase_140_210_Delete_cookie(base_tests.SimpleDataPlane):
         logging.info("Inserting flow")
         request = ofp.message.flow_add(
                 table_id=test_param_get("table", 0),
-                match=packet_to_flow_match(self, pkt),
+                #match=packet_to_flow_match(self, pkt),
+                match = match,
                 instructions=[
                     ofp.instruction.apply_actions(actions)],
                 buffer_id=ofp.OFP_NO_BUFFER, priority = 100, cookie= 0x1)
@@ -1287,7 +1316,8 @@ class Testcase_140_210_Delete_cookie(base_tests.SimpleDataPlane):
         logging.info("Inserting flow")
         request = ofp.message.flow_add(
                 table_id=test_param_get("table", 0),
-                match=packet_to_flow_match(self, pkt),
+                #match=packet_to_flow_match(self, pkt),
+                match = match,
                 instructions=[
                     ofp.instruction.apply_actions([ofp.action.output(out_portY)])],
                 buffer_id=ofp.OFP_NO_BUFFER, priority = 200, cookie= 0x5)
@@ -1301,7 +1331,8 @@ class Testcase_140_210_Delete_cookie(base_tests.SimpleDataPlane):
         logging.info("Inserting flow")
         request = ofp.message.flow_add(
                 table_id=test_param_get("table", 0),
-                match=packet_to_flow_match(self, pkt),
+               # match=packet_to_flow_match(self, pkt),
+                match = match,
                 instructions=[
                     ofp.instruction.apply_actions([ofp.action.output(out_portZ)])],
                 buffer_id=ofp.OFP_NO_BUFFER, priority = 300, cookie= 0x6)
@@ -1348,7 +1379,7 @@ class Testcase_140_220_Delete_all_tables(base_tests.SimpleDataPlane):
         #flags = ofp.OFPFF_SEND_FLOW_REM
         
         actions = [ofp.action.output(out_port)]
-
+        match = ofp.match([ofp.oxm.eth_type(0x0800)])
         #logging.info("Running actions test for %s", pp(actions))
 
         delete_all_flows(self.controller)
@@ -1376,7 +1407,8 @@ class Testcase_140_220_Delete_all_tables(base_tests.SimpleDataPlane):
         
         #for table_id in range(tables_no):
         req = ofp.message.flow_add(table_id=test_param_get("table", 0),
-                                   match=packet_to_flow_match(self, pkt),
+                                   #match=packet_to_flow_match(self, pkt),
+                                   match = match,
                                    buffer_id=ofp.OFP_NO_BUFFER,
                                    instructions=[ofp.instruction.apply_actions(actions)],
                                    priority = 100)
