@@ -766,7 +766,7 @@ class Testcase_440_470_RoleRequestFailedData(base_tests.SimpleDataPlane):
         if reply.type == ofp.const.OFPET_ROLE_REQUEST_FAILED:
             logging.info("Received error type was OFPET_ROLE_REQUEST_FAILED.")
             self.assertEqual(reply.code, ofp.const.OFPRRFC_BAD_ROLE,
-                              ("Flow mod failed code %d was received, but we "
+                              ("Role Request code %d was received, but we "
                                "expected OFPRRFC_BAD_ROLE.") % reply.code)
             logging.info("Received correct error code OFPRRFC_BAD_ROLE.")
             if len(reply.data) < 64:
@@ -776,7 +776,7 @@ class Testcase_440_470_RoleRequestFailedData(base_tests.SimpleDataPlane):
         elif reply.type == ofp.const.OFPET_BAD_REQUEST:
             logging.info("Received error type was OFPET_BAD_REQUEST.")
             self.assertEqual(reply.code, ofp.OFPBRC_BAD_TYPE,
-                              ("Flow mod failed code %d was received, but we "
+                              ("Bad request code %d was received, but we "
                                "expected OFPBRC_BAD_TYPE.") % reply.code)
             logging.info("Received correct error code OFPBRC_BAD_TYPE.")
         else:
@@ -823,14 +823,14 @@ class Testcase_440_580_MeterModFailedOutofMeter(base_tests.SimpleDataPlane):
                 if reply.type == ofp.const.OFPET_METER_MOD_FAILED:
                     logging.info("Received error type was OFPET_METER_MOD_FAILED.")
                     self.assertEqual(reply.code, ofp.const.OFPMMFC_OUT_OF_METERS,
-                                      ("Flow mod failed code %d was received, but we "
+                                      ("Meter mod failed code %d was received, but we "
                                        "expected OFPMMFC_OUT_OF_METERS.") % reply.code)
                     logging.info("Received correct error code OFPMMFC_OUT_OF_METERS.")
                     return
                 elif reply.type == ofp.const.OFPET_BAD_REQUEST:
                     logging.info("Received error type was OFPET_BAD_REQUEST.")
                     self.assertEqual(reply.code, ofp.OFPBRC_BAD_TYPE,
-                                      ("Flow mod failed code %d was received, but we "
+                                      ("Bad request code %d was received, but we "
                                        "expected OFPBRC_BAD_TYPE.") % reply.code)
                     logging.info("Received correct error code OFPBRC_BAD_TYPE.")
                     return
@@ -875,7 +875,7 @@ class Testcase_440_600_MeterModFailedData(base_tests.SimpleDataPlane):
                 if reply.type == ofp.const.OFPET_METER_MOD_FAILED:
                     logging.info("Received error type was OFPET_METER_MOD_FAILED.")
                     self.assertEqual(reply.code, ofp.const.OFPMMFC_OUT_OF_METERS,
-                                      ("Flow mod failed code %d was received, but we "
+                                      ("Meter Mod failed code %d was received, but we "
                                        "expected OFPMMFC_OUT_OF_METERS.") % reply.code)
                     if len(reply.data) < 64:
                         self.assertEqual(request.pack(), reply.data, "Data field of error message should include up to 64 bytes of the offending request")
@@ -886,7 +886,7 @@ class Testcase_440_600_MeterModFailedData(base_tests.SimpleDataPlane):
                 elif reply.type == ofp.const.OFPET_BAD_REQUEST:
                     logging.info("Received error type was OFPET_BAD_REQUEST.")
                     self.assertEqual(reply.code, ofp.OFPBRC_BAD_TYPE,
-                                      ("Flow mod failed code %d was received, but we "
+                                      ("Bad request code %d was received, but we "
                                        "expected OFPBRC_BAD_TYPE.") % reply.code)
                     logging.info("Received correct error code OFPBRC_BAD_TYPE.")
                     return
@@ -941,7 +941,7 @@ class Testcase_440_620_TableFeaturesFailedBadMetadata(base_tests.SimpleDataPlane
         req = ofp.message.table_features_stats_request()
         reply, _ = self.controller.transact(req)
         self.assertIsNotNone(reply, "Did not receive table_features_stats_reply")
-        self.assertFalse(reply.type == ofp.OFPT_ERROR,"The switch generated an error.")
+        self.assertFalse(reply.type == ofp.OFPT_ERROR,"The switch generated an error when receiving table feature stats request.")
         self.assertTrue(reply.type == ofp.OFPT_STATS_REPLY,"The switch responded an reply with wrong type.")
         self.assertTrue(len(reply.entries) > 0,"No entry included in table features reply")
         reply.entries[0].metadata_match = 0xffffffffffffffff ^ reply.entries[0].metadata_match

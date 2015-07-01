@@ -831,11 +831,13 @@ class Testcase_430_530_BadActionData(base_tests.SimpleDataPlane):
         delete_all_flows(self.controller)
         port_a, = openflow_ports(1)
         InvalidType = 0xff00
+        data = str(simple_tcp_packet())
         act = ofp.action.experimenter()
         act.type = InvalidType
         msg = ofp.message.packet_out(
                 in_port=ofp.OFPP_CONTROLLER,
                 actions=[act],
+                data = data,
                 buffer_id=ofp.OFP_NO_BUFFER)
         logging.info("Sending PacketOut, port %d", port_a)
         self.controller.message_send(msg)
