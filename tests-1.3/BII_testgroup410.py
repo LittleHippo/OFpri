@@ -105,22 +105,22 @@ class Testcase_410_60_action_output_controller_max_length_no_buffer(BII_testgrou
     """
 
 
-
+"""
 class Testcase_410_70_packet_in_buffer_documentation(base_tests.SimpleDataPlane):
-    """
+    
     Purpose
     Verify devices expose available buffering to its users.
 
     Methodology
     Vendor must provide this documentation to complete the basic conformance test suite. If the proper documentation is not provided this test case result shall be "fail."
 
-    """
+    
     @wireshark_capture
     def runTest(self):
         logging.info("Running testcase 410.70 action output controller max length no buffer")
         logging.info("Vendor must provide this documentation to complete the basic conformance test suite. If the proper documentation is not provided this test case result shall be fail")
 
-
+"""
 
 
 

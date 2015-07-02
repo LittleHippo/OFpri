@@ -752,12 +752,14 @@ class Testcase_260_230_FlowmodHard_IdleTimeout(base_tests.SimpleDataPlane):
         
         sleep(2)
         pkt = str(simple_tcp_packet())
-        logging.info("Sending dataplane packet")
+        logging.info("Sending dataplane packet within idle_timeout")
         self.dataplane.send(in_port, pkt)
+        logging.info("Sending Multipart msgs")
+        stats = get_flow_stats(self, match = ofp.match(), table_id = test_param_get("table", 0))
         verify_packet_in(self,pkt,in_port,ofp.OFPR_ACTION,self.controller)
-
+        logging.info("Wait until hard_timeout")
         sleep(3)
-
+        logging.info("Sending dataplane packet after hard_timeout")
         self.dataplane.send(in_port, pkt)
         verify_no_packet_in(self,pkt,in_port,self.controller)
 
@@ -781,6 +783,7 @@ class Testcase_260_230_FlowmodHard_IdleTimeout(base_tests.SimpleDataPlane):
             logging.info("Sending dataplane packets")
             sleep(1)
             self.dataplane.send(in_port, pkt)
+            stats = get_flow_stats(self, match = ofp.match(), table_id = test_param_get("table", 0))
             
             if i == 4:
                 verify_no_packet_in(self,pkt,in_port,self.controller)
