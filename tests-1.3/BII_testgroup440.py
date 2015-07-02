@@ -456,7 +456,7 @@ class Testcase_440_320_TableModFailedBadTable(base_tests.SimpleDataPlane):
         self.assertIsNotNone(reply, "The switch failed to generate an error.")
         logging.info("Error Message Received")
         
-        if reply.type == ofp.const.OFPET_TABLE_MOD_FAILED:
+        if reply.err_type == ofp.const.OFPET_TABLE_MOD_FAILED:
             logging.info("Received error type was OFPET_TABLE_MOD_FAILED.")
             if reply.code == ofp.OFPTMFC_BAD_TABLE:
                 logging.info("Received correct error code OFPTMFC_BAD_TABLE.")
@@ -464,7 +464,7 @@ class Testcase_440_320_TableModFailedBadTable(base_tests.SimpleDataPlane):
                 logging.info("Received correct error code OFPTFMFC_EPERM.")
             else:
                 self.assertEqual(0, 1, "Error code was not correct")
-        elif reply.type == ofp.const.OFPET_BAD_REQUEST:
+        elif reply.err_type == ofp.const.OFPET_BAD_REQUEST:
             logging.info("Received error type was OFPET_BAD_REQUEST.")
             self.assertEqual(reply.code, ofp.OFPBRC_BAD_TYPE,
                               ("Flow mod failed code %d was received, but we "
@@ -507,7 +507,7 @@ class Testcase_440_350_TableModFailedData(base_tests.SimpleDataPlane):
         self.assertIsNotNone(reply, "The switch failed to generate an error.")
         logging.info("Error Message Received")
         
-        if reply.type == ofp.const.OFPET_TABLE_MOD_FAILED:
+        if reply.err_type == ofp.const.OFPET_TABLE_MOD_FAILED:
             logging.info("Received error type was OFPET_TABLE_MOD_FAILED.")
             if reply.code == ofp.OFPTMFC_BAD_TABLE:
                 logging.info("Received correct error code OFPTMFC_BAD_TABLE.")
@@ -519,7 +519,7 @@ class Testcase_440_350_TableModFailedData(base_tests.SimpleDataPlane):
                 logging.info("Received correct error code OFPTFMFC_EPERM.")
             else:
                 self.assertEqual(0, 1, "Error code was not correct")
-        elif reply.type == ofp.const.OFPET_BAD_REQUEST:
+        elif reply.err_type == ofp.const.OFPET_BAD_REQUEST:
             logging.info("Received error type was OFPET_BAD_REQUEST.")
             self.assertEqual(reply.code, ofp.OFPBRC_BAD_TYPE,
                               ("Flow mod failed code %d was received, but we "
@@ -763,7 +763,7 @@ class Testcase_440_470_RoleRequestFailedData(base_tests.SimpleDataPlane):
         self.assertIsNotNone(reply, "The switch failed to generate an error.")
         logging.info("Error Message Received")
         
-        if reply.type == ofp.const.OFPET_ROLE_REQUEST_FAILED:
+        if reply.err_type == ofp.const.OFPET_ROLE_REQUEST_FAILED:
             logging.info("Received error type was OFPET_ROLE_REQUEST_FAILED.")
             self.assertEqual(reply.code, ofp.const.OFPRRFC_BAD_ROLE,
                               ("Role Request code %d was received, but we "
@@ -773,7 +773,7 @@ class Testcase_440_470_RoleRequestFailedData(base_tests.SimpleDataPlane):
                 self.assertEqual(request.pack(), reply.data, "Data field of error message should include up to 64 bytes of the offending request")
             else:
                 self.assertEqual(request.pack()[:len(reply.data)], reply.data, "Data field of error message should include up to 64 bytes of the offending request")
-        elif reply.type == ofp.const.OFPET_BAD_REQUEST:
+        elif reply.err_type == ofp.const.OFPET_BAD_REQUEST:
             logging.info("Received error type was OFPET_BAD_REQUEST.")
             self.assertEqual(reply.code, ofp.OFPBRC_BAD_TYPE,
                               ("Bad request code %d was received, but we "
@@ -820,14 +820,14 @@ class Testcase_440_580_MeterModFailedOutofMeter(base_tests.SimpleDataPlane):
             reply, _ = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
             if reply is not None:
                 logging.info("Error Message Received")
-                if reply.type == ofp.const.OFPET_METER_MOD_FAILED:
+                if reply.err_type == ofp.const.OFPET_METER_MOD_FAILED:
                     logging.info("Received error type was OFPET_METER_MOD_FAILED.")
                     self.assertEqual(reply.code, ofp.const.OFPMMFC_OUT_OF_METERS,
                                       ("Meter mod failed code %d was received, but we "
                                        "expected OFPMMFC_OUT_OF_METERS.") % reply.code)
                     logging.info("Received correct error code OFPMMFC_OUT_OF_METERS.")
                     return
-                elif reply.type == ofp.const.OFPET_BAD_REQUEST:
+                elif reply.err_type == ofp.const.OFPET_BAD_REQUEST:
                     logging.info("Received error type was OFPET_BAD_REQUEST.")
                     self.assertEqual(reply.code, ofp.OFPBRC_BAD_TYPE,
                                       ("Bad request code %d was received, but we "
@@ -872,7 +872,7 @@ class Testcase_440_600_MeterModFailedData(base_tests.SimpleDataPlane):
             reply, _ = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
             if reply is not None:
                 logging.info("Error Message Received")
-                if reply.type == ofp.const.OFPET_METER_MOD_FAILED:
+                if reply.err_type == ofp.const.OFPET_METER_MOD_FAILED:
                     logging.info("Received error type was OFPET_METER_MOD_FAILED.")
                     self.assertEqual(reply.code, ofp.const.OFPMMFC_OUT_OF_METERS,
                                       ("Meter Mod failed code %d was received, but we "
@@ -883,7 +883,7 @@ class Testcase_440_600_MeterModFailedData(base_tests.SimpleDataPlane):
                         self.assertEqual(request.pack()[:len(reply.data)], reply.data, "Data field of error message should include up to 64 bytes of the offending request")
                     logging.info("Received correct error code OFPMMFC_OUT_OF_METERS.")
                     return
-                elif reply.type == ofp.const.OFPET_BAD_REQUEST:
+                elif reply.err_type == ofp.const.OFPET_BAD_REQUEST:
                     logging.info("Received error type was OFPET_BAD_REQUEST.")
                     self.assertEqual(reply.code, ofp.OFPBRC_BAD_TYPE,
                                       ("Bad request code %d was received, but we "

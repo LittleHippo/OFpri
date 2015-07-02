@@ -369,14 +369,14 @@ class Testcase_200_150_basic_OFPT_TABLE_MOD(base_tests.SimpleDataPlane):
 
         reply,_= self.controller.poll(exp_msg = ofp.OFPT_ERROR, timeout = 3)
         self.assertIsNotNone(reply, "Did not receive error message")
-
-        if reply.type == ofp.const.OFPET_TABLE_MOD_FAILED:
+        
+        if reply.err_type == ofp.const.OFPET_TABLE_MOD_FAILED:
             logging.info("Received error type was OFPET_TABLE_MOD_FAILED.")
             self.assertEqual(reply.code, ofp.OFPTMFC_BAD_CONFIG,
                               ("Table mod failed code %d was received, but we "
                                "expected OFPTMFC_BAD_CONFIG.") % reply.code)
             logging.info("Received correct error code OFPTMFC_BAD_CONFIG.")
-        elif reply.type == ofp.const.OFPET_BAD_REQUEST:
+        elif reply.err_type == ofp.const.OFPET_BAD_REQUEST:
             logging.info("Received error type was OFPET_BAD_REQUEST.")
             self.assertEqual(reply.code, ofp.OFPTMFC_EPERM,
                               ("Flow mod failed code %d was received, but we "

@@ -209,7 +209,8 @@ class MatchTest(base_tests.SimpleDataPlane):
             logging.info("Sending non-matching packet %s, expecting packet-in", repr(name))
             pktstr = str(pkt)
             self.dataplane.send(in_port, pktstr)
-            verify_packet_in(self, pktstr, in_port, ofp.OFPR_ACTION)
+            #verify_packet_in(self, pktstr, in_port, ofp.OFPR_ACTION)
+            verify_packet_in(self, pktstr, in_port, reason = None)
 
 
 
