@@ -729,7 +729,7 @@ class Testcase_440_450_RoleRequestFailedUnsupported(base_tests.SimpleDataPlane):
             logging.info("Received error type was OFPET_ROLE_REQUEST_FAILED.")
             self.assertEqual(reply.code, ofp.const.OFPRRFC_UNSUP, "Error Code is not OFPRRFC_UNSUP")
             logging.info("Received Error code is OFPRRFC_UNSUP")
-        elif reply.type == ofp.const.OFPET_BAD_REQUEST:
+        elif reply.err_type == ofp.const.OFPET_BAD_REQUEST:
             logging.info("Received error type was OFPET_BAD_REQUEST.")
             self.assertEqual(reply.code, ofp.OFPBRC_BAD_TYPE,
                               ("Flow mod failed code %d was received, but we "
