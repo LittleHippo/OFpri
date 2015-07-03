@@ -967,7 +967,7 @@ class Testcase_430_610_BadInstructionBadLength(base_tests.SimpleDataPlane):
         logging.info("Error Message Received")
         self.assertEqual(reply.err_type,ofp.const.OFPET_BAD_INSTRUCTION, " Error type is not OFPET_BAD_INSTRUCTION")
         logging.info("Received OFPET_BAD_LEN")
-        self.assertEqual(reply.code, ofp.const.OFPBIC_BAD_EXPERIMENTER, "Error Code is not OFPBIC_BAD_LEN")
+        self.assertEqual(reply.code, ofp.const.OFPBIC_BAD_LEN, "Error Code is not OFPBIC_BAD_LEN")
         logging.info("Received Error code is OFPBIC_BAD_LEN")
 
 
