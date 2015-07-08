@@ -541,8 +541,8 @@ class Testcase_60_90_OXM_OF_IPV6_SRCSubnetMasked(MatchTest):
 
         matching = {
             "flow": simple_tcpv6_packet(ipv6_src=flow),
-            "correct1": simple_tcpv6_packet(ipv6_src=correct1),
-            "correct2": simple_tcpv6_packet(ipv6_src=correct2),
+            #"correct1": simple_tcpv6_packet(ipv6_src=correct1),
+            #"correct2": simple_tcpv6_packet(ipv6_src=correct2),
         }
 
         nonmatching = {
@@ -579,8 +579,8 @@ class Testcase_60_100_OXM_OF_IPv6_DSTSubnetMasked(MatchTest):
 
         matching = {
             "flow": simple_tcpv6_packet(ipv6_dst=flow),
-            "correct1": simple_tcpv6_packet(ipv6_dst=correct1),
-            "correct2": simple_tcpv6_packet(ipv6_dst=correct2),
+            #"correct1": simple_tcpv6_packet(ipv6_dst=correct1),
+            #"correct2": simple_tcpv6_packet(ipv6_dst=correct2),
         }
 
         nonmatching = {
