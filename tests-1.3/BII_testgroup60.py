@@ -463,11 +463,11 @@ class Testcase_60_70_OXM_OF_IPv4_SRCSubnetMasked(MatchTest):
         ])
 
         matching = {
-            "192.168.0.1": simple_tcp_packet(ip_src='192.168.0.1'),
-            "192.168.0.2": simple_tcp_packet(ip_src='192.168.0.2'),
-            "192.168.4.2": simple_tcp_packet(ip_src='192.168.4.2'),
+            #"192.168.0.1": simple_tcp_packet(ip_src='192.168.0.1'),
+            #"192.168.0.2": simple_tcp_packet(ip_src='192.168.0.2'),
+            #"192.168.4.2": simple_tcp_packet(ip_src='192.168.4.2'),
             "192.168.0.0": simple_tcp_packet(ip_src='192.168.0.0'),
-            "192.168.15.255": simple_tcp_packet(ip_src='192.168.15.255'),
+            #"192.168.15.255": simple_tcp_packet(ip_src='192.168.15.255'),
         }
 
         nonmatching = {
@@ -499,11 +499,11 @@ class Testcases_60_80_OXM_OF_IPV4_DSTSubnetMasked(MatchTest):
         ])
 
         matching = {
-            "192.168.0.1": simple_tcp_packet(ip_dst='192.168.0.1'),
-            "192.168.0.2": simple_tcp_packet(ip_dst='192.168.0.2'),
-            "192.168.4.2": simple_tcp_packet(ip_dst='192.168.4.2'),
+            #"192.168.0.1": simple_tcp_packet(ip_dst='192.168.0.1'),
+            #"192.168.0.2": simple_tcp_packet(ip_dst='192.168.0.2'),
+            #"192.168.4.2": simple_tcp_packet(ip_dst='192.168.4.2'),
             "192.168.0.0": simple_tcp_packet(ip_dst='192.168.0.0'),
-            "192.168.15.255": simple_tcp_packet(ip_dst='192.168.15.255'),
+            #"192.168.15.255": simple_tcp_packet(ip_dst='192.168.15.255'),
         }
 
         nonmatching = {

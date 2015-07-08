@@ -403,7 +403,7 @@ class Testcase_40_160_GetConfigFragMask(base_tests.SimpleProtocol):
         self.assertTrue(rv != -1, " Failed to send get config request.")
         (reply, pkt) = self.controller.poll(exp_msg=ofp.OFPT_GET_CONFIG_REPLY,timeout=timeout)
         self.assertIsNotNone(reply,'Did not receive get config reply')
-        self.assertTrue(reply.flags == 3, "Flags field cannot be OFPC_FRAG_MASK")
+        self.assertIsNotTrue(reply.flags == 3, "Flags field cannot be OFPC_FRAG_MASK")
         logging.info("Frag mask is set")
         request = ofp.message.set_config(flags=0,miss_send_len=128)
         self.controller.message_send(request)
