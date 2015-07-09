@@ -770,9 +770,9 @@ class Testcase_440_470_RoleRequestFailedData(base_tests.SimpleDataPlane):
                                "expected OFPRRFC_BAD_ROLE.") % reply.code)
             logging.info("Received correct error code OFPRRFC_BAD_ROLE.")
             if len(reply.data) < 64:
-                self.assertEqual(request.pack(), reply.data, "Data field of error message should include up to 64 bytes of the offending request")
+                self.assertEqual(req.pack(), reply.data, "Data field of error message should include up to 64 bytes of the offending request")
             else:
-                self.assertEqual(request.pack()[:len(reply.data)], reply.data, "Data field of error message should include up to 64 bytes of the offending request")
+                self.assertEqual(req.pack()[:len(reply.data)], reply.data, "Data field of error message should include up to 64 bytes of the offending request")
         elif reply.err_type == ofp.const.OFPET_BAD_REQUEST:
             logging.info("Received error type was OFPET_BAD_REQUEST.")
             self.assertEqual(reply.code, ofp.OFPBRC_BAD_TYPE,
@@ -856,7 +856,7 @@ class Testcase_440_600_MeterModFailedData(base_tests.SimpleDataPlane):
         req = ofp.message.meter_mod()
         req.command = ofp.OFPMC_DELETE
         req.meter_id = ofp.const.OFPM_ALL
-        self.controller.message_send(req)
+        self.controller.message_send(req)                   
         logging.info("Insert metermod")
         no = 2500
         band1 = ofp.meter_band.drop()
@@ -878,9 +878,9 @@ class Testcase_440_600_MeterModFailedData(base_tests.SimpleDataPlane):
                                       ("Meter Mod failed code %d was received, but we "
                                        "expected OFPMMFC_OUT_OF_METERS.") % reply.code)
                     if len(reply.data) < 64:
-                        self.assertEqual(request.pack(), reply.data, "Data field of error message should include up to 64 bytes of the offending request")
+                        self.assertEqual(msg.pack(), reply.data, "Data field of error message should include up to 64 bytes of the offending request")
                     else:
-                        self.assertEqual(request.pack()[:len(reply.data)], reply.data, "Data field of error message should include up to 64 bytes of the offending request")
+                        self.assertEqual(msg.pack()[:len(reply.data)], reply.data, "Data field of error message should include up to 64 bytes of the offending request")
                     logging.info("Received correct error code OFPMMFC_OUT_OF_METERS.")
                     return
                 elif reply.err_type == ofp.const.OFPET_BAD_REQUEST:
