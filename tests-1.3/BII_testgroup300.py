@@ -405,7 +405,7 @@ class Testcase_300_210_MultipartTypeGroupFeatures(base_tests.SimpleDataPlane):
             group_id=1,
             buckets=[
                 ofp.bucket(actions=[ofp.action.output(port_a)])])
-        rv = self.controller.message_send(request)
+        rv = self.controller.message_send(msg)
         self.assertTrue(rv != -1, "Failed to add group") 
 
         table_id = 0
