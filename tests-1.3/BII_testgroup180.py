@@ -42,7 +42,7 @@ class Testcase_180_10_reference_count(base_tests.SimpleDataPlane):
         in_port, out_port = openflow_ports(2)
 
         actions = [ofp.action.output(out_port)]
-        match = ofp.match([ofp.oxm.eth_type(0x0800),ofp.oxm.tcp_src(1234)])
+        match = ofp.match([ofp.oxm.eth_type(0x0800),ofp.oxm.ipv4_src(0xc0a80001),ofp.oxm.ip_proto(6),ofp.oxm.tcp_src(1234)])
         pkt = simple_tcp_packet()
         pkt1 = simple_tcp_packet(tcp_sport = 10)
 
