@@ -60,7 +60,8 @@ class Testcase_180_10_reference_count(base_tests.SimpleDataPlane):
         logging.info("Inserting flow")
         request = ofp.message.flow_add(
                 table_id=test_param_get("table", 0),
-                match=packet_to_flow_match(self, pkt),
+                #match=packet_to_flow_match(self, pkt),
+                match = match,
                 instructions=[
                     ofp.instruction.apply_actions(actions)],
                 buffer_id=ofp.OFP_NO_BUFFER,
