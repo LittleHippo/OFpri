@@ -78,9 +78,10 @@ class Testcase_210_50_port_administratively_down(base_tests.SimpleDataPlane):
         #self.controller.message_send(request)
         #reply, _ = self.controller.poll(exp_msg=ofp.OFPMP_PORT_DESCRIPTION, timeout=3)
         port_stats = get_stats(self, req = request)
-        hard_addr = port_stats[1].hw_addr
-        request = ofp.message.port_mod(port_no = out_port, hw_addr = hard_addr, config = 0, mask = ofp.OFPPC_PORT_DOWN)
-        self.controller.message_send(request)
+        #hard_addr = port_stats[1].hw_addr
+        #request = ofp.message.port_mod(port_no = out_port, hw_addr = hard_addr, config = 0, mask = ofp.OFPPC_PORT_DOWN)
+        #self.controller.message_send(request)
+        port_config_set(self.controller, port_no=out_port, config=0, mask = 0)
         logging.info("Set up port %d ", out_port)
         reply, _ = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
         self.assertIsNone(reply, "Switch generated an error when setting up the port")
@@ -122,11 +123,12 @@ class Testcase_210_50_port_administratively_down(base_tests.SimpleDataPlane):
         #self.controller.message_send(request)
         #reply, _ = self.controller.poll(exp_msg=ofp.OFPMP_PORT_DESCRIPTION, timeout=3)
         port_stats = get_stats(self, req = request)
-        hard_addr = port_stats[1].hw_addr
-        print hard_addr
+        #hard_addr = port_stats[1].hw_addr
+        #print hard_addr
         
-        request = ofp.message.port_mod(port_no = out_port, hw_addr = hard_addr, config = ofp.OFPPC_PORT_DOWN, mask = ofp.OFPPC_PORT_DOWN)
-        self.controller.message_send(request)
+        #request = ofp.message.port_mod(port_no = out_port, hw_addr = hard_addr, config = ofp.OFPPC_PORT_DOWN, mask = ofp.OFPPC_PORT_DOWN)
+        #self.controller.message_send(request)
+        port_config_set(self.controller, port_no=out_port, config=ofp.OFPPC_PORT_DOWN, mask = ofp.OFPPC_PORT_DOWN)
         logging.info("Set down port %d ", out_port)
         reply, _ = self.controller.poll(exp_msg=ofp.OFPT_ERROR, timeout=3)
         self.assertIsNone(reply, "Switch generated an error when setting down the port")
