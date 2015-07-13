@@ -97,8 +97,8 @@ class Testcase_90_60_All_supported(base_tests.SimpleDataPlane):
                 ofp.oxm.in_port(in_port),
                 ofp.oxm.eth_type(0x0800),
                 ofp.oxm.ip_proto(17),
-                ofp.oxm.ipv4_src_masked(0xc0a80001, 0xfffff000),
-                ofp.oxm.ipv4_dst_masked(0xc0a80001, 0xfffff000), # change ip dst to a address different from ip src
+                ofp.oxm.ipv4_src_masked(0xc0a80000, 0xfffff000),
+                ofp.oxm.ipv4_dst_masked(0xc0a80000, 0xfffff000), # change ip dst to a address different from ip src
                 ofp.oxm.udp_src(53),
                 ofp.oxm.udp_dst(54), # change dst port to a port different from src port
                 ])
